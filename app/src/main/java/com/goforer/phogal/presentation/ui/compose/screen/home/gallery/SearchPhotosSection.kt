@@ -47,7 +47,6 @@ import androidx.paging.compose.itemKey
 import com.goforer.base.designsystem.component.state.rememberLazyListState
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
-import com.goforer.phogal.presentation.analytics.TrackScreenViewEvent
 import com.goforer.phogal.presentation.stateholder.business.home.common.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosSectionState
@@ -270,9 +269,6 @@ private fun LazyListScope.photoItems(
         if (photos.itemCount < PAGE_SIZE_HINT && index == photos.itemCount - 1) {
             Spacer(modifier = Modifier.height(26.dp))
         }
-
-        // Analytics is emitted once per item appearance.
-        TrackScreenViewEvent(screenName = "SearchPhotosSection")
     }
 }
 

@@ -15,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -23,11 +22,9 @@ import androidx.compose.ui.unit.dp
 import coil.size.Size
 import com.goforer.base.designsystem.component.loadImagePainter
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
-import com.goforer.phogal.presentation.analytics.TrackScreenViewEvent
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.ImageContent
 import kotlin.math.absoluteValue
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BookmarkedPhotoScreen(
     modifier: Modifier = Modifier,
@@ -52,13 +49,11 @@ fun BookmarkedPhotoScreen(
             userScrollEnabled = true,
             reverseLayout = false,
             contentPadding = contentPadding,
-            beyondBoundsPageCount = 2,
+            beyondViewportPageCount = 2,
             pageSize = PageSize.Fill,
             flingBehavior = PagerDefaults.flingBehavior(state = pagerState),
             key = null,
-            pageNestedScrollConnection = remember(pagerState) {
-                PagerDefaults.pageNestedScrollConnection(pagerState, Orientation.Horizontal)
-            }
+            pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(pagerState, Orientation.Horizontal)
         ) { page ->
             Column(
                 modifier = Modifier
@@ -84,6 +79,4 @@ fun BookmarkedPhotoScreen(
             CircularProgressIndicator()
         }
     }
-
-    TrackScreenViewEvent(screenName = "Bookmark Photos")
 }

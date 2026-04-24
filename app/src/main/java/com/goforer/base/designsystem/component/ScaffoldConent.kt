@@ -17,11 +17,11 @@ import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 @Composable
 fun ScaffoldContent(
     topInterval: Dp,
-    content: @Composable (paddingValues: PaddingValues) -> Unit
+    content: @Composable (PaddingValues) -> Unit
 ) {
     Column {
         Spacer(modifier = Modifier.height(topInterval))
-        content(paddingValues = PaddingValues())
+        content(PaddingValues())
     }
 }
 

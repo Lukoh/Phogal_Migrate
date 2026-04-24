@@ -46,7 +46,6 @@ import androidx.paging.compose.itemKey
 import com.goforer.base.designsystem.component.state.rememberLazyListState
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
-import com.goforer.phogal.presentation.analytics.TrackScreenViewEvent
 import com.goforer.phogal.presentation.stateholder.business.home.common.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosSectionState
@@ -246,9 +245,6 @@ fun UserPhotosSection(
             state.clickedState.value = false
         }
     }
-
-    if (photos.itemCount > 0 )
-        TrackScreenViewEvent(screenName = "View_User_Photos")
 }
 
 private fun visibleUpButton(index: Int): Boolean {

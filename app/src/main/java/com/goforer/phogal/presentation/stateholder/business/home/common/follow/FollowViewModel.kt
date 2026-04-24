@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goforer.phogal.data.datasource.local.LocalDataSource
 import com.goforer.phogal.data.model.remote.response.gallery.common.User
+import com.goforer.phogal.di.dispatcher.IoDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class FollowViewModel @Inject constructor(
     private val localDataSource: LocalDataSource,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     private val _followingUsers = MutableStateFlow<List<User>>(emptyList())

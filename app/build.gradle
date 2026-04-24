@@ -148,6 +148,9 @@ android {
             universalApk true
         }
     }
+    kotlinOptions {
+        freeCompilerArgs = ['-XXLanguage:+PropertyParamAnnotationDefaultTargetMode']
+    }
 }
 
 // Compose Compiler 플러그인 옵션 (선택사항)
@@ -190,7 +193,7 @@ dependencies {
     implementation libs.androidx.tracing
     implementation libs.androidx.tracing.ktx
     implementation libs.androidx.profileinstaller
-    implementation libs.androidx.compose.adaptive.navigation3
+    implementation libs.androidx.compose.material3.adaptive.navigation3
     implementation libs.androidx.compose.animation
     implementation libs.androidx.compose.material.core
 

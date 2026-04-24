@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -75,7 +76,6 @@ import com.goforer.base.designsystem.component.loadImagePainter
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Exif
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
-import com.goforer.phogal.presentation.analytics.TrackScreenViewEvent
 import com.goforer.phogal.presentation.stateholder.business.home.common.photo.info.PictureViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.UiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserContainerState
@@ -159,8 +159,6 @@ fun HandlePictureResponse(
                     Spacer(modifier = Modifier.height(30.dp))
                 }
             }
-
-            TrackScreenViewEvent(screenName = "PhotoContent")
         }
         UiState.Loading, UiState.Idle -> {
             AnimatedVisibility(
@@ -237,9 +235,11 @@ fun BodyContent(
         )
 
         if (painter.state is AsyncImagePainter.State.Loading) {
+            val configuration = LocalConfiguration.current
+            val screenHeight = configuration.screenHeightDp
             val holderModifier = Modifier
                 .fillMaxWidth()
-                .height(Configuration.screenHeightDp)
+                .height(screenHeight.dp)
                 .align(Alignment.CenterHorizontally)
                 .background(ColorSystemGray7)
                 // In-house shimmer (replaces Accompanist placeholder, EOL 2024).

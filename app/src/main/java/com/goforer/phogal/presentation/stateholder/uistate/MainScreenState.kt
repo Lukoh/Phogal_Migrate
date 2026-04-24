@@ -8,8 +8,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import com.goforer.base.utils.connect.NetworkMonitor
 import com.goforer.phogal.presentation.ui.compose.screen.home.BottomNavRoute
-import com.goforer.phogal.presentation.ui.navigation.nav3.PhogalNavState
-import com.goforer.phogal.presentation.ui.navigation.nav3.rememberPhogalNavState
+import com.goforer.phogal.presentation.ui.navigation.nav3.NavigationState
+import com.goforer.phogal.presentation.ui.navigation.nav3.rememberNavigationState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -19,19 +19,19 @@ import kotlinx.coroutines.flow.stateIn
  * Top-level screen state for Phogal.
  *
  * Nav3 1.1.0 edition — there is no `NavHostController`. Navigation state lives
- * entirely inside [navState] ([PhogalNavState]). `currentTopLevelDestination`
+ * entirely inside [navState] ([NavigationState]). `currentTopLevelDestination`
  * is read synchronously from that state — no `@Composable get()` required
  * because the underlying value is plain Compose state, not a suspend/observable.
  */
 @Stable
 class MainScreenState(
-    val navState: PhogalNavState,
+    val navState: NavigationState,
     val coroutineScope: CoroutineScope,
     val windowSizeClass: WindowSizeClass,
     networkMonitor: NetworkMonitor
 ) {
     val currentTopLevelDestination: BottomNavRoute
-        get() = navState.currentTab
+        get() = navState.currentRoute
 
     val shouldShowBottomBar: Boolean
         get() = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
@@ -50,7 +50,7 @@ fun rememberMainScreenState(
     windowSizeClass: WindowSizeClass,
     networkMonitor: NetworkMonitor,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
-    navState: PhogalNavState = rememberPhogalNavState(initialTab = BottomNavRoute.Gallery)
+    navState: NavigationState = rememberNavigationState(initialRoute = BottomNavRoute.Gallery)
 ): MainScreenState = remember(navState, coroutineScope, windowSizeClass, networkMonitor) {
     MainScreenState(
         navState = navState,

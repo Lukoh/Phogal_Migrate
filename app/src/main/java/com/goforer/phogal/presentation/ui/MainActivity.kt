@@ -3,6 +3,7 @@ package com.goforer.phogal.presentation.ui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -18,8 +19,6 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.goforer.base.analytics.AnalyticsHelper
-import com.goforer.base.analytics.LocalAnalyticsHelper
 import com.goforer.base.utils.connect.ConnectivityManagerNetworkMonitor
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.goforer.phogal.presentation.ui.compose.screen.MainScreen
@@ -34,9 +33,6 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
     @Inject
     lateinit var connectivityManagerNetworkMonitor: ConnectivityManagerNetworkMonitor
-
-    @Inject
-    lateinit var analyticsHelper: AnalyticsHelper
 
     companion object {
         internal const val SplashWaitTime = 2000L
@@ -66,16 +62,11 @@ class MainActivity : ComponentActivity() {
         // Turn off the decor fitting system windows, which allows us to handle insets,
         // including IME animations
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
         setContent {
-            val systemUiController = rememberSystemUiController()
             val darkTheme = isSystemInDarkTheme()
 
-            DisposableEffect(systemUiController, darkTheme) {
-                systemUiController.systemBarsDarkContentEnabled = !darkTheme
-                onDispose {}
-            }
-
-            CompositionLocalProvider(LocalAnalyticsHelper provides analyticsHelper) {
+            CompositionLocalProvider() {
                 PhogalTheme(
                     darkTheme = darkTheme,
                     androidTheme = true
