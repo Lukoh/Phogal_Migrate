@@ -8,7 +8,6 @@
   <a href="#"><img alt="JDK" src="https://img.shields.io/badge/JDK-17-red?style=flat-square"></a>
   <a href="#"><img alt="PRs" src="https://img.shields.io/badge/PRs-Welcome-3DDC84?style=flat-square"></a>
 </p>
-</p>
 
 > **History**
 > 
