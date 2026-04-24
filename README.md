@@ -11,6 +11,7 @@
 </p>
 
 > **History**
+> 
 > Phogal shipped in August 2023 and stayed frozen for roughly two and a half years. This document records its end-to-end modernization onto the **stack Android recommends in April 2026** — Kotlin 2.0's Compose Compiler Plugin, **Navigation 3 1.1.0 (stable)**, Material 3 Adaptive, and Shared Element Transitions. The goal was never a version bump. It was to **pay down technical debt** and restore the codebase's long-term maintainability.
 
 ---
