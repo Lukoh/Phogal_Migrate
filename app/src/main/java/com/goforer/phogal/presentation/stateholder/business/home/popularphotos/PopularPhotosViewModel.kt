@@ -1,0 +1,61 @@
+package com.goforer.phogal.presentation.stateholder.business.home.popularphotos
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
+import com.goforer.phogal.data.repository.popularphotos.PopularPhotosRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
+
+/**
+ * ViewModel for the popular-photos feed. No param switching — the feed is static
+ * from the client's perspective — so the repository stream is created eagerly and
+ * held as a single [StateFlow].
+ */
+@HiltViewModel
+class PopularPhotosViewModel @Inject constructor(
+    popularPhotosRepository: PopularPhotosRepository
+) : ViewModel() {
+    /*
+    val photos: StateFlow<PagingData<Photo>> = popularPhotosRepository
+        .popularPhotos(orderBy = POPULAR, pageSize = PAGE_SIZE)
+        .cachedIn(viewModelScope)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = PagingData.empty()
+        )
+
+     */
+
+    private val _photos = emptyFlow<PagingData<Photo>>()
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    val photos: StateFlow<PagingData<Photo>> = _photos
+        .debounce(DEBOUNCE_MS)
+        .distinctUntilChanged()
+        .flatMapLatest { popularPhotosRepository.popularPhotos(orderBy = POPULAR, pageSize = PAGE_SIZE) }
+        .cachedIn(viewModelScope)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
+            initialValue = PagingData.empty()
+        )
+
+    private companion object {
+        const val POPULAR = "popular"
+        const val PAGE_SIZE = 10
+        const val DEBOUNCE_MS = 300L
+        const val STOP_TIMEOUT_MS = 5_000L
+    }
+}
