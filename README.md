@@ -4,6 +4,21 @@
   <a href="#"><img alt="PRs" src="https://img.shields.io/badge/PRs-Welcome-3DDC84?style=flat-square"></a>
 </p>
 
+# Phogal — The 2023 → 2026 Modernization Journey
+
+<p align="left">
+  <a href="#"><img alt="Android OS" src="https://img.shields.io/badge/OS-Android-3DDC84?style=flat-square&logo=android"></a>
+  <a href="#"><img alt="Language-Kotlin" src="https://img.shields.io/badge/Kotlin-2.0.21-f18e33?style=flat-square&logo=kotlin"></a>
+  <a href="#"><img alt="Compose" src="https://img.shields.io/badge/Compose_BOM-2026.3.01-4285F4?style=flat-square"></a>
+  <a href="#"><img alt="Navigation" src="https://img.shields.io/badge/Navigation_3-1.1.0_stable-00897B?style=flat-square"></a>
+  <a href="#"><img alt="JDK" src="https://img.shields.io/badge/JDK-17-red?style=flat-square"></a>
+</p>
+
+> **TL;DR**
+> Phogal shipped in August 2023 and stayed frozen for roughly two and a half years. This document records its end-to-end modernization onto the **stack Android recommends in April 2026** — Kotlin 2.0's Compose Compiler Plugin, **Navigation 3 1.1.0 (stable)**, Material 3 Adaptive, and Shared Element Transitions. The goal was never a version bump. It was to **pay down technical debt** and restore the codebase's long-term maintainability.
+
+---
+
 <p align="left">
 :eyeglasses: Phogal by open-source contributor, Lukoh.
 </p><br>
@@ -22,21 +37,6 @@ Now let’s dive into my open-source project, Phogal, which is based on the Andr
 
 
 <img src="https://github.com/Lukoh/Phogal/blob/main/screenshot.png" data-canonical-src="https://youtu.be/U_mvFoxypjM" width="220" height="450" /> <img src="https://github.com/Lukoh/Phogal/blob/main/Shot1.png" data-canonical-src="https://youtu.be/U_mvFoxypjM" width="220" height="450" /> <img src="https://github.com/Lukoh/Phogal/blob/main/shot2.png" data-canonical-src="https://youtu.be/U_mvFoxypjM" width="220" height="450" /> <img src="https://github.com/Lukoh/Phogal/blob/main/shot3.png" data-canonical-src="https://youtu.be/U_mvFoxypjM" width="220" height="450" /> <img src="https://github.com/Lukoh/Phogal/blob/main/shot4.png" data-canonical-src="https://youtu.be/U_mvFoxypjM" width="220" height="450" /> <img src="https://github.com/Lukoh/Phogal/blob/main/shot5.png" data-canonical-src="https://youtu.be/U_mvFoxypjM" width="220" height="450" /> <img src="https://github.com/Lukoh/Phogal/blob/main/Bookmark_shot1.png" data-canonical-src="https://youtu.be/U_mvFoxypjM" width="220" height="450" /> <img src="https://github.com/Lukoh/Phogal/blob/main/Bookmark_shot2.png" data-canonical-src="https://youtu.be/U_mvFoxypjM" width="220" height="450" /> <img src="https://github.com/Lukoh/Phogal/blob/main/Popular.png" data-canonical-src="https://youtu.be/U_mvFoxypjM" width="220" height="450" />
-
-# Phogal — The 2023 → 2026 Modernization Journey
-
-<p align="left">
-  <a href="#"><img alt="Android OS" src="https://img.shields.io/badge/OS-Android-3DDC84?style=flat-square&logo=android"></a>
-  <a href="#"><img alt="Language-Kotlin" src="https://img.shields.io/badge/Kotlin-2.0.21-f18e33?style=flat-square&logo=kotlin"></a>
-  <a href="#"><img alt="Compose" src="https://img.shields.io/badge/Compose_BOM-2026.3.01-4285F4?style=flat-square"></a>
-  <a href="#"><img alt="Navigation" src="https://img.shields.io/badge/Navigation_3-1.1.0_stable-00897B?style=flat-square"></a>
-  <a href="#"><img alt="JDK" src="https://img.shields.io/badge/JDK-17-red?style=flat-square"></a>
-</p>
-
-> **TL;DR**
-> Phogal shipped in August 2023 and stayed frozen for roughly two and a half years. This document records its end-to-end modernization onto the **stack Android recommends in April 2026** — Kotlin 2.0's Compose Compiler Plugin, **Navigation 3 1.1.0 (stable)**, Material 3 Adaptive, and Shared Element Transitions. The goal was never a version bump. It was to **pay down technical debt** and restore the codebase's long-term maintainability.
-
----
 
 ## 📑 Table of Contents
 
