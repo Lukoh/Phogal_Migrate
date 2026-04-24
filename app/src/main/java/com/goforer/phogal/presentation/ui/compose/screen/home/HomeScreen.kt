@@ -193,7 +193,7 @@ fun HomeScreen(
                 SharedTransitionLayout {
                     CompositionLocalProvider(LocalSharedTransitionScope provides this) {
                         /*
-                        // androidx.navigation3.runtime.
+                        // Please unblock this code if androidx.navigation3.runtime.1.1.1 could be applied...
                         NavDisplay(
                             backStack = navigationState.backStackForCurrentRoute,
                             onBack = { navigationState.pop() },
