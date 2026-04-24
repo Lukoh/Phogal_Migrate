@@ -176,6 +176,7 @@ dependencies {
     implementation libs.androidx.lifecycle.viewmodel.navigation3
     // Adaptive layouts (list-detail etc.) for tablets and foldables
     implementation libs.androidx.compose.material3.adaptive.navigation3
+    implementation(libs.kotlinx.serialization.core)
 
     // --- Paging ---
     implementation libs.androidx.paging.common.ktx

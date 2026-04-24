@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * [com.goforer.phogal.presentation.ui.compose.screen.home.BottomNavRoute]
  * (a sealed interface that itself implements [NavKey]) and the per-tab
  * `NavBackStack` in
- * [com.goforer.phogal.presentation.ui.navigation.nav3.PhogalNavState]. The
+ * [com.goforer.phogal.presentation.ui.navigation.nav3.NavigationState]. The
  * Nav2-era `GalleryGraph` / `PopularPhotosGraph` / `NotificationGraph` /
  * `SettingGraph` data objects have been removed because they were
  * `navigation<T>(...)` graph roots — a Nav2-only concept with no counterpart
@@ -40,7 +40,7 @@ object Routes {
     /**
      * Dialog destination for the "storage permission" bottom sheet.
      *
-     * This is pushed onto the back stack and rendered by [DialogSceneStrategy]
+     * This is pushed onto the back stack and rendered by [androidx.navigation3.scene.DialogSceneStrategy]
      * so it behaves like a first-class navigation entry: predictive back works,
      * rotation is preserved, and process death restores it.
      */

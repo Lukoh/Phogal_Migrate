@@ -172,7 +172,7 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
     // Note: we intentionally do NOT reuse `PermissionBottomSheet` here — it
     // wraps its content in a Material `ModalBottomSheet`, which would nest
     // inside the Dialog provided by DialogSceneStrategy (two overlays stacked).
-    // Instead the dialog entry renders a lightweight inline UI. If you want a
+    // Instead, the dialog entry renders a lightweight inline UI. If you want a
     // bottom-sheet feel, migrate the shared content out of PermissionBottomSheet
     // into a separate `PermissionRequestContent` composable that both this
     // entry and the legacy bottom sheet can call.
