@@ -44,6 +44,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.scene.Scene
+import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.goforer.phogal.presentation.ui.navigation.nav3.LocalSharedTransitionScope
@@ -191,6 +192,8 @@ fun HomeScreen(
                 // a CompositionLocal so any descendant can do shared-element animations.
                 SharedTransitionLayout {
                     CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+                        /*
+                        // androidx.navigation3.runtime.
                         NavDisplay(
                             backStack = navigationState.backStackForCurrentRoute,
                             onBack = { navigationState.pop() },
@@ -198,6 +201,19 @@ fun HomeScreen(
                             entryDecorators = entryDecorators,
                             transitionSpec = DefaultTransitions.push, // 타입이 일치함
                             popTransitionSpec = DefaultTransitions.pop,
+                            predictivePopTransitionSpec = DefaultTransitions.predictivePop,
+                            entryProvider = entryProvider { phogalEntries(navigationState) }
+                        )
+
+                         */
+
+                        NavDisplay(
+                            backStack = navigationState.backStackForCurrentRoute,
+                            onBack = { navigationState.pop() },
+                            entryDecorators = entryDecorators,
+                            transitionSpec = DefaultTransitions.push,
+                            popTransitionSpec = DefaultTransitions.pop,
+                            sceneStrategy = sceneStrategies.firstOrNull() as SceneStrategy<NavKey>,
                             predictivePopTransitionSpec = DefaultTransitions.predictivePop,
                             entryProvider = entryProvider { phogalEntries(navigationState) }
                         )
