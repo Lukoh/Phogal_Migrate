@@ -2,6 +2,7 @@ package com.goforer.phogal.presentation.ui.compose.screen.home.popularphotos
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import androidx.collection.emptyLongSet
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -36,18 +37,21 @@ fun PopularPhotosContent(
     onOpenWebView: (firstName: String, url: String) -> Unit,
     onSuccess: (isSuccessful: Boolean) -> Unit
 ) {
-    val photos = popularPhotosViewModel.photos.collectAsLazyPagingItems()
+    if (!state.loadedPhotosState.value) {
+        val photos = popularPhotosViewModel.photos.collectAsLazyPagingItems()
 
-    PopularPhotosSection(
-        modifier = modifier,
-        photos = photos,
-        state = rememberPopularPhotosSectionState(),
-        onItemClicked = { photo, _ -> onItemClicked(photo.id) },
-        onViewPhotos = onViewPhotos,
-        onShowSnackBar = onShowSnackBar,
-        onOpenWebView = onOpenWebView,
-        onSuccess = onSuccess
-    )
+        PopularPhotosSection(
+            modifier = modifier,
+            photos = photos,
+            state = rememberPopularPhotosSectionState(),
+            onItemClicked = { photo, _ -> onItemClicked(photo.id) },
+            onViewPhotos = onViewPhotos,
+            onShowSnackBar = onShowSnackBar,
+            onOpenWebView = onOpenWebView,
+            onSuccess = onSuccess,
+            onLoadedPhotos = { state.loadedPhotosState.value = it }
+        )
+    }
 }
 
 @SuppressLint("UnusedBoxWithConstraintsScope")

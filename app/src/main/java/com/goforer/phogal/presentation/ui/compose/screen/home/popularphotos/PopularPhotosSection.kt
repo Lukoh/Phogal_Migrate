@@ -68,7 +68,8 @@ fun PopularPhotosSection(
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
-    onSuccess: (isSuccessful: Boolean) -> Unit
+    onSuccess: (isSuccessful: Boolean) -> Unit,
+    onLoadedPhotos: (isLoadedPhotos: Boolean) -> Unit
 ) {
     val lazyListState = photos.rememberLazyListState()
     val isRefreshing = photos.loadState.refresh is LoadState.Loading
@@ -89,7 +90,9 @@ fun PopularPhotosSection(
     PullToRefreshBox(
         modifier = modifier.clip(RoundedCornerShape(0.2.dp)),
         isRefreshing = isRefreshing,
-        onRefresh = { photos.refresh() }
+        onRefresh = {
+            photos.refresh()
+        }
     ) {
         LazyColumn(
             modifier = Modifier
@@ -139,6 +142,8 @@ fun PopularPhotosSection(
                                 // Below is a workaround. More info: https://issuetracker.google.com/issues/177245496.
                                 // If this bug will got fixed... then have to be removed below code
                                 state.visibleUpButtonState.value = visibleUpButton(index)
+                                if (index == photos.itemCount - 1)
+                                    onLoadedPhotos(true)
 
                                 PhotoItem(
                                     modifier = modifier
