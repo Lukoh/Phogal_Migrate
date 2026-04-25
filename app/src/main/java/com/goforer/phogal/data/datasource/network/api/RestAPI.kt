@@ -64,8 +64,8 @@ interface RestAPI {
     @GET("photos")
     suspend fun getPopularPhotos(
         @Query("client_id") clientId: String,
-        @Query("order_by") orderBy: String,
         @Query("page") page: Int?,
-        @Query("per_page") perPage: Int?
+        @Query("per_page") perPage: Int?,
+        @Query("order_by") orderBy: String,
     ): Response<List<Photo>>
 }

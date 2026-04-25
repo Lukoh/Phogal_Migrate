@@ -8,7 +8,8 @@
     <string name="bottom_navigation_setting">Setting</string>
 
     <string name="up_to_top">Top</string>
-    <string name="placeholder_search">Search</string>
+    <string name="placeholder_search">Enter search keyword</string>
+    <string name="text_search">Search</string>
     <string name="internet_not_connected">⚠️ You aren’t connected to the internet</string>
 
     <string name="error_dialog_title">Error</string>

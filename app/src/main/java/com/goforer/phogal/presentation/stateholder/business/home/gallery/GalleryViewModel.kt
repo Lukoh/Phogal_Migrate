@@ -53,7 +53,8 @@ import javax.inject.Inject
 class GalleryViewModel @Inject constructor(
     private val photosRepository: PhotosRepository,
     private val localDataSource: LocalDataSource,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    @IoDispatcher
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     // ---------------- State ----------------
@@ -72,7 +73,7 @@ class GalleryViewModel @Inject constructor(
         .debounce(DEBOUNCE_MS)
         .distinctUntilChanged()
         .filter { it.isNotBlank() }
-        .flatMapLatest { q -> photosRepository.search(q, PAGE_SIZE) }
+        .flatMapLatest { query -> photosRepository.search(query, PAGE_SIZE) }
         .cachedIn(viewModelScope)
         .stateIn(
             scope = viewModelScope,

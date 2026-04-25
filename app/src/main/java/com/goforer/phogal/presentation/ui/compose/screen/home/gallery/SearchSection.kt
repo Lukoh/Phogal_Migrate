@@ -1,5 +1,6 @@
 package com.goforer.phogal.presentation.ui.compose.screen.home.gallery
 
+import android.R.attr.text
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -78,8 +79,10 @@ fun SearchSection(
             else
                 state.editableInputState.textState,
             onValueChange = {
-                state.wordChangedState.value = true
-                state.editableInputState.textState = it
+                if (!it.contains("\n")) {
+                    state.wordChangedState.value = true
+                    state.editableInputState.textState = it
+                }
             },
             enabled = state.enabledState.value,
             leadingIcon = {
@@ -102,6 +105,7 @@ fun SearchSection(
                 disabledContainerColor = Color.Transparent,
                 errorContainerColor = Color.Transparent
             ),
+            singleLine = true,
             shape = MaterialTheme.shapes.small,
             placeholder = {
                 Text(stringResource(R.string.placeholder_search),  style = MaterialTheme.typography.titleMedium.copy(color = Black))
@@ -141,7 +145,7 @@ fun SearchSection(
             },
             text = {
                 Text(
-                    stringResource(id = R.string.placeholder_search),
+                    stringResource(id = R.string.text_search),
                     fontFamily = FontFamily.SansSerif,
                     fontSize = 15.sp,
                     fontStyle = FontStyle.Italic

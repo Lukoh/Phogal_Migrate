@@ -15,6 +15,7 @@ import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+import androidx.core.content.edit
 
 @Singleton
 class LocalDataSource
@@ -164,11 +165,11 @@ constructor(val context: Context, cookieJar: PersistentCookieJar? = null) {
     }
 
     internal fun setSearchWords(words: List<String>? = null) {
-        val editor = pref.edit()
-        val json = Gson().toJson(words)
+        pref.edit {
+            val json = Gson().toJson(words)
 
-        editor.putString(key_search_word_list, json)
-        editor.apply()
+            putString(key_search_word_list, json)
+        }
     }
 
     internal fun getFollowingUsers(): MutableList<User>? {
@@ -222,24 +223,24 @@ constructor(val context: Context, cookieJar: PersistentCookieJar? = null) {
     var enabledFollowingNotification: Boolean
         get() = pref.getBoolean(key_notification_following_enabled, true)
         set(value) {
-            pref.edit()
-                .putBoolean(key_notification_following_enabled, value)
-                .apply()
+            pref.edit {
+                putBoolean(key_notification_following_enabled, value)
+            }
         }
 
     var enabledLatestNotification: Boolean
         get() = pref.getBoolean(key_notification_latest_enabled, true)
         set(value) {
-            pref.edit()
-                .putBoolean(key_notification_latest_enabled, value)
-                .apply()
+            pref.edit {
+                putBoolean(key_notification_latest_enabled, value)
+            }
         }
 
     var enableCommunityNotification: Boolean
         get() = pref.getBoolean(key_notification_community_enabled, true)
         set(value) {
-            pref.edit()
-                .putBoolean(key_notification_community_enabled, value)
-                .apply()
+            pref.edit {
+                putBoolean(key_notification_community_enabled, value)
+            }
         }
 }

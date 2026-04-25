@@ -22,7 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class FollowViewModel @Inject constructor(
     private val localDataSource: LocalDataSource,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    @IoDispatcher
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     private val _followingUsers = MutableStateFlow<List<User>>(emptyList())

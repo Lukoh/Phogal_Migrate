@@ -151,7 +151,7 @@ fun SearchPhotosContent(
  * so the newly-committed keyword is highlighted without the full history noise).
  */
 @Composable
-private fun ColumnScope.RecentWordsChips(
+private fun RecentWordsChips(
     recentWords: List<String>,
     isScrolling: Boolean,
     triggered: Boolean,

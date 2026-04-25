@@ -5,6 +5,7 @@ import android.net.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import androidx.core.net.toUri
 
 object ConnectionUtils {
     fun isNetworkAvailable(context: Context): Boolean {
@@ -25,7 +26,7 @@ object ConnectionUtils {
     }
 
     fun getUri(urlString: String): Uri {
-        return Uri.parse(if (!urlString.contains("://")) "http://$urlString" else urlString)
+        return (if (!urlString.contains("://")) "http://$urlString" else urlString.toUri()) as Uri
     }
 }
 
