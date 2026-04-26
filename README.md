@@ -406,7 +406,7 @@ NavDisplay asks each strategy in order: "can you render this top entry?" If a st
 ```
 
 <p align="left">
-  <a href="#"><img alt="Android OS" src="https://img.shields.io/badge/OS-Android-3DDC84?style=flat-square&logo=android"></a>
+  <a href="#"><img alt="Android OS" src="[https://img.shields.io/badge/OS-Android-3DDC84?style=flat-square&logo=android](https://github.com/Lukoh/Phogal_Migrate/blob/main/phogal_architecture_Ver1.0.png)"></a>
 </p>
 
 ### 6.2 Zoomed-in navigation layer (new in 2026)
