@@ -363,6 +363,8 @@ NavDisplay asks each strategy in order: "can you render this top entry?" If a st
 
 ## 6. Modern Architecture
 
+<img src="phogal_architecture_Ver1.0.png" width="820" height="1450" />
+
 ### 6.1 End-to-end layering (Clean Architecture + MVVM, with the 2026 updates applied)
 
 ```
@@ -404,8 +406,6 @@ NavDisplay asks each strategy in order: "can you render this top entry?" If a st
 │                  Coroutines + Flow + Paging 3                     │
 └───────────────────────────────────────────────────────────────────┘
 ```
-
-<img src="phogal_architecture_Ver1.0.png" width="820" height="1450" />
 
 ### 6.2 Zoomed-in navigation layer (new in 2026)
 
