@@ -36,7 +36,7 @@ fun PopularPhotosContent(
     PopularPhotosSection(
         modifier = modifier,
         photos = photos,
-        state = rememberPopularPhotosSectionUiState(),
+        sectionUiState = rememberPopularPhotosSectionUiState(),
         onItemClicked = { photo, _ -> onItemClicked(photo.id) },
         onViewPhotos = onViewPhotos,
         onShowSnackBar = onShowSnackBar,
