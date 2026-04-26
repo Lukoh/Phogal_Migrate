@@ -405,7 +405,7 @@ NavDisplay asks each strategy in order: "can you render this top entry?" If a st
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-<img src="phogal_architecture_Ver1.0.png" width="220" height="450" />
+<img src="phogal_architecture_Ver1.0.png" width="620" height="1250" />
 
 ### 6.2 Zoomed-in navigation layer (new in 2026)
 
