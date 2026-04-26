@@ -17,7 +17,7 @@ import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Stable
-class UserInfoState(
+class UserInfoUiState(
     val baseUiState: BaseUiState,
     val openBottomSheetState: MutableState<Boolean>,
     val scope: CoroutineScope,
@@ -26,15 +26,15 @@ class UserInfoState(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun rememberUserInfoState(
+fun rememberUserInfoUiState(
     baseUiState: BaseUiState = rememberBaseUiState(),
     openBottomSheetState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     skipPartiallyExpanded: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     scope: CoroutineScope = rememberCoroutineScope(),
     bottomSheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-): UserInfoState = remember(
+): UserInfoUiState = remember(
     baseUiState, openBottomSheetState, skipPartiallyExpanded, scope, bottomSheetState) {
-    UserInfoState(
+    UserInfoUiState(
         baseUiState = baseUiState,
         openBottomSheetState = openBottomSheetState,
         scope = scope,

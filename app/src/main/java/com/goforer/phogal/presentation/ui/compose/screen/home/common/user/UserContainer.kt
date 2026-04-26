@@ -26,7 +26,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ripple
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -66,9 +65,9 @@ import com.goforer.base.extension.toUser
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.User
 import com.goforer.phogal.presentation.stateholder.business.home.common.follow.FollowViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.UserContainerState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserContainerState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserInfoState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.UserContainerUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserContainerUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserInfoUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.follow.ShowFollowButton
 import com.goforer.phogal.presentation.ui.theme.Black
 import com.goforer.phogal.presentation.ui.theme.Blue50
@@ -82,7 +81,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun UserContainer(
     modifier: Modifier = Modifier,
-    state: UserContainerState = rememberUserContainerState(),
+    state: UserContainerUiState = rememberUserContainerUiState(),
     followViewModel: FollowViewModel = hiltViewModel(),
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
@@ -189,11 +188,10 @@ fun UserContainer(
         val text = stringResource(id = R.string.user_info_has_no_portfolio)
 
         UserInfoBottomSheet(
-            userInfoState = rememberUserInfoState(),
+            userInfoUiState = rememberUserInfoUiState(),
             user = user,
             showUserInfoBottomSheet = showUserInfoBottomSheet,
             onDismissedRequest = {
-                showUserInfoBottomSheet = false
                 if (it) {
                     if (user.portfolio_url.isNullOrEmpty()) {
                         state.baseUiState.scope.launch {

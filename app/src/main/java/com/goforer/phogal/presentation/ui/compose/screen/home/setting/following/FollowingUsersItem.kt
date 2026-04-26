@@ -23,8 +23,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,8 +50,8 @@ import com.goforer.phogal.data.model.remote.response.gallery.common.LinksX
 import com.goforer.phogal.data.model.remote.response.gallery.common.ProfileImage
 import com.goforer.phogal.data.model.remote.response.gallery.common.Social
 import com.goforer.phogal.data.model.remote.response.gallery.common.User
-import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.FollowingUserItemState
-import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserItemState
+import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.FollowingUserItemUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserItemUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.follow.ShowFollowButton
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.user.ProfileItem
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.user.UserInfoItem
@@ -66,13 +64,13 @@ import com.goforer.phogal.presentation.ui.theme.DarkGreenGray99
 @Composable
 fun FollowingUsersItem(
     modifier: Modifier = Modifier,
-    state: FollowingUserItemState = rememberFollowingUserItemState(),
+    followingUserItemUiState: FollowingUserItemUiState = rememberFollowingUserItemUiState(),
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String?) -> Unit,
     onFollow: (user: User) -> Unit
 ) {
-    val user = state.userState.value as User
-    val verticalPadding = if (state.indexState.value == 0)
+    val user = followingUserItemUiState.userState.value as User
+    val verticalPadding = if (followingUserItemUiState.indexState.value == 0)
         2.dp
     else
         4.dp
@@ -89,7 +87,7 @@ fun FollowingUsersItem(
             modifier = modifier.padding(vertical = verticalPadding),
             colors = CardDefaults.cardColors(
                 contentColor = Blue70,
-                containerColor =  if (state.clickedState.value)
+                containerColor =  if (followingUserItemUiState.clickedState.value)
                     Blue75
                 else
                     Blue70,
@@ -131,7 +129,7 @@ fun FollowingUsersItem(
                     ShowFollowButton(
                         modifier = modifier,
                         followColor = Blue50,
-                        isUserFollowed = state.followedState.value
+                        isUserFollowed = followingUserItemUiState.followedState.value
                     ) {
                        onFollow(user)
                     }

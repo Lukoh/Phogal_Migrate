@@ -54,9 +54,9 @@ import com.goforer.base.designsystem.component.loadImagePainter
 import com.goforer.phogal.presentation.ui.compose.base.designsystem.component.shimmer
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserContainerState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.PhotoItemState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.PhotoItemUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserContainerUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.user.UserContainer
 import com.goforer.phogal.presentation.ui.theme.Blue50
 import com.goforer.phogal.presentation.ui.theme.Blue70
@@ -68,7 +68,7 @@ import com.goforer.phogal.presentation.ui.theme.Red60Transparent
 @Composable
 fun PhotoItem(
     modifier: Modifier = Modifier,
-    state: PhotoItemState = rememberPhotoItemState(),
+    state: PhotoItemUiState = rememberPhotoItemUiState(),
     onItemClicked: (item: Photo, index: Int) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
@@ -173,7 +173,7 @@ fun PhotoItem(
 
                 UserContainer(
                     modifier = Modifier,
-                    state = rememberUserContainerState(
+                    state = rememberUserContainerUiState(
                         userState = rememberSaveable { mutableStateOf(photo.user.toString()) },
                         profileSizeState = rememberSaveable { mutableDoubleStateOf(36.0) },
                         colorsState = remember { mutableStateOf(listOf(Color.White, Color.White, Blue70, Blue75, Blue50, ColorSnowWhite)) },
@@ -229,7 +229,7 @@ fun PhotosItemPreview(modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .wrapContentHeight()
             .clip(RoundedCornerShape(4.dp))
-            .clickable { isClicked = true }
+            .clickable { }
 
         Image(
             modifier = imageModifier,

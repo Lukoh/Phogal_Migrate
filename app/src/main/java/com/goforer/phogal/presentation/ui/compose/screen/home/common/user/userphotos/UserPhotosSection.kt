@@ -11,7 +11,6 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -47,9 +46,9 @@ import com.goforer.base.designsystem.component.state.rememberLazyListState
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
 import com.goforer.phogal.presentation.stateholder.business.home.common.bookmark.BookmarkViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosSectionState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosSectionState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosSectionUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosSectionUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.error.ErrorContent
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.PhotoItem
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.ShowUpButton
@@ -66,7 +65,7 @@ fun UserPhotosSection(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
     photos: LazyPagingItems<Photo>,
-    state: UserPhotosSectionState = rememberUserPhotosSectionState(),
+    sectionUiState: UserPhotosSectionUiState = rememberUserPhotosSectionUiState(),
     bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
     onItemClicked: (item: Photo, index: Int) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
@@ -121,7 +120,7 @@ fun UserPhotosSection(
                     }
                     refresh is LoadState.NotLoading -> {
                         if (photos.itemCount == 0 ) {
-                            state.visibleUpButtonState.value = false
+                            sectionUiState.visibleUpButtonState.value = false
                             onSuccess(false)
                             item {
                                 Spacer(modifier = Modifier.height(320.dp))
@@ -145,12 +144,12 @@ fun UserPhotosSection(
                                 // This behavior/issue is resetting the LazyListState scroll position.
                                 // Below is a workaround. More info: https://issuetracker.google.com/issues/177245496.
                                 // If this bug will got fixed... then have to be removed below code
-                                state.visibleUpButtonState.value = visibleUpButton(index)
+                                sectionUiState.visibleUpButtonState.value = visibleUpButton(index)
                                 PhotoItem(
                                     modifier.animateItem(
                                         placementSpec = tween(durationMillis = 250)
                                     ),
-                                    state = rememberPhotoItemState(
+                                    state = rememberPhotoItemUiState(
                                         indexState = rememberSaveable { mutableIntStateOf(index) },
                                         photoState = rememberSaveable { mutableStateOf(photos[index]!!) },
                                         visibleViewButtonState = rememberSaveable { mutableStateOf(true) },
@@ -229,20 +228,20 @@ fun UserPhotosSection(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .navigationBarsPadding(),
-                visible = state.visibleUpButtonState.value,
+                visible = sectionUiState.visibleUpButtonState.value,
                 onClick = {
-                    state.clickedState.value = true
+                    sectionUiState.clickedState.value = true
                 }
             )
         }
 
-        LaunchedEffect(lazyListState, true, state.clickedState.value) {
-            if (state.clickedState.value) {
+        LaunchedEffect(lazyListState, true, sectionUiState.clickedState.value) {
+            if (sectionUiState.clickedState.value) {
                 lazyListState.animateScrollToItem (0)
-                state.visibleUpButtonState.value = false
+                sectionUiState.visibleUpButtonState.value = false
             }
 
-            state.clickedState.value = false
+            sectionUiState.clickedState.value = false
         }
     }
 }

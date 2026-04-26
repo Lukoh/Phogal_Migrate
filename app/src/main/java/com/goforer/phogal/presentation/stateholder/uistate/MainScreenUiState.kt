@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.stateIn
  * because the underlying value is plain Compose state, not a suspend/observable.
  */
 @Stable
-class MainScreenState(
+class MainScreenUiState(
     val navState: NavigationState,
     val coroutineScope: CoroutineScope,
     val windowSizeClass: WindowSizeClass,
@@ -46,13 +46,13 @@ class MainScreenState(
 }
 
 @Composable
-fun rememberMainScreenState(
+fun rememberMainScreenUiState(
     windowSizeClass: WindowSizeClass,
     networkMonitor: NetworkMonitor,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     navState: NavigationState = rememberNavigationState(initialRoute = BottomNavRoute.Gallery)
-): MainScreenState = remember(navState, coroutineScope, windowSizeClass, networkMonitor) {
-    MainScreenState(
+): MainScreenUiState = remember(navState, coroutineScope, windowSizeClass, networkMonitor) {
+    MainScreenUiState(
         navState = navState,
         coroutineScope = coroutineScope,
         windowSizeClass = windowSizeClass,

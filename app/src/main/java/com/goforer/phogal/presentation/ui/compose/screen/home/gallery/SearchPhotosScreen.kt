@@ -40,8 +40,10 @@ import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.business.home.gallery.GalleryViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosContentState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosContentState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchSectionUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchSectionUiState
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 import kotlinx.coroutines.launch
@@ -62,7 +64,8 @@ import kotlinx.coroutines.launch
 fun SearchPhotosScreen(
     modifier: Modifier = Modifier,
     galleryViewModel: GalleryViewModel,
-    state: SearchPhotosContentState = rememberSearchPhotosContentState(),
+    contentUiState: SearchPhotosContentUiState = rememberSearchPhotosContentUiState(galleryViewModel),
+    sectionUiState: SearchSectionUiState = rememberSearchSectionUiState(enabledState = contentUiState.enabledState),
     onItemClicked: (id: String) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
@@ -70,6 +73,27 @@ fun SearchPhotosScreen(
     onStop: () -> Unit = {}
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    // Stable lambdas — created once per VM instance so child composables
+    // don't see a new reference on every recomposition.
+    val onSearch: (String) -> Unit = remember(galleryViewModel, contentUiState.galleryUiState.currentQuery, contentUiState) {
+        { keyword ->
+            if (keyword.isNotEmpty() && keyword != contentUiState.galleryUiState.currentQuery) {
+                contentUiState.baseUiState.keyboardController?.hide()
+                galleryViewModel.onQueryChanged(keyword)
+                galleryViewModel.commitSearch()
+                contentUiState.triggeredState.value = true
+            }
+        }
+    }
+
+    val onChipClicked: (String) -> Unit = remember(galleryViewModel, contentUiState, sectionUiState) {
+        { keyword ->
+            sectionUiState.editableInputState.textState = keyword
+            contentUiState.baseUiState.keyboardController?.hide()
+            galleryViewModel.onQueryChanged(keyword)
+            galleryViewModel.commitSearch()
+        }
+    }
 
     ObserveLifecycle(
         lifecycleOwner = LocalLifecycleOwner.current,
@@ -78,7 +102,7 @@ fun SearchPhotosScreen(
     )
 
     BackHandler(enabled = true) {
-        (state.baseUiState.context as Activity).finish()
+        (contentUiState.baseUiState.context as Activity).finish()
     }
 
     Scaffold(
@@ -86,7 +110,7 @@ fun SearchPhotosScreen(
         snackbarHost = { SearchSnackbarHost(snackbarHostState) },
         topBar = {
             SearchTopBar(
-                showFavoriteAction = state.visibleActionsState.value,
+                showFavoriteAction = contentUiState.visibleActionsState.value,
                 onMenuClick = { /* TODO */ },
                 onFavoriteClick = { /* TODO */ }
             )
@@ -97,17 +121,18 @@ fun SearchPhotosScreen(
                     modifier = modifier.padding(
                         top = paddingValues.calculateTopPadding()
                     ),
-                    galleryViewModel = galleryViewModel,
-                    photosContentState = state,
+                    photosContentUiState = contentUiState,
+                    onSearch = onSearch,
+                    onChipClicked = onChipClicked,
                     onItemClicked = onItemClicked,
                     onViewPhotos = onViewPhotos,
                     onShowSnackBar = { message ->
-                        state.baseUiState.scope.launch {
+                        contentUiState.baseUiState.scope.launch {
                             snackbarHostState.showSnackbar(message)
                         }
                     },
                     onOpenWebView = onOpenWebView,
-                    onSuccess = { state.visibleActionsState.value = it }
+                    onSuccess = { contentUiState.visibleActionsState.value = it }
                 )
             }
         }

@@ -10,7 +10,7 @@ import com.goforer.base.designsystem.component.GradientBackground
 import com.goforer.base.designsystem.theme.GradientColors
 import com.goforer.base.designsystem.theme.LocalGradientColors
 import com.goforer.base.utils.connect.ConnectivityManagerNetworkMonitor
-import com.goforer.phogal.presentation.stateholder.uistate.rememberMainScreenState
+import com.goforer.phogal.presentation.stateholder.uistate.rememberMainScreenUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.BottomNavRoute
 import com.goforer.phogal.presentation.ui.compose.screen.home.HomeScreen
 import com.goforer.phogal.presentation.ui.compose.screen.home.OfflineScreen
@@ -19,14 +19,14 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.OfflineScreen
  * App entry composable. This project uses **Navigation 3 1.1.0 exclusively**
  * (Nav2 has been fully removed). All navigation state is owned by
  * [com.goforer.phogal.presentation.ui.navigation.nav3.NavigationState], threaded
- * through [com.goforer.phogal.presentation.stateholder.uistate.MainScreenState].
+ * through [com.goforer.phogal.presentation.stateholder.uistate.MainScreenUiState].
  */
 @Composable
 fun MainScreen(
     networkMonitor: ConnectivityManagerNetworkMonitor,
     windowSizeClass: WindowSizeClass
 ) {
-    val state = rememberMainScreenState(
+    val state = rememberMainScreenUiState(
         windowSizeClass = windowSizeClass,
         networkMonitor = networkMonitor
     )

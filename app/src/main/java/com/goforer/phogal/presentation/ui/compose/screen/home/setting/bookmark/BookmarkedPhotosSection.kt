@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemUiState
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -56,7 +56,7 @@ fun BookmarkedPhotosSection(
                     modifier = modifier.animateItem(
                         tween(durationMillis = 250)
                     ),
-                    state = rememberPhotoItemState(
+                    photoItemUiState = rememberPhotoItemUiState(
                         indexState = rememberSaveable { mutableIntStateOf(index) },
                         photoState = rememberSaveable { mutableStateOf(item) },
                         visibleViewButtonState = rememberSaveable { mutableStateOf(true) }

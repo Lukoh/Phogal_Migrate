@@ -1,6 +1,5 @@
 package com.goforer.phogal.presentation.ui.compose.screen.home.gallery
 
-import android.R.attr.text
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -40,9 +39,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.goforer.base.designsystem.component.IconButton
 import com.goforer.phogal.R
-import com.goforer.phogal.presentation.stateholder.uistate.EditableInputState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchSectionState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchSectionState
+import com.goforer.phogal.presentation.stateholder.uistate.EditableInputUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchSectionUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberEditableInputState
 import com.goforer.phogal.presentation.ui.theme.Black
 import com.goforer.phogal.presentation.ui.theme.ColorSnowWhite
@@ -52,10 +51,10 @@ import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 @Composable
 fun SearchSection(
     modifier: Modifier = Modifier,
-    state: SearchSectionState = rememberSearchSectionState(),
+    sectionUiState: SearchSectionUiState = rememberSearchSectionUiState(),
     onSearched: (word: String) -> Unit
 ) {
-    val isFocused by state.interactionSource.collectIsFocusedAsState()
+    val isFocused by sectionUiState.interactionSource.collectIsFocusedAsState()
     val indicatorColor = if (isFocused) Color.Black else Color.Gray
 
     Row(
@@ -74,17 +73,17 @@ fun SearchSection(
             .fillMaxWidth()
     ) {
         TextField(
-            value = if (state.editableInputState.isHint)
+            value = if (sectionUiState.editableInputState.isHint)
                 ""
             else
-                state.editableInputState.textState,
+                sectionUiState.editableInputState.textState,
             onValueChange = {
                 if (!it.contains("\n")) {
-                    state.wordChangedState.value = true
-                    state.editableInputState.textState = it
+                    sectionUiState.wordChangedState.value = true
+                    sectionUiState.editableInputState.textState = it
                 }
             },
-            enabled = state.enabledState.value,
+            enabled = sectionUiState.enabledState.value,
             leadingIcon = {
                 Icon(
                     modifier = Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp),
@@ -134,8 +133,8 @@ fun SearchSection(
             modifier = modifier.padding(horizontal = 2.dp),
             height = 42.dp,
             onClick = {
-                if (state.wordChangedState.value)
-                    onSearched(state.editableInputState.textState)
+                if (sectionUiState.wordChangedState.value)
+                    onSearched(sectionUiState.editableInputState.textState)
             },
             icon = {
                 Icon(
@@ -168,7 +167,7 @@ fun SearchSectionPreview(modifier: Modifier = Modifier) {
         val interactionSource = remember { MutableInteractionSource() }
         val isFocused by interactionSource.collectIsFocusedAsState()
         val indicatorColor = if (isFocused) Color.Black else Color.Gray
-        val state: EditableInputState = rememberEditableInputState("")
+        val state: EditableInputUiState = rememberEditableInputState("")
 
         Row(
             verticalAlignment = Alignment.CenterVertically,

@@ -23,9 +23,9 @@ import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.business.home.common.photo.info.PictureViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.common.user.UserPhotosViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.gallery.GalleryViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoContentState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosContentState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosContentState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.PictureScreen
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.user.userphotos.UserPhotosScreen
@@ -89,8 +89,8 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
         val galleryViewModel: GalleryViewModel = hiltViewModel()
         SearchPhotosScreen(
             galleryViewModel = galleryViewModel,
-            state = rememberSearchPhotosContentState(
-                baseUiState = rememberBaseUiState()
+            contentUiState = rememberSearchPhotosContentUiState(
+                baseUiState = rememberBaseUiState(), galleryViewModel = galleryViewModel
             ),
             onItemClicked = { id ->
                 navigationState.push(Routes.PictureRoute(id = id, showViewPhotosButton = true))
@@ -118,7 +118,7 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
         val pictureViewModel: PictureViewModel = hiltViewModel()
         PictureScreen(
             pictureViewModel = pictureViewModel,
-            state = rememberPhotoContentState(
+            state = rememberPhotoContentUiState(
                 idState = rememberSaveable { mutableStateOf(key.id) },
                 visibleViewButtonState = rememberSaveable {
                     mutableStateOf(key.showViewPhotosButton)
@@ -145,7 +145,7 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
         val userPhotosViewModel: UserPhotosViewModel = hiltViewModel()
         UserPhotosScreen(
             userPhotosViewModel = userPhotosViewModel,
-            state = rememberUserPhotosContentState(
+            contentUiState = rememberUserPhotosContentUiState(
                 baseUiState = rememberBaseUiState(),
                 nameState = rememberSaveable { mutableStateOf(key.name) },
                 firstNameState = rememberSaveable { mutableStateOf(key.firstName) }

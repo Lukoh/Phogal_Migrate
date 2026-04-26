@@ -10,7 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 
 @Stable
-class PhotoItemState(
+class PhotoItemUiState(
     val indexState:  MutableState<Int>,
     val photoState: State<Any>,
     val visibleViewButtonState: MutableState<Boolean>,
@@ -19,14 +19,14 @@ class PhotoItemState(
 )
 
 @Composable
-fun rememberPhotoItemState(
+fun rememberPhotoItemUiState(
     indexState: MutableState<Int> = rememberSaveable { mutableIntStateOf(0) },
     photoState: State<Any> = remember { mutableStateOf(Any()) },
     visibleViewButtonState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     clickedState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     bookmarkedState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
-): PhotoItemState = remember(indexState, photoState, visibleViewButtonState, clickedState) {
-    PhotoItemState(
+): PhotoItemUiState = remember(indexState, photoState, visibleViewButtonState, clickedState) {
+    PhotoItemUiState(
         indexState = indexState,
         photoState = photoState,
         visibleViewButtonState = visibleViewButtonState,

@@ -21,15 +21,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.goforer.phogal.data.model.remote.response.gallery.common.User
+import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.presentation.stateholder.business.home.common.follow.FollowViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserItemState
+import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserItemUiState
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FollowingUsersSection(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
-    followViewModel: FollowViewModel = hiltViewModel(),
     users: MutableList<User>,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String?) -> Unit,
@@ -59,11 +59,11 @@ fun FollowingUsersSection(
                     modifier = modifier.animateItem(
                         tween(durationMillis = 250)
                     ),
-                    state = rememberFollowingUserItemState(
+                    followingUserItemUiState = rememberFollowingUserItemUiState(
                         indexState = rememberSaveable { mutableIntStateOf(index) },
                         userState = rememberSaveable { mutableStateOf(item) },
                         visibleViewButtonState = rememberSaveable { mutableStateOf(true) },
-                        followedState = rememberSaveable { mutableStateOf(followViewModel.isUserFollowed(item)) }
+                        followedState = rememberSaveable { mutableStateOf(true) }
                     ),
                     onViewPhotos = onViewPhotos,
                     onOpenWebView = onOpenWebView,

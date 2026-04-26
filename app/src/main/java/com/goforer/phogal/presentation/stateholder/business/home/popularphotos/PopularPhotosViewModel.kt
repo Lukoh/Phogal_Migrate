@@ -40,11 +40,9 @@ class PopularPhotosViewModel @Inject constructor(
 
      */
 
-    private val _photos = MutableStateFlow<PagingData<Photo>>(
-        value = PagingData.empty()
-    )
+    private val _orderBy = MutableStateFlow(POPULAR)
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    val photos: StateFlow<PagingData<Photo>> = _photos
+    val photos: StateFlow<PagingData<Photo>> = _orderBy
         .flatMapLatest { popularPhotosRepository.popularPhotos(orderBy = POPULAR, pageSize = PAGE_SIZE) }
         .cachedIn(viewModelScope)
         .stateIn(
@@ -53,10 +51,15 @@ class PopularPhotosViewModel @Inject constructor(
             initialValue = PagingData.empty()
         )
 
-    private companion object {
+    fun updateOrderBy(newOrderBy: String) {
+        _orderBy.value = newOrderBy
+    }
+
+    companion object {
         const val POPULAR = "popular"
+        const val LATEST = "latest"
+        const val OLDEST = "oldest"
         const val PAGE_SIZE = 10
-        const val DEBOUNCE_MS = 300L
         const val STOP_TIMEOUT_MS = 5_000L
     }
 }

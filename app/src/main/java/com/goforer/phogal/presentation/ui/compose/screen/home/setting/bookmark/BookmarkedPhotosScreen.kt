@@ -32,13 +32,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goforer.base.designsystem.component.CardSnackBar
 import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
+import com.goforer.phogal.presentation.stateholder.business.home.common.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.BaseUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
@@ -48,7 +51,8 @@ import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 @Composable
 fun BookmarkedPhotosScreen(
     modifier: Modifier = Modifier,
-    state: BaseUiState = rememberBaseUiState(),
+    bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
+    baseUiState: BaseUiState = rememberBaseUiState(),
     onItemClicked: (item: Picture, index: Int) -> Unit,
     onBackPressed: () -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
@@ -65,12 +69,13 @@ fun BookmarkedPhotosScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val enabledLoadPhotosState = remember { mutableStateOf(true) }
     val backHandlingEnabled by remember { mutableStateOf(true) }
+    val bookmarkedPictures = bookmarkViewModel.bookmarkedPictures.collectAsStateWithLifecycle()
 
     BackHandler(backHandlingEnabled) {
         onBackPressed()
     }
 
-    DisposableEffect(state.lifecycle) {
+    DisposableEffect(baseUiState.lifecycle) {
         // Create an observer that triggers our remembered callbacks
         // for doing anything
         val observer = LifecycleEventObserver { _, event ->
@@ -82,11 +87,11 @@ fun BookmarkedPhotosScreen(
         }
 
         // Add the observer to the lifecycle
-        state.lifecycle.addObserver(observer)
+        baseUiState.lifecycle.addObserver(observer)
 
         // When the effect leaves the Composition, remove the observer
         onDispose {
-            state.lifecycle.removeObserver(observer)
+            baseUiState.lifecycle.removeObserver(observer)
         }
     }
 
@@ -128,6 +133,7 @@ fun BookmarkedPhotosScreen(
             ScaffoldContent(topInterval = 2.dp) {
                 BookmarkedPhotosContent(
                     modifier = modifier,
+                    bookmarkedPictures = bookmarkedPictures.value.toMutableList(),
                     contentPadding = paddingValues,
                     enabledLoadPhotosState = enabledLoadPhotosState,
                     onItemClicked = onItemClicked,

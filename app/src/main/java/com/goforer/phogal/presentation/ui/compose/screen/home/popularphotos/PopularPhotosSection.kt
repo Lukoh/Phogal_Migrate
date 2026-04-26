@@ -44,9 +44,9 @@ import com.goforer.base.designsystem.component.state.rememberLazyListState
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
 import com.goforer.phogal.presentation.stateholder.business.home.common.bookmark.BookmarkViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemState
-import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.PopularPhotosSectionState
-import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.rememberPopularPhotosSectionState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.PopularPhotosSectionUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.rememberPopularPhotosSectionUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.gallery.LoadingPhotos
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.error.ErrorContent
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.PhotoItem
@@ -62,7 +62,7 @@ private const val PAGE_SIZE_HINT = 10
 fun PopularPhotosSection(
     modifier: Modifier = Modifier,
     photos: LazyPagingItems<Photo>,
-    state: PopularPhotosSectionState = rememberPopularPhotosSectionState(),
+    sectionUiState: PopularPhotosSectionUiState = rememberPopularPhotosSectionUiState(),
     bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
     onItemClicked: (item: Photo, index: Int) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
@@ -113,7 +113,7 @@ fun PopularPhotosSection(
                     }
                     refresh is LoadState.NotLoading -> {
                         if (photos.itemCount == 0 ) {
-                            state.visibleUpButtonState.value = false
+                            sectionUiState.visibleUpButtonState.value = false
                             onSuccess(false)
                             item {
                                 Spacer(modifier = Modifier.height(320.dp))
@@ -141,7 +141,8 @@ fun PopularPhotosSection(
                                 // This behavior/issue is resetting the LazyListState scroll position.
                                 // Below is a workaround. More info: https://issuetracker.google.com/issues/177245496.
                                 // If this bug will got fixed... then have to be removed below code
-                                state.visibleUpButtonState.value = visibleUpButton(index)
+                                sectionUiState.visibleUpButtonState.value = visibleUpButton(index)
+
                                 if (index == photos.itemCount - 1)
                                     onLoadedPhotos(true)
 
@@ -149,7 +150,7 @@ fun PopularPhotosSection(
                                     modifier = modifier
                                         .padding(top = padding)
                                         .animateItem(tween(durationMillis = 250)),
-                                    state = rememberPhotoItemState(
+                                    state = rememberPhotoItemUiState(
                                         indexState = rememberSaveable { mutableIntStateOf(index) },
                                         photoState = rememberSaveable { mutableStateOf(photos[index]!!) },
                                         visibleViewButtonState = rememberSaveable { mutableStateOf(true) },
@@ -226,20 +227,20 @@ fun PopularPhotosSection(
         if (!lazyListState.isScrollInProgress) {
             ShowUpButton(
                 modifier = Modifier.align(Alignment.BottomEnd),
-                visible = state.visibleUpButtonState.value,
+                visible = sectionUiState.visibleUpButtonState.value,
                 onClick = {
-                    state.clickedState.value = true
+                    sectionUiState.clickedState.value = true
                 }
             )
         }
 
-        LaunchedEffect(lazyListState, true, state.clickedState.value) {
-            if (state.clickedState.value) {
+        LaunchedEffect(lazyListState, true, sectionUiState.clickedState.value) {
+            if (sectionUiState.clickedState.value) {
                 lazyListState.animateScrollToItem (0)
-                state.visibleUpButtonState.value = false
+                sectionUiState.visibleUpButtonState.value = false
             }
 
-            state.clickedState.value = false
+            sectionUiState.clickedState.value = false
         }
     }
 }

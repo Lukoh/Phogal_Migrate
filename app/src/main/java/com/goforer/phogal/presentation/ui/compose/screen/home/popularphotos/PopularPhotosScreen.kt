@@ -24,13 +24,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.goforer.base.designsystem.component.CardSnackBar
 import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.business.home.popularphotos.PopularPhotosViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.PopularPhotosContentState
-import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.rememberPopularPhotosContentState
+import com.goforer.phogal.presentation.stateholder.business.home.popularphotos.PopularPhotosViewModel.Companion.POPULAR
+import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.PopularPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.rememberPopularPhotosContentUiState
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import kotlinx.coroutines.launch
 
@@ -39,7 +41,7 @@ import kotlinx.coroutines.launch
 fun PopularPhotosScreen(
     modifier: Modifier = Modifier,
     popularPhotosViewModel: PopularPhotosViewModel = hiltViewModel(),
-    state: PopularPhotosContentState = rememberPopularPhotosContentState(),
+    contentUiState: PopularPhotosContentUiState = rememberPopularPhotosContentUiState(),
     onItemClicked: (id: String) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
@@ -56,10 +58,10 @@ fun PopularPhotosScreen(
     val backHandlingEnabled by remember { mutableStateOf(true) }
 
     BackHandler(backHandlingEnabled) {
-        (state.baseUiState.context as Activity).finish()
+        (contentUiState.baseUiState.context as Activity).finish()
     }
 
-    DisposableEffect(state.baseUiState.lifecycle) {
+    DisposableEffect(contentUiState.baseUiState.lifecycle) {
         // Create an observer that triggers our remembered callbacks
         // for doing anything
         val observer = LifecycleEventObserver { _, event ->
@@ -71,11 +73,11 @@ fun PopularPhotosScreen(
         }
 
         // Add the observer to the lifecycle
-        state.baseUiState.lifecycle.addObserver(observer)
+        contentUiState.baseUiState.lifecycle.addObserver(observer)
 
         // When the effect leaves the Composition, remove the observer
         onDispose {
-            state.baseUiState.lifecycle.removeObserver(observer)
+            contentUiState.baseUiState.lifecycle.removeObserver(observer)
         }
     }
 
@@ -104,20 +106,23 @@ fun PopularPhotosScreen(
             )
         }, content = { paddingValues ->
             ScaffoldContent(topInterval = paddingValues.calculateTopPadding()) {
+                popularPhotosViewModel.updateOrderBy(POPULAR)
                 PopularPhotosContent(
                     modifier = modifier,
-                    popularPhotosViewModel = popularPhotosViewModel,
-                    state = state,
+                    photos = popularPhotosViewModel.photos.collectAsLazyPagingItems(),
                     onItemClicked = onItemClicked,
                     onViewPhotos = onViewPhotos,
                     onShowSnackBar = {
-                        state.baseUiState.scope.launch {
+                        contentUiState.baseUiState.scope.launch {
                             snackbarHostState.showSnackbar(it)
                         }
                     },
                     onOpenWebView = onOpenWebView,
                     onSuccess = {
-                        state.visibleActionsState.value = it
+                        contentUiState.visibleActionsState.value = it
+                    },
+                    onLoadedPhotos = {
+                        contentUiState.loadedPhotosState.value = it
                     }
                 )
             }

@@ -52,8 +52,8 @@ import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.business.home.common.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.common.photo.info.PictureViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.UiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.PhotoContentState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoContentState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.PhotoContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoContentUiState
 import com.goforer.phogal.presentation.ui.theme.Red60
 import kotlinx.coroutines.launch
 
@@ -71,7 +71,7 @@ fun PictureScreen(
     modifier: Modifier = Modifier,
     pictureViewModel: PictureViewModel,
     bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
-    state: PhotoContentState = rememberPhotoContentState(),
+    state: PhotoContentUiState = rememberPhotoContentUiState(),
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onBackPressed: () -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,

@@ -67,7 +67,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.wear.compose.materialcore.screenHeightDp
 import coil.compose.AsyncImagePainter
 import coil.size.Size
 import com.goforer.base.designsystem.animation.GenericCubicAnimationShape
@@ -78,9 +77,9 @@ import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Exi
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.presentation.stateholder.business.home.common.photo.info.PictureViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.UiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserContainerState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.PhotoContentState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoContentState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.PhotoContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserContainerUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.error.ErrorContent
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.user.UserContainer
 import com.goforer.phogal.presentation.ui.theme.Black
@@ -98,7 +97,7 @@ import com.goforer.phogal.presentation.ui.theme.DarkGreen60
 fun PictureContent(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
-    state: PhotoContentState = rememberPhotoContentState(),
+    state: PhotoContentUiState = rememberPhotoContentUiState(),
     pictureViewModel: PictureViewModel = hiltViewModel(),
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
@@ -124,7 +123,7 @@ fun HandlePictureResponse(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
     pictureViewModel: PictureViewModel = hiltViewModel(),
-    state: PhotoContentState = rememberPhotoContentState(),
+    state: PhotoContentUiState = rememberPhotoContentUiState(),
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
     onShownPhoto: (picture: Picture) -> Unit,
@@ -256,7 +255,7 @@ fun BodyContent(
         } else {
             UserContainer(
                 modifier = Modifier,
-                state = rememberUserContainerState(
+                state = rememberUserContainerUiState(
                     userState = rememberSaveable { mutableStateOf(picture.user.toString()) },
                     profileSizeState = rememberSaveable { mutableDoubleStateOf(48.0) },
                     colorsState = remember { mutableStateOf(listOf(ColorSystemGray1, ColorSystemGray1, ColorSnowWhite, ColorSystemGray5, Blue75, DarkGreen60)) },

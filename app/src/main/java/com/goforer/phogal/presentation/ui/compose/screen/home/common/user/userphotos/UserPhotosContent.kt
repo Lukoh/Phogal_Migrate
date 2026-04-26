@@ -23,9 +23,9 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.goforer.base.customtab.openCustomTab
 import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.business.home.common.user.UserPhotosViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosContentState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosContentState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosSectionState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosSectionUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.InitScreen
 import com.goforer.phogal.presentation.ui.compose.screen.home.gallery.SearchSection
 import com.goforer.phogal.presentation.ui.theme.ColorSystemGray7
@@ -36,31 +36,31 @@ fun UserPhotosContent(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(4.dp),
     userPhotosViewModel: UserPhotosViewModel = hiltViewModel(),
-    state: UserPhotosContentState = rememberUserPhotosContentState(),
+    contentUiState: UserPhotosContentUiState = rememberUserPhotosContentUiState(),
     onItemClicked: (id: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
     onSuccess: (isSuccessful: Boolean) -> Unit
 ) {
     // Kick off the Paging stream whenever the target user changes.
-    LaunchedEffect(state.nameState.value) {
-        if (state.nameState.value.isNotBlank()) {
-            userPhotosViewModel.loadFor(state.nameState.value)
+    LaunchedEffect(contentUiState.nameState.value) {
+        if (contentUiState.nameState.value.isNotBlank()) {
+            userPhotosViewModel.loadFor(contentUiState.nameState.value)
         }
     }
 
     val photos = userPhotosViewModel.photos.collectAsLazyPagingItems()
 
-    if (state.nameState.value.isNotBlank()) {
+    if (contentUiState.nameState.value.isNotBlank()) {
         UserPhotosSection(
             modifier = Modifier.padding(top = 0.5.dp),
             contentPadding = contentPadding,
             photos = photos,
-            state = rememberUserPhotosSectionState(),
+            sectionUiState = rememberUserPhotosSectionUiState(),
             onItemClicked = { photo, _ -> onItemClicked(photo.id) },
             onViewPhotos = { _, _, _, _ -> },
             onShowSnackBar = onShowSnackBar,
             onOpenWebView = { _, url ->
-                openCustomTab(state.baseUiState.context, url)
+                openCustomTab(contentUiState.baseUiState.context, url)
             },
             onSuccess = onSuccess
         )

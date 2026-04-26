@@ -48,9 +48,9 @@ import com.goforer.base.designsystem.component.state.rememberLazyListState
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
 import com.goforer.phogal.presentation.stateholder.business.home.common.bookmark.BookmarkViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosSectionState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosSectionState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosSectionUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosSectionUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.error.ErrorContent
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.PhotoItem
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.ShowUpButton
@@ -83,7 +83,7 @@ private const val SCROLL_OFFSET_SIGNAL = 35
 fun SearchPhotosSection(
     modifier: Modifier = Modifier,
     photos: LazyPagingItems<Photo>,
-    state: SearchPhotosSectionState = rememberSearchPhotosSectionState(),
+    sectionUiState: SearchPhotosSectionUiState = rememberSearchPhotosSectionUiState(),
     bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
     onItemClicked: (item: Photo, index: Int) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
@@ -128,7 +128,7 @@ fun SearchPhotosSection(
         ) {
             renderLoadState(
                 photos = photos,
-                state = state,
+                sectionUiState = sectionUiState,
                 bookmarkViewModel = bookmarkViewModel,
                 onItemClicked = onItemClicked,
                 onViewPhotos = onViewPhotos,
@@ -146,18 +146,18 @@ fun SearchPhotosSection(
         if (!lazyListState.isScrollInProgress) {
             ShowUpButton(
                 modifier = Modifier.align(Alignment.BottomEnd),
-                visible = isScrolledPastThreshold && state.visibleUpButtonState.value,
-                onClick = { state.clickedState.value = true }
+                visible = isScrolledPastThreshold && sectionUiState.visibleUpButtonState.value,
+                onClick = { sectionUiState.clickedState.value = true }
             )
         }
     }
 
     // Animate scroll-to-top when the up-button was tapped.
-    LaunchedEffect(state.clickedState.value) {
-        if (state.clickedState.value) {
+    LaunchedEffect(sectionUiState.clickedState.value) {
+        if (sectionUiState.clickedState.value) {
             lazyListState.animateScrollToItem(0)
-            state.visibleUpButtonState.value = false
-            state.clickedState.value = false
+            sectionUiState.visibleUpButtonState.value = false
+            sectionUiState.clickedState.value = false
         }
     }
 }
@@ -174,7 +174,7 @@ fun SearchPhotosSection(
 @OptIn(ExperimentalFoundationApi::class)
 private fun LazyListScope.renderLoadState(
     photos: LazyPagingItems<Photo>,
-    state: SearchPhotosSectionState,
+    sectionUiState: SearchPhotosSectionUiState,
     bookmarkViewModel: BookmarkViewModel,
     onItemClicked: (item: Photo, index: Int) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
@@ -191,7 +191,7 @@ private fun LazyListScope.renderLoadState(
 
         loadState.refresh is LoadState.NotLoading && photos.itemCount == 0 -> {
             onLoadSuccess(false)
-            state.visibleUpButtonState.value = false
+            sectionUiState.visibleUpButtonState.value = false
             item { EmptyState() }
         }
 
@@ -251,7 +251,7 @@ private fun LazyListScope.photoItems(
 
         PhotoItem(
             modifier = Modifier.animateItem(tween(durationMillis = 250)),
-            state = rememberPhotoItemState(
+            state = rememberPhotoItemUiState(
                 indexState = rememberSaveable { mutableIntStateOf(index) },
                 photoState = rememberSaveable { mutableStateOf(photo) },
                 visibleViewButtonState = rememberSaveable { mutableStateOf(true) },

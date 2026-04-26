@@ -5,7 +5,6 @@ import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -40,8 +39,8 @@ import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.business.home.common.user.UserPhotosViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosContentState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosContentState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosContentUiState
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 import kotlinx.coroutines.launch
@@ -51,7 +50,7 @@ import kotlinx.coroutines.launch
 fun UserPhotosScreen(
     modifier: Modifier = Modifier,
     userPhotosViewModel: UserPhotosViewModel,
-    state: UserPhotosContentState = rememberUserPhotosContentState(),
+    contentUiState: UserPhotosContentUiState = rememberUserPhotosContentUiState(),
     onItemClicked: (id: String) -> Unit,
     onBackPressed: () -> Unit,
     onStart: () -> Unit = {
@@ -70,7 +69,7 @@ fun UserPhotosScreen(
         onBackPressed()
     }
 
-    DisposableEffect(state.baseUiState.lifecycle) {
+    DisposableEffect(contentUiState.baseUiState.lifecycle) {
         // Create an observer that triggers our remembered callbacks
         // for doing anything
         val observer = LifecycleEventObserver { _, event ->
@@ -82,11 +81,11 @@ fun UserPhotosScreen(
         }
 
         // Add the observer to the lifecycle
-        state.baseUiState.lifecycle.addObserver(observer)
+        contentUiState.baseUiState.lifecycle.addObserver(observer)
 
         // When the effect leaves the Composition, remove the observer
         onDispose {
-            state.baseUiState.lifecycle.removeObserver(observer)
+            contentUiState.baseUiState.lifecycle.removeObserver(observer)
         }
     }
 
@@ -101,7 +100,7 @@ fun UserPhotosScreen(
             CustomCenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "${state.firstNameState.value}${" "}${stringResource(id = R.string.picture_photos)}",
+                        text = "${contentUiState.firstNameState.value}${" "}${stringResource(id = R.string.picture_photos)}",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontFamily = FontFamily.SansSerif,
@@ -121,7 +120,7 @@ fun UserPhotosScreen(
                     }
                 },
                 actions = {
-                    if (state.visibleActionsState.value) {
+                    if (contentUiState.visibleActionsState.value) {
                         IconButton(onClick = { /* doSomething() */ }) {
                             Icon(
                                 imageVector = Icons.Filled.Favorite,
@@ -137,15 +136,15 @@ fun UserPhotosScreen(
                     modifier = modifier,
                     contentPadding = paddingValues,
                     userPhotosViewModel = userPhotosViewModel,
-                    state = state,
+                    contentUiState = contentUiState,
                     onItemClicked = onItemClicked,
                     onShowSnackBar = {
-                        state.baseUiState.scope.launch {
+                        contentUiState.baseUiState.scope.launch {
                             snackbarHostState.showSnackbar(it)
                         }
                     },
                     onSuccess = { isSuccessful ->
-                        state.visibleActionsState.value = isSuccessful
+                        contentUiState.visibleActionsState.value = isSuccessful
                     }
                 )
             }

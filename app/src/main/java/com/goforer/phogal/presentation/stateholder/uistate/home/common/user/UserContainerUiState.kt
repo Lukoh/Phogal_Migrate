@@ -13,7 +13,7 @@ import com.goforer.phogal.presentation.stateholder.uistate.BaseUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 
 @Stable
-class UserContainerState(
+class UserContainerUiState(
     val baseUiState: BaseUiState,
     val userState: MutableState<String>,
     val profileSizeState: MutableState<Double>,
@@ -24,16 +24,16 @@ class UserContainerState(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun rememberUserContainerState(
+fun rememberUserContainerUiState(
     baseUiState: BaseUiState = rememberBaseUiState(),
     userState: MutableState<String> = rememberSaveable { mutableStateOf("") },
     profileSizeState: MutableState<Double> = rememberSaveable { mutableDoubleStateOf(0.0) },
     colorsState: MutableState<List<Color>> = rememberSaveable { mutableStateOf(listOf(Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent)) },
     visibleViewButtonState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     fromItemState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
-): UserContainerState = remember(
+): UserContainerUiState = remember(
     profileSizeState, colorsState, visibleViewButtonState) {
-    UserContainerState(
+    UserContainerUiState(
         baseUiState = baseUiState,
         userState = userState,
         profileSizeState = profileSizeState,

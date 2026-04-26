@@ -21,15 +21,15 @@ import androidx.compose.ui.unit.dp
 import com.goforer.base.designsystem.animation.animateIconScale
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.User
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.UserInfoState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserInfoState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.UserInfoUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserInfoUiState
 import com.goforer.phogal.presentation.ui.theme.DarkGreenGray10
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserInfoBottomSheet(
-    userInfoState: UserInfoState = rememberUserInfoState(),
+    userInfoUiState: UserInfoUiState = rememberUserInfoUiState(),
     user: User,
     showUserInfoBottomSheet: Boolean,
     onDismissedRequest: (Boolean) -> Unit
@@ -37,17 +37,17 @@ fun UserInfoBottomSheet(
     if (showUserInfoBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = {
-                userInfoState.scope.launch {
-                    userInfoState.bottomSheetState.hide()
+                userInfoUiState.scope.launch {
+                    userInfoUiState.bottomSheetState.hide()
                 }.invokeOnCompletion {
-                    if (!userInfoState.bottomSheetState.isVisible) {
-                        userInfoState.openBottomSheetState.value = false
+                    if (!userInfoUiState.bottomSheetState.isVisible) {
+                        userInfoUiState.openBottomSheetState.value = false
                     }
                 }
 
                 onDismissedRequest(false)
             },
-            sheetState = userInfoState.bottomSheetState,
+            sheetState = userInfoUiState.bottomSheetState,
             tonalElevation = 8.dp
         ) {
             Column(
@@ -92,9 +92,9 @@ fun UserInfoBottomSheet(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     ShowPortfolioButton(
-                        scope = userInfoState.scope,
-                        bottomSheetState = userInfoState.bottomSheetState,
-                        openBottomSheetState = userInfoState.openBottomSheetState,
+                        scope = userInfoUiState.scope,
+                        bottomSheetState = userInfoUiState.bottomSheetState,
+                        openBottomSheetState = userInfoUiState.openBottomSheetState,
                         firstName = user.first_name,
                         onDismissedRequest = onDismissedRequest
                     )

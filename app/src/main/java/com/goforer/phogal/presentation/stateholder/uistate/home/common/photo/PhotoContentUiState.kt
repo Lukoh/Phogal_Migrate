@@ -18,7 +18,7 @@ import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
  * truth duplication that made the legacy `LikeResponseHandle` logic fragile.
  */
 @Stable
-class PhotoContentState(
+class PhotoContentUiState(
     val baseUiState: BaseUiState,
     val idState: MutableState<String>,
     val visibleViewButtonState: MutableState<Boolean>,
@@ -27,18 +27,18 @@ class PhotoContentState(
 )
 
 @Composable
-fun rememberPhotoContentState(
+fun rememberPhotoContentUiState(
     baseUiState: BaseUiState = rememberBaseUiState(),
     idState: MutableState<String> = rememberSaveable { mutableStateOf("") },
     visibleViewButtonState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     enabledBookmarkState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     visibleActionsState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
-): PhotoContentState = remember(
+): PhotoContentUiState = remember(
     baseUiState,
     idState,
     visibleViewButtonState
 ) {
-    PhotoContentState(
+    PhotoContentUiState(
         baseUiState = baseUiState,
         idState = idState,
         visibleViewButtonState = visibleViewButtonState,

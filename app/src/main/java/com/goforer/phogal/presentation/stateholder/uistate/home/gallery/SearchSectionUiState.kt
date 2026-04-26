@@ -7,25 +7,25 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import com.goforer.phogal.presentation.stateholder.uistate.EditableInputState
+import com.goforer.phogal.presentation.stateholder.uistate.EditableInputUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberEditableInputState
 
 @Stable
-class SearchSectionState(
-    val editableInputState: EditableInputState,
+class SearchSectionUiState(
+    val editableInputState: EditableInputUiState,
     val interactionSource: MutableInteractionSource,
     val wordChangedState: MutableState<Boolean>,
     val enabledState: MutableState<Boolean>
 )
 
 @Composable
-fun rememberSearchSectionState(
-    editableInputState: EditableInputState = rememberEditableInputState(hint = "Search"),
+fun rememberSearchSectionUiState(
+    editableInputState: EditableInputUiState = rememberEditableInputState(hint = "Search"),
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     wordChangedState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     enabledState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
-): SearchSectionState = remember {
-    SearchSectionState(
+): SearchSectionUiState = remember {
+    SearchSectionUiState(
         editableInputState = editableInputState,
         interactionSource = interactionSource,
         wordChangedState = wordChangedState,

@@ -14,30 +14,28 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.User
+import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.presentation.stateholder.business.home.common.follow.FollowViewModel
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.InitScreen
 
 @Composable
 fun FollowingUsersContent(
     modifier: Modifier = Modifier,
+    users: MutableList<User>,
     contentPadding: PaddingValues = PaddingValues(4.dp),
-    followViewModel: FollowViewModel = hiltViewModel(),
     enabledLoadPhotosState: MutableState<Boolean>,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
-    onOpenWebView: (firstName: String, url: String?) -> Unit
+    onOpenWebView: (firstName: String, url: String?) -> Unit,
+    onFollow: (user: User) -> Unit
 ) {
-    val users = followViewModel.followingUsers.collectAsStateWithLifecycle().value
-
     if (users.isNotEmpty()) {
         FollowingUsersSection(
             modifier = modifier,
             contentPadding = contentPadding,
-            users = users as MutableList<User>,
+            users = users,
             onViewPhotos = onViewPhotos,
             onOpenWebView = onOpenWebView,
-            onFollow = {
-                followViewModel.setUserFollow(it)
-            }
+            onFollow = onFollow
         )
     } else {
         if (enabledLoadPhotosState.value) {

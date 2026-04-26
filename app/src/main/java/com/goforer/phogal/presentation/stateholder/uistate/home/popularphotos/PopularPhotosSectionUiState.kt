@@ -8,17 +8,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 
 @Stable
-class PopularPhotosSectionState(
+class PopularPhotosSectionUiState(
     val clickedState: MutableState<Boolean>,
     val visibleUpButtonState: MutableState<Boolean>
 )
 
 @Composable
-fun rememberPopularPhotosSectionState(
+fun rememberPopularPhotosSectionUiState(
     clickedState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     visibleUpButtonState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
-): PopularPhotosSectionState = remember(clickedState) {
-    PopularPhotosSectionState(
+): PopularPhotosSectionUiState = remember(clickedState) {
+    PopularPhotosSectionUiState(
         clickedState = clickedState,
         visibleUpButtonState = visibleUpButtonState
     )

@@ -10,17 +10,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 
 @Stable
-class EditableInputState(private val hint: String, initialText: String) {
+class EditableInputUiState(private val hint: String, initialText: String) {
     var textState by mutableStateOf(initialText)
 
     val isHint: Boolean
         get() = textState == hint
 
     companion object {
-        val Saver: Saver<EditableInputState, *> = listSaver(
+        val Saver: Saver<EditableInputUiState, *> = listSaver(
             save = { listOf(it.hint, it.textState) },
             restore = {
-                EditableInputState(
+                EditableInputUiState(
                     hint = it[0],
                     initialText = it[1],
                 )
@@ -30,7 +30,7 @@ class EditableInputState(private val hint: String, initialText: String) {
 }
 
 @Composable
-fun rememberEditableInputState(hint: String): EditableInputState =
-    rememberSaveable(hint, saver = EditableInputState.Saver) {
-        EditableInputState(hint, hint)
+fun rememberEditableInputState(hint: String): EditableInputUiState =
+    rememberSaveable(hint, saver = EditableInputUiState.Saver) {
+        EditableInputUiState(hint, hint)
     }

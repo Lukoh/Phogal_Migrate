@@ -20,20 +20,18 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.common.InitScreen
 @Composable
 fun BookmarkedPhotosContent(
     modifier: Modifier = Modifier,
-    bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
+    bookmarkedPictures: MutableList<Picture>,
     contentPadding: PaddingValues = PaddingValues(4.dp),
     enabledLoadPhotosState: MutableState<Boolean>,
     onItemClicked: (item: Picture, index: Int) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit
 ) {
-    val bookmarkedPictures = bookmarkViewModel.bookmarkedPictures.collectAsStateWithLifecycle().value
-
     if (bookmarkedPictures.isNotEmpty()) {
         BookmarkedPhotosSection(
             modifier = modifier,
             contentPadding = contentPadding,
-            photos = bookmarkedPictures as MutableList<Picture>,
+            photos = bookmarkedPictures,
             onItemClicked = onItemClicked,
             onViewPhotos = onViewPhotos,
             onOpenWebView = onOpenWebView

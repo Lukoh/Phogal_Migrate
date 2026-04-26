@@ -14,7 +14,7 @@ import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
  * `UserPhotosViewModel.photos` via `collectAsLazyPagingItems()` in the screen.
  */
 @Stable
-class UserPhotosContentState(
+class UserPhotosContentUiState(
     val baseUiState: BaseUiState,
     val nameState: MutableState<String>,
     val firstNameState: MutableState<String>,
@@ -22,17 +22,17 @@ class UserPhotosContentState(
 )
 
 @Composable
-fun rememberUserPhotosContentState(
+fun rememberUserPhotosContentUiState(
     baseUiState: BaseUiState = rememberBaseUiState(),
     nameState: MutableState<String> = rememberSaveable { mutableStateOf("") },
     firstNameState: MutableState<String> = rememberSaveable { mutableStateOf("") },
     visibleActionsState: MutableState<Boolean> = rememberSaveable { mutableStateOf(true) }
-): UserPhotosContentState = remember(
+): UserPhotosContentUiState = remember(
     baseUiState,
     nameState,
     firstNameState
 ) {
-    UserPhotosContentState(
+    UserPhotosContentUiState(
         baseUiState = baseUiState,
         nameState = nameState,
         firstNameState = firstNameState,

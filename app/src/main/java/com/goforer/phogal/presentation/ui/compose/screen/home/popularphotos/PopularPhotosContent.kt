@@ -2,7 +2,6 @@ package com.goforer.phogal.presentation.ui.compose.screen.home.popularphotos
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import androidx.collection.emptyLongSet
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -12,12 +11,9 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.paging.compose.collectAsLazyPagingItems
-import com.goforer.phogal.presentation.stateholder.business.home.popularphotos.PopularPhotosViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.PopularPhotosContentState
-import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.rememberPopularPhotosContentState
-import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.rememberPopularPhotosSectionState
+import androidx.paging.compose.LazyPagingItems
+import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
+import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.rememberPopularPhotosSectionUiState
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 
 /**
@@ -29,29 +25,25 @@ import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 @Composable
 fun PopularPhotosContent(
     modifier: Modifier = Modifier,
-    popularPhotosViewModel: PopularPhotosViewModel = hiltViewModel(),
-    state: PopularPhotosContentState = rememberPopularPhotosContentState(),
+    photos: LazyPagingItems<Photo>,
     onItemClicked: (id: String) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
-    onSuccess: (isSuccessful: Boolean) -> Unit
+    onSuccess: (isSuccessful: Boolean) -> Unit,
+    onLoadedPhotos: (isLoadedPhotos: Boolean) -> Unit
 ) {
-    if (!state.loadedPhotosState.value) {
-        val photos = popularPhotosViewModel.photos.collectAsLazyPagingItems()
-
-        PopularPhotosSection(
-            modifier = modifier,
-            photos = photos,
-            state = rememberPopularPhotosSectionState(),
-            onItemClicked = { photo, _ -> onItemClicked(photo.id) },
-            onViewPhotos = onViewPhotos,
-            onShowSnackBar = onShowSnackBar,
-            onOpenWebView = onOpenWebView,
-            onSuccess = onSuccess,
-            onLoadedPhotos = { state.loadedPhotosState.value = it }
-        )
-    }
+    PopularPhotosSection(
+        modifier = modifier,
+        photos = photos,
+        state = rememberPopularPhotosSectionUiState(),
+        onItemClicked = { photo, _ -> onItemClicked(photo.id) },
+        onViewPhotos = onViewPhotos,
+        onShowSnackBar = onShowSnackBar,
+        onOpenWebView = onOpenWebView,
+        onSuccess = onSuccess,
+        onLoadedPhotos = onLoadedPhotos
+    )
 }
 
 @SuppressLint("UnusedBoxWithConstraintsScope")

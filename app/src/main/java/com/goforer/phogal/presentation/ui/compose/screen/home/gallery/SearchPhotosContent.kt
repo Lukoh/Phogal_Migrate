@@ -12,7 +12,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -23,22 +22,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.goforer.base.designsystem.animation.GenericCubicAnimationShape
 import com.goforer.base.designsystem.component.Chips
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
-import com.goforer.phogal.presentation.stateholder.business.home.gallery.GalleryViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosContentState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchSectionState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberPermissionState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosContentState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosSectionState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchSectionState
-import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosSectionUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchSectionUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.InitScreen
 import com.goforer.phogal.presentation.ui.theme.Black
 import com.goforer.phogal.presentation.ui.theme.Blue70
@@ -65,79 +58,52 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 @Composable
 fun SearchPhotosContent(
     modifier: Modifier = Modifier,
-    galleryViewModel: GalleryViewModel = hiltViewModel(),
-    photosContentState: SearchPhotosContentState = rememberSearchPhotosContentState(
-        baseUiState = rememberBaseUiState()
+    photosContentUiState: SearchPhotosContentUiState,
+    searchUiState: SearchSectionUiState = rememberSearchSectionUiState(
+        enabledState = photosContentUiState.enabledState
     ),
-    searchState: SearchSectionState = rememberSearchSectionState(
-        enabledState = photosContentState.enabledState
-    ),
+    onSearch: (String) -> Unit,
+    onChipClicked: (String) -> Unit,
     onItemClicked: (id: String) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
     onSuccess: (isSuccessful: Boolean) -> Unit
 ) {
-    val photos = galleryViewModel.photos.collectAsLazyPagingItems()
-    val currentQuery by galleryViewModel.query.collectAsStateWithLifecycle()
-    val recentWords by galleryViewModel.recentWords.collectAsStateWithLifecycle()
-
-    // Stable lambdas — created once per VM instance so child composables
-    // don't see a new reference on every recomposition.
-    val onSearch: (String) -> Unit = remember(galleryViewModel, currentQuery, photosContentState) {
-        { keyword ->
-            if (keyword.isNotEmpty() && keyword != currentQuery) {
-                photosContentState.baseUiState.keyboardController?.hide()
-                galleryViewModel.onQueryChanged(keyword)
-                galleryViewModel.commitSearch()
-                photosContentState.triggeredState.value = true
-            }
-        }
-    }
-
-    val onChipClicked: (String) -> Unit = remember(galleryViewModel, searchState, photosContentState) {
-        { keyword ->
-            searchState.editableInputState.textState = keyword
-            photosContentState.baseUiState.keyboardController?.hide()
-            galleryViewModel.onQueryChanged(keyword)
-            galleryViewModel.commitSearch()
-        }
-    }
-
     Column(
         modifier = modifier.clickable {
-            photosContentState.baseUiState.keyboardController?.hide()
+            photosContentUiState.baseUiState.keyboardController?.hide()
         }
     ) {
         SearchSection(
             modifier = Modifier.padding(2.dp, 0.dp, 2.dp, 0.dp),
-            state = searchState,
+            sectionUiState = searchUiState,
             onSearched = onSearch
         )
 
         RecentWordsChips(
-            recentWords = recentWords,
-            isScrolling = photosContentState.scrollingState.value,
-            triggered = photosContentState.triggeredState.value,
-            onTriggeredConsumed = { photosContentState.triggeredState.value = false },
+            recentWords = photosContentUiState.galleryUiState.recentWords,
+            isScrolling = photosContentUiState.scrollingState.value,
+            triggered = photosContentUiState.triggeredState.value,
+            onTriggeredConsumed = { photosContentUiState.triggeredState.value = false },
             onChipClicked = onChipClicked
         )
 
         PhotosOrInitScreen(
-            query = currentQuery,
-            photos = photos,
+            query = photosContentUiState.galleryUiState.currentQuery,
+            photos = photosContentUiState.galleryUiState.photos,
             onItemClicked = { photo, _ -> onItemClicked(photo.id) },
             onViewPhotos = onViewPhotos,
             onShowSnackBar = onShowSnackBar,
             onLoadSuccess = onSuccess,
-            onScroll = { photosContentState.scrollingState.value = it },
+            onScroll = { photosContentUiState.scrollingState.value = it },
             onOpenWebView = onOpenWebView
         )
     }
 
     PermissionHandler(
-        permissions = photosContentState.permissions,
-        photosContentState = photosContentState
+        permissions = photosContentUiState.permissions,
+        photosContentState = photosContentUiState
     )
 }
 
@@ -205,7 +171,7 @@ private fun ColumnScope.PhotosOrInitScreen(
                 .padding(top = 0.5.dp)
                 .weight(1f),
             photos = photos,
-            state = rememberSearchPhotosSectionState(),
+            sectionUiState = rememberSearchPhotosSectionUiState(),
             onItemClicked = onItemClicked,
             onViewPhotos = onViewPhotos,
             onShowSnackBar = onShowSnackBar,
@@ -231,7 +197,7 @@ private fun ColumnScope.PhotosOrInitScreen(
 @Composable
 private fun PermissionHandler(
     permissions: List<String>,
-    photosContentState: SearchPhotosContentState
+    photosContentState: SearchPhotosContentUiState
 ) {
     val multiplePermissionsState: MultiplePermissionsState =
         rememberMultiplePermissionsState(permissions)
