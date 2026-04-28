@@ -15,7 +15,6 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
 @Singleton
 class LocalDataSource
 @Inject
@@ -91,6 +90,8 @@ constructor(val context: Context, cookieJar: PersistentCookieJar? = null) {
         val json = pref.getString(key_bookmark_photos, null)
         val type = object : TypeToken<ArrayList<Picture>>() {}.type
 
+        if (json.isNullOrEmpty()) return mutableListOf()
+
         return Gson().fromJson(json, type)
     }
 
@@ -151,6 +152,8 @@ constructor(val context: Context, cookieJar: PersistentCookieJar? = null) {
         val json = pref.getString(key_search_word_list, null)
         val type = object : TypeToken<ArrayList<String>>() {}.type
 
+        if (json.isNullOrEmpty()) return mutableListOf()
+
         return Gson().fromJson(json, type)
     }
 
@@ -165,6 +168,8 @@ constructor(val context: Context, cookieJar: PersistentCookieJar? = null) {
     internal fun getFollowingUsers(): MutableList<User>? {
         val json = pref.getString(key_following_user, null)
         val type = object : TypeToken<ArrayList<User>>() {}.type
+
+        if (json.isNullOrEmpty()) return mutableListOf()
 
         return Gson().fromJson(json, type)
     }
