@@ -64,7 +64,7 @@ import com.goforer.base.designsystem.component.loadImagePainter
 import com.goforer.base.extension.toUser
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.User
-import com.goforer.phogal.presentation.stateholder.business.home.common.follow.FollowViewModel
+import com.goforer.phogal.presentation.stateholder.business.home.setting.follow.FollowViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.UserContainerUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserContainerUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserInfoUiState

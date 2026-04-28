@@ -45,7 +45,7 @@ import androidx.paging.compose.itemKey
 import com.goforer.base.designsystem.component.state.rememberLazyListState
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
-import com.goforer.phogal.presentation.stateholder.business.home.common.bookmark.BookmarkViewModel
+import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosSectionUiState
