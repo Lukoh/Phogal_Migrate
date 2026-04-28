@@ -1,4 +1,4 @@
-package com.goforer.phogal.presentation.stateholder.business.home.common.bookmark
+package com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,7 +33,6 @@ class BookmarkViewModel @Inject constructor(
     @IoDispatcher
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
-
     private val _bookmarkedPictures = MutableStateFlow<List<Picture>>(emptyList())
     val bookmarkedPictures: StateFlow<PagingData<Picture>> = bookmarkRepository
         .bookmarks(localDataSource.geBookmarkedPhotos()?.toMutableList()!!,  pageSize = PAGE_SIZE)
@@ -43,6 +42,7 @@ class BookmarkViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
             initialValue = PagingData.empty()
         )
+
     init {
         refresh()
     }

@@ -1,4 +1,4 @@
-package com.goforer.phogal.presentation.stateholder.business.home.common.follow
+package com.goforer.phogal.presentation.stateholder.business.home.setting.follow
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,15 +8,14 @@ import com.goforer.phogal.data.datasource.local.LocalDataSource
 import com.goforer.phogal.data.model.remote.response.gallery.common.User
 import com.goforer.phogal.data.repository.follow.FollowUserRepository
 import com.goforer.phogal.di.dispatcher.IoDispatcher
-import com.goforer.phogal.presentation.stateholder.business.home.common.bookmark.BookmarkViewModel.Companion.PAGE_SIZE
-import com.goforer.phogal.presentation.stateholder.business.home.common.bookmark.BookmarkViewModel.Companion.STOP_TIMEOUT_MS
+import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel.Companion.PAGE_SIZE
+import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel.Companion.STOP_TIMEOUT_MS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
