@@ -12,7 +12,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.LazyPagingItems
 import com.goforer.phogal.R
+import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.presentation.stateholder.business.home.common.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.InitScreen
@@ -20,14 +22,14 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.common.InitScreen
 @Composable
 fun BookmarkedPhotosContent(
     modifier: Modifier = Modifier,
-    bookmarkedPictures: MutableList<Picture>,
+    bookmarkedPictures: LazyPagingItems<Picture>,
     contentPadding: PaddingValues = PaddingValues(4.dp),
     enabledLoadPhotosState: MutableState<Boolean>,
     onItemClicked: (item: Picture, index: Int) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit
 ) {
-    if (bookmarkedPictures.isNotEmpty()) {
+    if (bookmarkedPictures.itemCount > 0) {
         BookmarkedPhotosSection(
             modifier = modifier,
             contentPadding = contentPadding,

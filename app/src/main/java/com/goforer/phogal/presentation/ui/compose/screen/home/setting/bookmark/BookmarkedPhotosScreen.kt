@@ -54,9 +54,7 @@ import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 fun BookmarkedPhotosScreen(
     modifier: Modifier = Modifier,
     bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
-    baseUiState: BaseUiState = rememberBaseUiState(),
-    // In case of getting the bookmark photos from Backend-server not local, the use this BookmarkContentUiState variable,....
-    //bookmarkContentUiState: BookmarkContentUiState  = rememberBookmarkContentUiState(bookmarkViewModel),
+    bookmarkContentUiState: BookmarkContentUiState  = rememberBookmarkContentUiState(bookmarkViewModel),
     onItemClicked: (item: Picture, index: Int) -> Unit,
     onBackPressed: () -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
@@ -73,15 +71,12 @@ fun BookmarkedPhotosScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val enabledLoadPhotosState = remember { mutableStateOf(true) }
     val backHandlingEnabled by remember { mutableStateOf(true) }
-    // In case of getting the bookmark photos from Backend-server not local, the use this BookmarkContentUiState variable,....
-    // val photos = bookmarkContentUiState.bookmarkedPictures.value
-    val photos = bookmarkViewModel.bookmarkedPictures.collectAsStateWithLifecycle()
 
     BackHandler(backHandlingEnabled) {
         onBackPressed()
     }
 
-    DisposableEffect(baseUiState.lifecycle) {
+    DisposableEffect(bookmarkContentUiState.baseUiState.lifecycle) {
         // Create an observer that triggers our remembered callbacks
         // for doing anything
         val observer = LifecycleEventObserver { _, event ->
@@ -93,11 +88,11 @@ fun BookmarkedPhotosScreen(
         }
 
         // Add the observer to the lifecycle
-        baseUiState.lifecycle.addObserver(observer)
+        bookmarkContentUiState.baseUiState.lifecycle.addObserver(observer)
 
         // When the effect leaves the Composition, remove the observer
         onDispose {
-            baseUiState.lifecycle.removeObserver(observer)
+            bookmarkContentUiState.baseUiState.lifecycle.removeObserver(observer)
         }
     }
 
@@ -139,7 +134,7 @@ fun BookmarkedPhotosScreen(
             ScaffoldContent(topInterval = 2.dp) {
                 BookmarkedPhotosContent(
                     modifier = modifier,
-                    bookmarkedPictures = photos.value.toMutableList(),
+                    bookmarkedPictures = bookmarkContentUiState.bookmarkUiState.bookmarkedPictures,
                     contentPadding = paddingValues,
                     enabledLoadPhotosState = enabledLoadPhotosState,
                     onItemClicked = onItemClicked,

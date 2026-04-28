@@ -1,11 +1,15 @@
 package com.goforer.phogal.di.module
 
+import com.goforer.phogal.data.repository.bookmark.BookmarkRepository
+import com.goforer.phogal.data.repository.bookmark.BookmarkRepositoryImpl
 import com.goforer.phogal.data.repository.common.photo.info.PictureRepository
 import com.goforer.phogal.data.repository.common.photo.info.PictureRepositoryImpl
 import com.goforer.phogal.data.repository.common.photo.like.PictureLikeRepository
 import com.goforer.phogal.data.repository.common.photo.like.PictureLikeRepositoryImpl
 import com.goforer.phogal.data.repository.common.user.photos.UserPhotosRepository
 import com.goforer.phogal.data.repository.common.user.photos.UserPhotosRepositoryImpl
+import com.goforer.phogal.data.repository.follow.FollowUserRepository
+import com.goforer.phogal.data.repository.follow.FollowUserRepositoryImpl
 import com.goforer.phogal.data.repository.gallery.PhotosRepository
 import com.goforer.phogal.data.repository.gallery.PhotosRepositoryImpl
 import com.goforer.phogal.data.repository.popularphotos.PopularPhotosRepository
@@ -46,4 +50,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindPopularPhotosRepository(impl: PopularPhotosRepositoryImpl): PopularPhotosRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBookmarkRepository(impl: BookmarkRepositoryImpl): BookmarkRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFollowUserRepository(impl: FollowUserRepositoryImpl): FollowUserRepository
 }

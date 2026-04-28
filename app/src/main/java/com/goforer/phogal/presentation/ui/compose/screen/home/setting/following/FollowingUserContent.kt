@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.LazyPagingItems
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.User
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
@@ -21,14 +22,14 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.common.InitScreen
 @Composable
 fun FollowingUsersContent(
     modifier: Modifier = Modifier,
-    users: MutableList<User>,
+    users: LazyPagingItems<User>,
     contentPadding: PaddingValues = PaddingValues(4.dp),
     enabledLoadPhotosState: MutableState<Boolean>,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String?) -> Unit,
     onFollow: (user: User) -> Unit
 ) {
-    if (users.isNotEmpty()) {
+    if (users.itemCount > 0) {
         FollowingUsersSection(
             modifier = modifier,
             contentPadding = contentPadding,

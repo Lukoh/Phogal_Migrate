@@ -3,7 +3,8 @@ package com.goforer.phogal.presentation.stateholder.uistate.home.follwing
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.goforer.phogal.data.model.remote.response.gallery.common.User
 import com.goforer.phogal.presentation.stateholder.business.home.common.follow.FollowViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.BaseUiState
@@ -17,7 +18,7 @@ class FollowingUserContentUiState(
 
 @Stable
 class FollowingUserUiState(
-    val users: MutableList<User>,
+    val users: LazyPagingItems<User>,
 )
 
 @Composable
@@ -39,12 +40,12 @@ fun rememberFollowingUserContentUiState(
 fun rememberFollowingUserUiState(
     followViewModel: FollowViewModel
 ): FollowingUserUiState {
-    val users = followViewModel.followingUsers.collectAsStateWithLifecycle()
+    val users = followViewModel.followedUsers.collectAsLazyPagingItems()
 
     // 2. 클래스에 담아서 반환
     return remember(users) {
         FollowingUserUiState(
-            users = users.value.toMutableList(),
+            users = users,
         )
     }
 }

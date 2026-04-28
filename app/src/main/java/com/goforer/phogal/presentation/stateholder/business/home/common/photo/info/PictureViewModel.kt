@@ -2,19 +2,25 @@ package com.goforer.phogal.presentation.stateholder.business.home.common.photo.i
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.goforer.phogal.data.datasource.network.NetworkResult
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.data.repository.common.photo.info.PictureRepository
 import com.goforer.phogal.data.repository.common.photo.like.PictureLikeRepository
+import com.goforer.phogal.presentation.stateholder.business.home.common.bookmark.BookmarkViewModel.Companion.PAGE_SIZE
+import com.goforer.phogal.presentation.stateholder.business.home.common.bookmark.BookmarkViewModel.Companion.STOP_TIMEOUT_MS
 import com.goforer.phogal.presentation.stateholder.uistate.UiState
 import com.goforer.phogal.presentation.stateholder.uistate.toUiStateStrict
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
