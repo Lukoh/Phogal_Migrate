@@ -196,6 +196,7 @@ dependencies {
     implementation libs.androidx.compose.material3.adaptive.navigation3
     implementation libs.androidx.compose.animation
     implementation libs.androidx.compose.material.core
+    implementation libs.androidx.runner
 
     // --- Compose (BOM-managed) ---
     def composeBom = platform(libs.androidx.compose.bom)

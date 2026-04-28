@@ -2,8 +2,7 @@ package com.goforer.phogal.data.datasource.local
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
+import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
@@ -15,7 +14,7 @@ import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
-import androidx.core.content.edit
+
 
 @Singleton
 class LocalDataSource
@@ -30,17 +29,8 @@ constructor(val context: Context, cookieJar: PersistentCookieJar? = null) {
         const val key_notification_community_enabled = "key_notification_community_enabled"
     }
 
-    private val spec = KeyGenParameterSpec.Builder(
-        MasterKey.DEFAULT_MASTER_KEY_ALIAS,
-        KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-    )
-        .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-        .setKeySize(MasterKey.DEFAULT_AES_GCM_MASTER_KEY_SIZE)
-        .build()
-
-    private val masterKey = MasterKey.Builder(context)
-        .setKeyGenParameterSpec(spec)
+    val masterKey = MasterKey.Builder(context)
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
         .build()
 
     private val pref = EncryptedSharedPreferences.create(
