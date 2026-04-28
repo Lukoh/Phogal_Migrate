@@ -18,6 +18,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.goforer.base.designsystem.component.CardSnackBar
 import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
@@ -131,12 +133,21 @@ fun UserPhotosScreen(
                 }
             )
         }, content = { paddingValues ->
+            // Kick off the Paging stream whenever the target user changes.
+            LaunchedEffect(contentUiState.nameState.value) {
+                if (contentUiState.nameState.value.isNotBlank()) {
+                    userPhotosViewModel.loadFor(contentUiState.nameState.value)
+                }
+            }
+
+            val photos = userPhotosViewModel.photos.collectAsLazyPagingItems()
+
             ScaffoldContent(topInterval = 2.dp) {
                 UserPhotosContent(
                     modifier = modifier,
                     contentPadding = paddingValues,
-                    userPhotosViewModel = userPhotosViewModel,
                     contentUiState = contentUiState,
+                    photos = photos,
                     onItemClicked = onItemClicked,
                     onShowSnackBar = {
                         contentUiState.baseUiState.scope.launch {

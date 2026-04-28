@@ -43,6 +43,8 @@ import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.presentation.stateholder.business.home.common.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.BaseUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.bookmark.BookmarkContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.bookmark.rememberBookmarkContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
@@ -53,6 +55,8 @@ fun BookmarkedPhotosScreen(
     modifier: Modifier = Modifier,
     bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
     baseUiState: BaseUiState = rememberBaseUiState(),
+    // In case of getting the bookmark photos from Backend-server not local, the use this BookmarkContentUiState variable,....
+    //bookmarkContentUiState: BookmarkContentUiState  = rememberBookmarkContentUiState(bookmarkViewModel),
     onItemClicked: (item: Picture, index: Int) -> Unit,
     onBackPressed: () -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
@@ -69,7 +73,9 @@ fun BookmarkedPhotosScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val enabledLoadPhotosState = remember { mutableStateOf(true) }
     val backHandlingEnabled by remember { mutableStateOf(true) }
-    val bookmarkedPictures = bookmarkViewModel.bookmarkedPictures.collectAsStateWithLifecycle()
+    // In case of getting the bookmark photos from Backend-server not local, the use this BookmarkContentUiState variable,....
+    // val photos = bookmarkContentUiState.bookmarkedPictures.value
+    val photos = bookmarkViewModel.bookmarkedPictures.collectAsStateWithLifecycle()
 
     BackHandler(backHandlingEnabled) {
         onBackPressed()
@@ -133,7 +139,7 @@ fun BookmarkedPhotosScreen(
             ScaffoldContent(topInterval = 2.dp) {
                 BookmarkedPhotosContent(
                     modifier = modifier,
-                    bookmarkedPictures = bookmarkedPictures.value.toMutableList(),
+                    bookmarkedPictures = photos.value.toMutableList(),
                     contentPadding = paddingValues,
                     enabledLoadPhotosState = enabledLoadPhotosState,
                     onItemClicked = onItemClicked,

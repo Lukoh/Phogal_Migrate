@@ -18,11 +18,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.LazyPagingItems
 import com.goforer.base.customtab.openCustomTab
 import com.goforer.phogal.R
-import com.goforer.phogal.presentation.stateholder.business.home.common.user.UserPhotosViewModel
+import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosSectionUiState
@@ -35,21 +34,12 @@ import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 fun UserPhotosContent(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(4.dp),
-    userPhotosViewModel: UserPhotosViewModel = hiltViewModel(),
     contentUiState: UserPhotosContentUiState = rememberUserPhotosContentUiState(),
+    photos: LazyPagingItems<Photo>,
     onItemClicked: (id: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
     onSuccess: (isSuccessful: Boolean) -> Unit
 ) {
-    // Kick off the Paging stream whenever the target user changes.
-    LaunchedEffect(contentUiState.nameState.value) {
-        if (contentUiState.nameState.value.isNotBlank()) {
-            userPhotosViewModel.loadFor(contentUiState.nameState.value)
-        }
-    }
-
-    val photos = userPhotosViewModel.photos.collectAsLazyPagingItems()
-
     if (contentUiState.nameState.value.isNotBlank()) {
         UserPhotosSection(
             modifier = Modifier.padding(top = 0.5.dp),

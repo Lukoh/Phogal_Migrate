@@ -81,12 +81,10 @@ fun rememberSearchPhotosContentUiState(
 fun rememberGalleryUiState(
     galleryViewModel: GalleryViewModel
 ): GalleryUiState {
-    // 1. 상태 수집
     val photos = galleryViewModel.photos.collectAsLazyPagingItems()
     val currentQuery by galleryViewModel.query.collectAsStateWithLifecycle()
     val recentWords by galleryViewModel.recentWords.collectAsStateWithLifecycle()
 
-    // 2. 클래스에 담아서 반환
     return remember(photos, currentQuery, recentWords) {
         GalleryUiState(
             photos = photos,

@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 fun PopularPhotosScreen(
     modifier: Modifier = Modifier,
     popularPhotosViewModel: PopularPhotosViewModel = hiltViewModel(),
-    contentUiState: PopularPhotosContentUiState = rememberPopularPhotosContentUiState(),
+    contentUiState: PopularPhotosContentUiState = rememberPopularPhotosContentUiState(popularPhotosViewModel),
     onItemClicked: (id: String) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
@@ -109,7 +109,7 @@ fun PopularPhotosScreen(
                 popularPhotosViewModel.updateOrderBy(POPULAR)
                 PopularPhotosContent(
                     modifier = modifier,
-                    photos = popularPhotosViewModel.photos.collectAsLazyPagingItems(),
+                    photos = contentUiState.popularPhotosUiState.photos,
                     onItemClicked = onItemClicked,
                     onViewPhotos = onViewPhotos,
                     onShowSnackBar = {

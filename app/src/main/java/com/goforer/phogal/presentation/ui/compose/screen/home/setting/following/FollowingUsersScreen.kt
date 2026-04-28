@@ -29,15 +29,14 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goforer.base.designsystem.component.CardSnackBar
 import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.base.extension.isNull
 import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.business.home.common.follow.FollowViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.BaseUiState
-import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.follwing.FollowingUserContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.follwing.rememberFollowingUserContentUiState
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import kotlinx.coroutines.launch
 
@@ -46,7 +45,7 @@ import kotlinx.coroutines.launch
 fun FollowingUsersScreen(
     modifier: Modifier = Modifier,
     followViewModel: FollowViewModel = hiltViewModel(),
-    baseUiState: BaseUiState = rememberBaseUiState(),
+    followingUserContentUiState: FollowingUserContentUiState = rememberFollowingUserContentUiState(followViewModel),
     onBackPressed: () -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
@@ -62,13 +61,12 @@ fun FollowingUsersScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val enabledLoadPhotosState = remember { mutableStateOf(true) }
     val backHandlingEnabled by remember { mutableStateOf(true) }
-    val users = followViewModel.followingUsers.collectAsStateWithLifecycle()
 
     BackHandler(backHandlingEnabled) {
         onBackPressed()
     }
 
-    DisposableEffect(baseUiState.lifecycle) {
+    DisposableEffect(followingUserContentUiState.baseUiState.lifecycle) {
         // Create an observer that triggers our remembered callbacks
         // for doing anything
         val observer = LifecycleEventObserver { _, event ->
@@ -80,11 +78,11 @@ fun FollowingUsersScreen(
         }
 
         // Add the observer to the lifecycle
-        baseUiState.lifecycle.addObserver(observer)
+        followingUserContentUiState.baseUiState.lifecycle.addObserver(observer)
 
         // When the effect leaves the Composition, remove the observer
         onDispose {
-            baseUiState.lifecycle.removeObserver(observer)
+            followingUserContentUiState.baseUiState.lifecycle.removeObserver(observer)
         }
     }
 
@@ -127,13 +125,13 @@ fun FollowingUsersScreen(
             ScaffoldContent(topInterval = 2.dp) {
                 FollowingUsersContent(
                     modifier = modifier,
-                    users = users.value.toMutableList(),
+                    users = followingUserContentUiState.followingUserUiState.users,
                     contentPadding = paddingValues,
                     enabledLoadPhotosState = enabledLoadPhotosState,
                     onViewPhotos = onViewPhotos,
                     onOpenWebView = { firstName, url ->
                         url.isNull({
-                            baseUiState.scope.launch {
+                            followingUserContentUiState.baseUiState.scope.launch {
                                 snackbarHostState.showSnackbar("${firstName}${" "}${text}")
                             }
                         }, {
