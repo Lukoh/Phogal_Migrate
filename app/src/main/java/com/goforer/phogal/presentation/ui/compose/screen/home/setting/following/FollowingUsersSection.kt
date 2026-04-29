@@ -41,8 +41,8 @@ import androidx.paging.compose.itemKey
 import com.goforer.base.designsystem.component.state.rememberLazyListState
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.User
-import com.goforer.phogal.presentation.stateholder.uistate.home.follwing.FollowingUserSectionUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.follwing.rememberFollowingUserSectionUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.FollowingUserSectionUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserItemUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.error.ErrorContent
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.ShowUpButton

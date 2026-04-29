@@ -1,4 +1,4 @@
-package com.goforer.phogal.presentation.stateholder.uistate.home.follwing
+package com.goforer.phogal.presentation.stateholder.uistate.home.setting.following
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState

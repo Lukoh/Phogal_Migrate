@@ -1,4 +1,4 @@
-package com.goforer.phogal.presentation.stateholder.uistate.home.follwing
+package com.goforer.phogal.presentation.stateholder.uistate.home.setting.following
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -42,7 +42,6 @@ fun rememberFollowingUserUiState(
 ): FollowingUserUiState {
     val users = followViewModel.followedUsers.collectAsLazyPagingItems()
 
-    // 2. 클래스에 담아서 반환
     return remember(users) {
         FollowingUserUiState(
             users = users,

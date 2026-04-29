@@ -35,8 +35,8 @@ import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.base.extension.isNull
 import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.business.home.setting.follow.FollowViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.follwing.FollowingUserContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.follwing.rememberFollowingUserContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.FollowingUserContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserContentUiState
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import kotlinx.coroutines.launch
 

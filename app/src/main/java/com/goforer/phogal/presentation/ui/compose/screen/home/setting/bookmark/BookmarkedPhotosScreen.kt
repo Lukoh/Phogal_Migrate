@@ -41,8 +41,8 @@ import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.bookmark.BookmarkContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.bookmark.rememberBookmarkContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.setting.bookmark.BookmarkContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.setting.bookmark.rememberBookmarkContentUiState
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 

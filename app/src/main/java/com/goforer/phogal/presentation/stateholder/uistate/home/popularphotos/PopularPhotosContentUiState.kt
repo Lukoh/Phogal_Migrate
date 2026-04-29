@@ -51,7 +51,6 @@ fun rememberPopularPhotosUiState(
 ): PopularPhotosUiState {
     val photos = popularPhotosViewModel.photos.collectAsLazyPagingItems()
 
-    // 2. 클래스에 담아서 반환
     return remember(photos) {
         PopularPhotosUiState(
             photos = photos,

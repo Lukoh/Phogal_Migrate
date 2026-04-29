@@ -1,4 +1,4 @@
-package com.goforer.phogal.presentation.stateholder.uistate.home.bookmark
+package com.goforer.phogal.presentation.stateholder.uistate.home.setting.bookmark
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -41,7 +41,7 @@ fun rememberBookmarkUiState(
     bookmarkViewModel: BookmarkViewModel
 ): BookmarkUiState {
     val bookmarkedPictures = bookmarkViewModel.bookmarkedPictures.collectAsLazyPagingItems()
-    // 2. 클래스에 담아서 반환
+
     return remember(bookmarkedPictures) {
         BookmarkUiState(
             bookmarkedPictures = bookmarkedPictures,

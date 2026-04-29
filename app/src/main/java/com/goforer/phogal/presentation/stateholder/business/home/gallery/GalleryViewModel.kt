@@ -124,10 +124,6 @@ class GalleryViewModel @Inject constructor(
         }
     }
 
-    fun selectRecentWord(word: String) {
-        _query.value = word
-    }
-
     private fun refreshRecentWords() {
         viewModelScope.launch {
             _recentWords.value = withContext(ioDispatcher) {
