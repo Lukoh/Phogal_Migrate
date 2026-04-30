@@ -279,10 +279,10 @@ fun BodyContent(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            BehaviorItem(picture.likes, picture.downloads, picture.views)
+            BehaviorItem(700, 700, 700)
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = picture.description ?: picture.alt_description
+                text = picture.description ?: "None"
                 ?: stringResource(id = R.string.picture_no_description),
                 modifier = Modifier.padding(8.dp, 4.dp),
                 color = ColorText4,
@@ -298,7 +298,7 @@ fun BodyContent(
                 Spacer(modifier = Modifier.height(2.dp))
             }
 
-            DateItem(picture.created_at)
+            DateItem(picture.createdAt)
             Spacer(modifier = Modifier.height(2.dp))
             picture.exif?.let { exif ->
                 GenericCubicAnimationShape(
@@ -515,7 +515,7 @@ fun ExifItem(
             exif.name?.let {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${"Lens\n"}${"f/"}${exif.aperture}${"  "}${exif.focal_length}${"mm  "}${exif.exposure_time}${"s  iso "}${exif.iso}",
+                    text = "${"Lens\n"}${"f/"}${exif.aperture}${"  "}${exif.focalLength}${"mm  "}${exif.exposureTime}${"s  iso "}${exif.iso}",
                     modifier = Modifier.padding(horizontal = 28.dp),
                     color = ColorBlackLight,
                     fontFamily = FontFamily.SansSerif,

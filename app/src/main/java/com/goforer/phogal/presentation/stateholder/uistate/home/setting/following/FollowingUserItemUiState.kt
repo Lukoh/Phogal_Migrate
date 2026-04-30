@@ -12,7 +12,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 @Stable
 class FollowingUserItemUiState(
     val indexState: MutableState<Int>,
-    val userState: State<Any>,
+    val userState: MutableState<String>,
     val visibleViewButtonState: MutableState<Boolean>,
     val clickedState: MutableState<Boolean>,
     val followedState: MutableState<Boolean>
@@ -21,7 +21,7 @@ class FollowingUserItemUiState(
 @Composable
 fun rememberFollowingUserItemUiState(
     indexState: MutableState<Int> = rememberSaveable { mutableIntStateOf(0) },
-    userState: State<Any> = remember { mutableStateOf(Any()) },
+    userState: MutableState<String> = remember { mutableStateOf("") },
     visibleViewButtonState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     clickedState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     followedState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }

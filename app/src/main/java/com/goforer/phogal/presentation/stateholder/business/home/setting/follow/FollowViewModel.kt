@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.goforer.phogal.data.datasource.local.LocalDataSource
-import com.goforer.phogal.data.model.remote.response.gallery.common.User
+import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
 import com.goforer.phogal.data.repository.follow.FollowUserRepository
 import com.goforer.phogal.di.dispatcher.IoDispatcher
 import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel.Companion.PAGE_SIZE

@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.goforer.phogal.data.datasource.local.LocalDataSource
-import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
+import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.data.repository.gallery.PhotosRepository
 import com.goforer.phogal.di.dispatcher.IoDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel

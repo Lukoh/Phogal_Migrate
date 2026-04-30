@@ -1,13 +1,15 @@
 package com.goforer.phogal.data.model.remote.response.gallery.photos
 
+import kotlinx.serialization.Serializable
 import android.os.Parcelable
-import com.goforer.phogal.data.model.BaseModel
-import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
+import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
 
+@Serializable
 @Parcelize
 data class PhotosResponse(
     val results: MutableList<Photo>,
     val total: Int,
-    val total_pages: Int
-) : BaseModel(), Parcelable
+    @SerialName("total_pages") val totalPages: Int
+) : Parcelable

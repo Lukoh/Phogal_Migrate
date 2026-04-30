@@ -179,6 +179,7 @@ dependencies {
     implementation libs.androidx.lifecycle.viewmodel.navigation3
     // Adaptive layouts (list-detail etc.) for tablets and foldables
     implementation libs.androidx.compose.material3.adaptive.navigation3
+    implementation libs.androidx.ui
     implementation(libs.kotlinx.serialization.core)
 
     // --- Paging ---
@@ -239,7 +240,11 @@ dependencies {
 
     // --- Networking ---
     implementation libs.retrofit
-    implementation libs.retrofit.converter.gson
+    // Replaced converter-gson with the kotlinx.serialization converter as part
+    // of the Gson → kotlinx.serialization migration (April 2026).
+    // The Json instance is provided by AppModule.provideJson() and configured
+    // for production-grade resilience (ignoreUnknownKeys = true, etc).
+    implementation libs.retrofit.converter.kotlinx.serialization
     implementation platform(libs.okhttp.bom)
     implementation libs.okhttp
     implementation libs.okhttp.logging.interceptor

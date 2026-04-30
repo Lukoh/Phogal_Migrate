@@ -1,13 +1,14 @@
 package com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo
 
+import kotlinx.serialization.Serializable
 import android.os.Parcelable
-import com.goforer.phogal.data.model.BaseModel
 import kotlinx.parcelize.Parcelize
 
+@Serializable
 @Parcelize
 data class Location(
-    val city: String,
-    val country: String,
+    val city: String?,
+    val country: String?,
     val name: String?,
     val position: Position
-) : BaseModel(), Parcelable
+) : Parcelable

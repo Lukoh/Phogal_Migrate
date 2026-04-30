@@ -45,11 +45,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.goforer.base.designsystem.animation.animateIconScale
 import com.goforer.base.designsystem.component.IconButton
+import com.goforer.base.extension.toUser
+import com.goforer.base.extension.toUserLinks
 import com.goforer.phogal.R
-import com.goforer.phogal.data.model.remote.response.gallery.common.LinksX
 import com.goforer.phogal.data.model.remote.response.gallery.common.ProfileImage
 import com.goforer.phogal.data.model.remote.response.gallery.common.Social
-import com.goforer.phogal.data.model.remote.response.gallery.common.User
+import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
+import com.goforer.phogal.data.model.remote.response.gallery.common.user.UserLinks
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.FollowingUserItemUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserItemUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.follow.ShowFollowButton
@@ -69,7 +71,7 @@ fun FollowingUsersItem(
     onOpenWebView: (firstName: String, url: String?) -> Unit,
     onFollow: (user: User) -> Unit
 ) {
-    val user = followingUserItemUiState.userState.value as User
+    val user = followingUserItemUiState.userState.value.toUser()
     val verticalPadding = if (followingUserItemUiState.indexState.value == 0)
         2.dp
     else
@@ -112,17 +114,19 @@ fun FollowingUsersItem(
                         .fillMaxWidth()
                 ) {
                     ProfileItem(
-                        image = user.profile_image.medium,
+                        image = user.profileImage.medium,
                         name = user.name,
                         nameColor = Color.White,
                         position = 9,
                         onClicked = {
-                            onViewPhotos(
-                                user.username,
-                                user.first_name,
-                                user.last_name ?: "",
-                                user.username
-                            )
+                            user.username?.let {
+                                onViewPhotos(
+                                    it,
+                                    user.firstName,
+                                    user.lastName ?: "",
+                                    user.username
+                                )
+                            }
                         }
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -139,7 +143,7 @@ fun FollowingUsersItem(
                     UserInfoItem(
                         text = item.text,
                         textColor = Color.White,
-                        painter = item.painter,
+                        iconResId = item.iconResId,
                         position = item.position
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -165,9 +169,9 @@ fun FollowingUsersItem(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     ShowPortfolioButton(
-                        firstName = user.first_name,
+                        firstName = user.firstName,
                         onOpenWebView = {
-                            onOpenWebView(user.first_name, user.portfolio_url)
+                            onOpenWebView(user.firstName, user.portfolioUrl)
                         }
                     )
                 }
@@ -227,43 +231,40 @@ fun ShowPortfolioButton(
 fun FollowingUsersItemPreview(
     modifier: Modifier = Modifier
 ) {
+    val links = UserLinks(
+        html = "https://unsplash.com/fr/@an_ku_sh",
+        self = "https://api.unsplash.com/users/an_ku_sh",
+        photos = "https://api.unsplash.com/photos/LBI7cgq3pbM/download"
+        ).toString().toUserLinks()
+
     val user = User(
-        accepted_tos = true,
+        acceptedTos = true,
         bio = null,
-        first_name = "Ankush",
-        for_hire = true,
+        firstName = "Ankush",
+        forHire = true,
         id = "Ebx2G7C0GBo",
-        instagram_username = "An.ku.sh",
-        last_name = "Minda",
-        links = LinksX(
-            followers = "https://api.unsplash.com/users/an_ku_sh/followers",
-            following = "https://api.unsplash.com/users/an_ku_sh/following",
-            html = "https://unsplash.com/fr/@an_ku_sh",
-            likes = "https://api.unsplash.com/users/an_ku_sh/likes",
-            photos = "https://api.unsplash.com/users/an_ku_sh/photos",
-            portfolio = "https://api.unsplash.com/users/an_ku_sh/portfolio",
-            related = null,
-            self = "https://api.unsplash.com/users/an_ku_sh"
-        ),
+        instagramUsername = "An.ku.sh",
+        lastName = "Minda",
+        links = links,
         location = "India",
         name = "Ankush Minda",
-        portfolio_url = "http://ankushminda.com",
-        profile_image = ProfileImage(
+        portfolioUrl = "http://ankushminda.com",
+        profileImage = ProfileImage(
             large = "https://images.unsplash.com/profile-1539269396658-18762f46fa72?ixlib=rb-4.0.3&crop=faces&fit=crop&w=128&h=128",
             medium = "https://images.unsplash.com/profile-1539269396658-18762f46fa72?ixlib=rb-4.0.3&crop=faces&fit=crop&w=64&h=64",
             small = "https://images.unsplash.com/profile-1539269396658-18762f46fa72?ixlib=rb-4.0.3&crop=faces&fit=crop&w=32&h=32"
         ),
         social = Social(
-            instagram_username = "An.ku.sh",
-            paypal_email = null,
-            portfolio_url = "http://ankushminda.com, twitter_username=AnkushMinda",
-            twitter_username = ""
+            instagramUsername = "An.ku.sh",
+            paypalEmail = null,
+            portfolioUrl = "http://ankushminda.com, twitter_username=AnkushMinda",
+            twitterUsername = ""
         ),
-        total_collections = 0,
-        total_likes = 132,
-        total_photos = 101,
-        twitter_username = "AnkushMinda",
-        updated_at = "2023-06-14T12:23:44Z",
+        totalCollections = 0,
+        totalLikes = 132,
+        totalPhotos = 101,
+        twitterUsername = "AnkushMinda",
+        updatedAt = "2023-06-14T12:23:44Z",
         username = "an_ku_sh"
     )
     val verticalPadding = 2.dp
@@ -296,7 +297,7 @@ fun FollowingUsersItemPreview(
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
                 ProfileItem(
-                    image = user.profile_image.medium,
+                    image = user.profileImage.medium,
                     name = user.name,
                     nameColor = Color.White,
                     position = 9,
@@ -307,7 +308,7 @@ fun FollowingUsersItemPreview(
                     UserInfoItem(
                         text = item.text,
                         textColor = Color.White,
-                        painter = item.painter,
+                        iconResId = item.iconResId,
                         position = item.position
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -333,7 +334,7 @@ fun FollowingUsersItemPreview(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     ShowPortfolioButton(
-                        firstName = user.first_name,
+                        firstName = user.firstName,
                         onOpenWebView = {}
                     )
                 }

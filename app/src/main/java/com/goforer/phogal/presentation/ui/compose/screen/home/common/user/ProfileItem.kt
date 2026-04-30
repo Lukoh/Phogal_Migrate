@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -42,7 +41,7 @@ import com.goforer.base.designsystem.component.ImageCrossFade
 import com.goforer.base.designsystem.component.loadImagePainter
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.local.home.common.ProfileInfoItem
-import com.goforer.phogal.data.model.remote.response.gallery.common.User
+import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 
 @Composable
@@ -125,43 +124,43 @@ fun ProfileItem(
 fun getProfileInfoItems(user: User) = listOf(
     ProfileInfoItem(
         text = user.bio ?: stringResource(id = R.string.user_info_no_sex_info),
-        painter = painterResource(id = R.drawable.ic_bio),
+        iconResId = R.drawable.ic_bio,
         position = 8
     ),
     ProfileInfoItem(
         text = user.location ?: stringResource(id = R.string.user_info_no_location_info),
-        painter = painterResource(id = R.drawable.ic_location),
+        iconResId = R.drawable.ic_location,
         position = 7
     ),
     ProfileInfoItem(
-        text = "${stringResource(id = R.string.user_info_instagram_name)}${" "}${user.instagram_username ?: stringResource(id = R.string.user_info_no_instagram_name)}",
-        painter = painterResource(id = R.drawable.ic_instagram),
+        text = "${stringResource(id = R.string.user_info_instagram_name)}${" "}${user.instagramUsername ?: stringResource(id = R.string.user_info_no_instagram_name)}",
+        iconResId = R.drawable.ic_instagram,
         position = 6
     ),
     ProfileInfoItem(
-        text = "${stringResource(id = R.string.user_info_twitter_name)}${" "}${user.twitter_username ?: stringResource(id = R.string.user_info_no_twitter_name)}",
-        painter = painterResource(id = R.drawable.ic_twitter),
+        text = "${stringResource(id = R.string.user_info_twitter_name)}${" "}${user.twitterUsername ?: stringResource(id = R.string.user_info_no_twitter_name)}",
+        iconResId = R.drawable.ic_twitter,
         position = 5
     ),
     ProfileInfoItem(
-        text = user.links.followers ?: "",
-        painter = painterResource(id = R.drawable.ic_follower),
+        text = 700.toString(),
+        iconResId = R.drawable.ic_follower,
         position = 4
     ),
     ProfileInfoItem(
-        text = user.links.following ?: "",
-        painter = painterResource(id = R.drawable.ic_following),
+        text = 700.toString(),
+        iconResId = R.drawable.ic_following,
         position = 3
     ),
     ProfileInfoItem(
-        text = "${stringResource(id = R.string.user_updated_at)}${" "}${user.updated_at}",
-        painter = painterResource(id = R.drawable.ic_date),
+        text = "${stringResource(id = R.string.user_updated_at)}${" "}${user.updatedAt}",
+        iconResId = R.drawable.ic_following,
         position = 2
     )
 )
 
 @Composable
-fun UserInfoItem(text: String, textColor: Color, painter: Painter, position: Int) {
+fun UserInfoItem(text: String, textColor: Color, iconResId: Int, position: Int) {
     Row(
         modifier = Modifier.padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.Center,
@@ -170,7 +169,7 @@ fun UserInfoItem(text: String, textColor: Color, painter: Painter, position: Int
         val animationIconScale = animateIconScale(inputScale = 0.6F, position = position, delay = 150L)
 
         Image(
-            painter = painter,
+            painter = painterResource(id = iconResId),
             contentDescription = "UserInfoItem",
             modifier = Modifier
                 .size(22.dp)

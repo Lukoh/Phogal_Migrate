@@ -1,28 +1,30 @@
 package com.goforer.phogal.data.model.remote.response.gallery.common
 
+import kotlinx.serialization.Serializable
 import android.os.Parcelable
-import com.goforer.phogal.data.model.BaseModel
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
 
+@Serializable
 @Parcelize
 data class Sponsor(
-    val accepted_tos: Boolean,
+    @SerialName("accepted_tos") val acceptedTos: Boolean,
     val bio: String,
-    val first_name: String,
-    val for_hire: Boolean,
+    @SerialName("first_name") val firstName: String,
+    @SerialName("for_hire") val forHire: Boolean,
     val id: String,
-    val instagram_username: String,
-    val last_name: String? = null,
-    val links: LinksX,
-    val location: String,
+    @SerialName("instagram_username") val instagramUsername: String? = null,
+    val last_name: String?,
+    val links: Links,
+    val location: String?,
     val name: String,
-    val portfolio_url: String,
-    val profile_image: ProfileImage,
+    val portfolio_url: String?,
+    @SerialName("profile_image") val profileImage: ProfileImage,
     val social: Social,
-    val total_collections: Int,
-    val total_likes: Int,
-    val total_photos: Int,
-    val twitter_username: String,
-    val updated_at: String,
+    @SerialName("total_collections") val totalCollections: Int,
+    @SerialName("total_likes") val totalLikes: Int,
+    @SerialName("total_photos") val totalPhotos: Int,
+    @SerialName("twitter_username") val twitterUsername: String?,
+    @SerialName("updated_at") val updatedAt: String,
     val username: String
-) : BaseModel(), Parcelable
+) : Parcelable

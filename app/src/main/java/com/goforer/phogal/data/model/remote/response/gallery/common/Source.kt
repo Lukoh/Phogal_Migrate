@@ -1,16 +1,18 @@
 package com.goforer.phogal.data.model.remote.response.gallery.common
 
+import kotlinx.serialization.Serializable
 import android.os.Parcelable
-import com.goforer.phogal.data.model.BaseModel
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
 
+@Serializable
 @Parcelize
 data class Source(
     val ancestry: Ancestry?,
-    val cover_photo: CoverPhoto?,
-    val description: String?,
-    val meta_description: String?,
-    val meta_title: String?,
+    @SerialName("cover_photo") val coverPhoto: CoverPhoto?,
+    val description: String? = null,
+    @SerialName("meta_description") val metaDescription: String?,
+    @SerialName("meta_title") val metaTitle: String?,
     val subtitle: String?,
     val title: String?
-) : BaseModel(), Parcelable
+) : Parcelable

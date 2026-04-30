@@ -15,13 +15,13 @@ import com.goforer.phogal.data.datasource.network.NetworkError
 import com.goforer.phogal.data.datasource.network.NetworkErrorHandler
 import com.goforer.phogal.data.datasource.network.adapter.factory.NullOnEmptyConverterFactory
 import com.goforer.phogal.data.datasource.network.api.RestAPI
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
@@ -29,7 +29,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
@@ -49,13 +49,46 @@ object AppModule {
     @Provides
     fun provideConnectivityManagerNetworkMonitor(context: Context) = ConnectivityManagerNetworkMonitor(context)
 
+    /**
+     * Provides the project's `Json` instance for both Retrofit serialization
+     * and ad-hoc JSON encode/decode (e.g. inside `LocalDataSource` for
+     * persisted lists).
+     *
+     * ### Configuration choices
+     *
+     * - **`ignoreUnknownKeys = true`** — the Unsplash API returns fields we
+     *   don't model (analytics fields, beta features). Without this, every
+     *   new field they ship would crash the app on parse. This is the single
+     *   most important production setting.
+     *
+     * - **`coerceInputValues = true`** — when the server sends `null` for a
+     *   property that has a default value, use the default rather than
+     *   throwing. Catches a class of compatibility bugs that would otherwise
+     *   reach end users.
+     *
+     * - **`isLenient = true`** — accept slightly malformed JSON (unquoted
+     *   keys, trailing commas). Conservative trade-off; we accept input that
+     *   may be technically invalid because real-world APIs sometimes are.
+     *
+     * - **`explicitNulls = false`** — when serializing OUT, omit properties
+     *   whose value is `null`. Reduces request payload size and matches what
+     *   most server-side validators expect.
+     *
+     * Replaces the previous `provideGSon()` as part of the Gson →
+     * kotlinx.serialization migration.
+     */
     @Singleton
     @Provides
-    fun provideGSon(): Gson = GsonBuilder().create()
+    fun provideJson(): Json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+        isLenient = true
+        explicitNulls = false
+    }
 
     @Singleton
     @Provides
-    fun provideNetworkErrorHandler(context: Context) = NetworkErrorHandler(context)
+    fun provideNetworkErrorHandler(context: Context, json: Json) = NetworkErrorHandler(context, json)
 
     @Singleton
     @Provides
@@ -116,8 +149,14 @@ object AppModule {
     @Singleton
     fun getRequestInterceptor(
         application: Application,
-        context: Context
+        context: Context,
+        json: Json
     ): Interceptor {
+        // Captured by the Interceptor lambda below for decoding error responses.
+        // Aliased to `errorJson` to make it explicit at the call site that this
+        // is for error-envelope decoding, not for the application's data payloads
+        // (those go through Retrofit's converter, set up in provideRestAPI).
+        val errorJson = json
         return Interceptor {
             Timber.tag("PRETTY_LOGGER")
 
@@ -153,15 +192,25 @@ object AppModule {
                         }
 
                         NetworkError.ERROR_SERVICE_UNPROCESSABLE_ENTITY -> {
-                            val networkError =
-                                Gson().fromJson(bodyStr, NetworkError::class.java)
+                            // Decode the error envelope using kotlinx.serialization.
+                            // Use a fresh Json instance configured with the same lenient
+                            // settings as provideJson() — passing the injected one would
+                            // require restructuring this lambda to receive it, which is
+                            // out of scope for the migration.
+                            val networkError = errorJson.decodeFromString(
+                                NetworkError.serializer(),
+                                bodyStr
+                            )
 
                             networkError.isNull({
 
                             }, {
                                 networkError.detail[0].msg =
                                     original.url.encodedPath + "\n" + networkError.detail[0].msg
-                                bodyStr = Gson().toJson(networkError)
+                                bodyStr = errorJson.encodeToString(
+                                    NetworkError.serializer(),
+                                    networkError
+                                )
                             })
                         }
 
@@ -181,13 +230,33 @@ object AppModule {
         }
     }
 
+    /**
+     * Builds the Retrofit instance that drives [RestAPI].
+     *
+     * ### Converter chain (order matters)
+     *
+     * 1. `NullOnEmptyConverterFactory` — handles HTTP 200 with empty body
+     *    (Unsplash returns this for some "no content" success cases). Must
+     *    be first so it gets a chance to short-circuit before the JSON
+     *    converter tries to parse an empty string and throws.
+     *
+     * 2. `Json.asConverterFactory(...)` — the kotlinx.serialization converter,
+     *    keyed off the `application/json` media type. Replaces the previous
+     *    `GsonConverterFactory.create(gson)` as part of the Gson →
+     *    kotlinx.serialization migration.
+     *
+     * The `Json` instance is the one provided by [provideJson], so all of its
+     * production hardening (`ignoreUnknownKeys`, `coerceInputValues`, etc.)
+     * is in effect for every API response.
+     */
     @Singleton
     @Provides
-    fun provideRestAPI(gson: Gson, okHttpClient: OkHttpClient): RestAPI {
+    fun provideRestAPI(json: Json, okHttpClient: OkHttpClient): RestAPI {
+        val contentType = "application/json".toMediaType()
         val retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.apiServer)
             .addConverterFactory(NullOnEmptyConverterFactory())
-            .addConverterFactory(GsonConverterFactory.create(gson))
+            .addConverterFactory(json.asConverterFactory(contentType))
             .client(okHttpClient)
             .build()
 

@@ -1,7 +1,7 @@
 package com.goforer.phogal.data.repository.popularphotos
 
 import androidx.paging.PagingData
-import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
+import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import kotlinx.coroutines.flow.Flow
 
 /**

@@ -106,7 +106,7 @@ fun PictureScreen(
     // Top-bar icons read from the authoritative pictureUiState.
     val pictureUiState by pictureViewModel.pictureUiState.collectAsStateWithLifecycle()
     val currentPicture = (pictureUiState as? UiState.Success)?.data
-    val isLikedByUser = currentPicture?.liked_by_user == true
+    val isLikedByUser = currentPicture?.likedByUser == true
 
     // Observe like/unlike transient result so we can surface an error dialog.
     LikeActionHandle(pictureViewModel = pictureViewModel)

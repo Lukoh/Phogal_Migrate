@@ -42,7 +42,7 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.goforer.base.designsystem.component.state.rememberLazyListState
 import com.goforer.phogal.R
-import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
+import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.PopularPhotosSectionUiState
@@ -152,7 +152,7 @@ fun PopularPhotosSection(
                                         .animateItem(tween(durationMillis = 250)),
                                     state = rememberPhotoItemUiState(
                                         indexState = rememberSaveable { mutableIntStateOf(index) },
-                                        photoState = rememberSaveable { mutableStateOf(photos[index]!!) },
+                                        photoState = rememberSaveable { mutableStateOf(photos[index]!!.toString()) },
                                         visibleViewButtonState = rememberSaveable { mutableStateOf(true) },
                                         bookmarkedState = rememberSaveable { mutableStateOf(bookmarkViewModel.isPhotoBookmarked(photos[index]!!.id)) }
                                     ),

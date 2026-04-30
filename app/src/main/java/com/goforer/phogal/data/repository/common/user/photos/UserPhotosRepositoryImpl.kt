@@ -4,7 +4,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.goforer.phogal.data.datasource.network.api.RestAPI
-import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
+import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.data.repository.common.user.photos.paging.UserPhotosPagingSource
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

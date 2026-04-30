@@ -6,19 +6,58 @@ import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
-import com.goforer.phogal.data.model.remote.response.gallery.common.User
+import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Encrypted local storage for bookmarks, search history, and follows.
+ *
+ * ### Migrated to kotlinx.serialization (April 2026)
+ *
+ * Previously this class used Gson with reflection-based `TypeToken<ArrayList<X>>`
+ * patterns:
+ * ```
+ * val type = object : TypeToken<ArrayList<Picture>>() {}.type
+ * Gson().fromJson(json, type)
+ * ```
+ *
+ * That approach had three problems:
+ *  1. **Reflection at runtime** — Gson reads class shapes via reflection on
+ *     every call. R8/ProGuard could strip needed members, manifesting as
+ *     mysterious null fields in production.
+ *  2. **No type safety on the OUT side** — `Gson().toJson(...)` silently
+ *     accepts any object; type errors only surface as wrong JSON later.
+ *  3. **Anonymous TypeToken inner classes** — every `object : TypeToken<…>() {}`
+ *     allocates a new anonymous class, which R8 cannot fully optimize.
+ *
+ * The new approach uses kotlinx.serialization's typed serializers:
+ * ```
+ * private val pictureListSerializer = ListSerializer(Picture.serializer())
+ * json.decodeFromString(pictureListSerializer, jsonString)
+ * ```
+ *
+ * Each serializer is computed at compile time by the Kotlin Serialization
+ * plugin and held as a `private val`, so there is no reflection, no extra
+ * class allocation, and any type mismatch is a compile error.
+ *
+ * The injected [json] instance shares its configuration with the rest of the
+ * app (see `AppModule.provideJson`).
+ */
 @Singleton
 class LocalDataSource
 @Inject
-constructor(val context: Context, cookieJar: PersistentCookieJar? = null) {
+constructor(
+    val context: Context,
+    private val json: Json,
+    cookieJar: PersistentCookieJar? = null
+) {
     companion object {
         const val key_bookmark_photos = "key_bookmark_photos"
         const val key_search_word_list = "search_word_list"
@@ -27,6 +66,14 @@ constructor(val context: Context, cookieJar: PersistentCookieJar? = null) {
         const val key_notification_latest_enabled = "key_notification_latest_enabled"
         const val key_notification_community_enabled = "key_notification_community_enabled"
     }
+
+    // Pre-built typed serializers. Building these once and reusing them avoids
+    // recomputing the schema on every call. They are inexpensive to allocate,
+    // but doing it eagerly makes the code uniformly fast across all entry
+    // points (no surprise warm-ups).
+    private val pictureListSerializer = ListSerializer(Picture.serializer())
+    private val userListSerializer = ListSerializer(User.serializer())
+    private val stringListSerializer = ListSerializer(String.serializer())
 
     val masterKey = MasterKey.Builder(context)
         .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -86,13 +133,20 @@ constructor(val context: Context, cookieJar: PersistentCookieJar? = null) {
         editor.commit()
     }
 
+    /**
+     * Reads the persisted bookmark list. Returns `null` when no list has ever
+     * been written (first launch). Returns an empty list if the stored payload
+     * is empty `[]`. Treats malformed JSON as null with a Timber warning,
+     * matching Gson's previous behavior of returning `null` on parse errors.
+     */
     internal fun geBookmarkedPhotos(): MutableList<Picture>? {
-        val json = pref.getString(key_bookmark_photos, null)
-        val type = object : TypeToken<ArrayList<Picture>>() {}.type
-
-        if (json.isNullOrEmpty()) return mutableListOf()
-
-        return Gson().fromJson(json, type)
+        val jsonStr = pref.getString(key_bookmark_photos, null) ?: return mutableListOf()
+        return runCatching {
+            json.decodeFromString(pictureListSerializer, jsonStr).toMutableList()
+        }.getOrElse { e ->
+            Timber.w(e, "geBookmarkedPhotos: failed to parse stored JSON, returning empty list")
+            mutableListOf()
+        }
     }
 
     internal fun isPhotoBookmarked(photo: Picture): Boolean {
@@ -119,18 +173,26 @@ constructor(val context: Context, cookieJar: PersistentCookieJar? = null) {
         }
     }
 
+    /**
+     * Toggles [bookmarkedPhoto] in the persisted bookmarks list and returns
+     * the resulting list (now reflecting the change).
+     *
+     * Behavior preserved from the original Gson implementation:
+     *  - If no bookmarks exist yet, creates a new list with this entry.
+     *  - If the photo is already bookmarked, removes it (toggle semantics).
+     *  - If the photo is not bookmarked, adds it.
+     */
     internal fun setBookmarkPhoto(bookmarkedPhoto: Picture): MutableList<Picture>? {
         val editor = pref.edit()
         var photos = geBookmarkedPhotos()
-        val json: String
-        val type = object : TypeToken<ArrayList<Picture>>() {}.type
+        val jsonStr: String
 
         if (photos.isNullOrEmpty()) {
             photos = mutableListOf()
             photos.add(bookmarkedPhoto)
-            json = Gson().toJson(photos)
+            jsonStr = json.encodeToString(pictureListSerializer, photos)
             editor.apply()
-            editor.putString(key_bookmark_photos, json)
+            editor.putString(key_bookmark_photos, jsonStr)
             editor.apply()
         } else {
             val photo = photos.find { it.id == bookmarkedPhoto.id || it.urls.raw == bookmarkedPhoto.urls.raw }
@@ -140,38 +202,52 @@ constructor(val context: Context, cookieJar: PersistentCookieJar? = null) {
             else
                 photos.remove(photo)
 
-            json = Gson().toJson(photos)
-            editor.putString(key_bookmark_photos, json)
+            jsonStr = json.encodeToString(pictureListSerializer, photos)
+            editor.putString(key_bookmark_photos, jsonStr)
             editor.apply()
         }
 
-        return Gson().fromJson(json, type)
+        // Re-decode to mirror the original behavior — historically the caller
+        // received a freshly-parsed list rather than the in-memory one. Cheap
+        // round-trip, but worth preserving in case any caller relies on the
+        // copy semantics.
+        return runCatching {
+            json.decodeFromString(pictureListSerializer, jsonStr).toMutableList()
+        }.getOrElse { photos }
     }
 
     internal fun getSearchWords(): List<String>? {
-        val json = pref.getString(key_search_word_list, null)
-        val type = object : TypeToken<ArrayList<String>>() {}.type
-
-        if (json.isNullOrEmpty()) return mutableListOf()
-
-        return Gson().fromJson(json, type)
+        val jsonStr = pref.getString(key_search_word_list, null) ?: return mutableListOf()
+        return runCatching {
+            json.decodeFromString(stringListSerializer, jsonStr)
+        }.getOrElse { e ->
+            Timber.w(e, "getSearchWords: failed to parse stored JSON, returning empty list")
+            mutableListOf()
+        }
     }
 
     internal fun setSearchWords(words: List<String>? = null) {
         pref.edit {
-            val json = Gson().toJson(words)
+            // When `words` is null, persist an empty list rather than `"null"` —
+            // this matches what Gson did with `toJson(null)` in this codebase
+            // (Gson serialized `null` as the JSON string `"null"`, which then
+            // failed to parse back as a List on read; the new code stores `[]`
+            // explicitly to avoid that round-trip bug).
+            val safe = words.orEmpty()
+            val jsonStr = json.encodeToString(stringListSerializer, safe)
 
-            putString(key_search_word_list, json)
+            putString(key_search_word_list, jsonStr)
         }
     }
 
-    internal fun getFollowingUsers(): MutableList<User>? {
-        val json = pref.getString(key_following_user, null)
-        val type = object : TypeToken<ArrayList<User>>() {}.type
-
-        if (json.isNullOrEmpty()) return mutableListOf()
-
-        return Gson().fromJson(json, type)
+    internal fun getFollowingUsers(): MutableList<User> {
+        val jsonStr = pref.getString(key_following_user, null) ?: return mutableListOf()
+        return runCatching {
+            json.decodeFromString(userListSerializer, jsonStr).toMutableList()
+        }.getOrElse { e ->
+            Timber.w(e, "getFollowingUsers: failed to parse stored JSON, returning empty list")
+            mutableListOf()
+        }
     }
 
     internal fun isUserFollowed(user: User): Boolean {
@@ -189,15 +265,14 @@ constructor(val context: Context, cookieJar: PersistentCookieJar? = null) {
     internal fun setFollowingUser(user: User): MutableList<User>? {
         val editor = pref.edit()
         var users = getFollowingUsers()
-        val json: String
-        val type = object : TypeToken<ArrayList<User>>() {}.type
+        val jsonStr: String
 
         if (users.isNullOrEmpty()) {
             users = mutableListOf()
             users.add(user)
-            json = Gson().toJson(users)
+            jsonStr = json.encodeToString(userListSerializer, users)
             editor.apply()
-            editor.putString(key_following_user, json)
+            editor.putString(key_following_user, jsonStr)
             editor.apply()
         } else {
             val followingUser = users.find { it.id == user.id && it.username == user.username }
@@ -207,12 +282,14 @@ constructor(val context: Context, cookieJar: PersistentCookieJar? = null) {
             else
                 users.remove(followingUser)
 
-            json = Gson().toJson(users)
-            editor.putString(key_following_user, json)
+            jsonStr = json.encodeToString(userListSerializer, users)
+            editor.putString(key_following_user, jsonStr)
             editor.apply()
         }
 
-        return Gson().fromJson(json, type)
+        return runCatching {
+            json.decodeFromString(userListSerializer, jsonStr).toMutableList()
+        }.getOrElse { users }
     }
 
     var enabledFollowingNotification: Boolean

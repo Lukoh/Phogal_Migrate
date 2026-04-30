@@ -63,7 +63,7 @@ import com.goforer.base.designsystem.component.ImageCrossFade
 import com.goforer.base.designsystem.component.loadImagePainter
 import com.goforer.base.extension.toUser
 import com.goforer.phogal.R
-import com.goforer.phogal.data.model.remote.response.gallery.common.User
+import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
 import com.goforer.phogal.presentation.stateholder.business.home.setting.follow.FollowViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.UserContainerUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserContainerUiState
@@ -88,7 +88,7 @@ fun UserContainer(
     onOpenWebView: (firstName: String, url: String) -> Unit
 ) {
     val user = state.userState.value.toUser()
-    val lastName = user.last_name ?: stringResource(id = R.string.picture_no_last_name)
+    val lastName = user.lastName ?: stringResource(id = R.string.picture_no_last_name)
     var showUserInfoBottomSheet by rememberSaveable { mutableStateOf(false) }
 
     Column(
@@ -130,8 +130,8 @@ fun UserContainer(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    "${user.total_likes}${" "}" +
-                            "${stringResource(id = R.string.picture_likes)}${" "}${user.total_collections}${" "}" +
+                    "${user.totalLikes}${" "}" +
+                            "${stringResource(id = R.string.picture_likes)}${" "}${user.totalCollections}${" "}" +
                             "${stringResource(id = R.string.picture_collections)}${" "}",
                     fontFamily = FontFamily.SansSerif,
                     fontSize = 12.sp,
@@ -141,7 +141,7 @@ fun UserContainer(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    "${stringResource(id = R.string.user_updated_at)}${" "}${user.updated_at}",
+                    "${stringResource(id = R.string.user_updated_at)}${" "}${user.updatedAt}",
                     fontFamily = FontFamily.SansSerif,
                     fontSize = 12.sp,
                     fontStyle = FontStyle.Normal,
@@ -162,14 +162,23 @@ fun UserContainer(
 
         if (state.visibleViewButtonState.value) {
             Text(
-                "${stringResource(id = R.string.picture_view_photos)}${" "}${user.total_photos}${" "}${stringResource(id = R.string.picture_photos, user.name)}",
+                "${stringResource(id = R.string.picture_view_photos)}${" "}${user.totalPhotos}${" "}${stringResource(id = R.string.picture_photos, user.name)}",
                 modifier = Modifier
-                    .padding(start = if (state.fromItemState.value)
-                        56.dp
-                    else
-                        66.dp)
+                    .padding(
+                        start = if (state.fromItemState.value)
+                            56.dp
+                        else
+                            66.dp
+                    )
                     .clickable {
-                        onViewPhotos(user.username, user.first_name, lastName, user.username)
+                        user.username?.let {
+                            onViewPhotos(
+                                it,
+                                user.firstName,
+                                lastName,
+                                user.username
+                            )
+                        }
                     },
                 color = if (state.fromItemState.value)
                     Color.White
@@ -193,12 +202,12 @@ fun UserContainer(
             showUserInfoBottomSheet = showUserInfoBottomSheet,
             onDismissedRequest = {
                 if (it) {
-                    if (user.portfolio_url.isNullOrEmpty()) {
+                    if (user.portfolioUrl.isNullOrEmpty()) {
                         state.baseUiState.scope.launch {
-                            onShowSnackBar("${user.first_name}${" "}${text}")
+                            onShowSnackBar("${user.firstName}${" "}${text}")
                         }
                     } else {
-                        onOpenWebView(user.first_name, user.portfolio_url)
+                        onOpenWebView(user.firstName, user.portfolioUrl)
                     }
                 }
             }
@@ -217,7 +226,7 @@ fun ShowProfileImage(
     IconContainer(profileImageSize) {
         Box {
             val painter = loadImagePainter(
-                data = user.profile_image.small,
+                data = user.profileImage.small,
                 size = Size.ORIGINAL
             )
 
@@ -232,12 +241,14 @@ fun ShowProfileImage(
                     .border(0.5.dp, MaterialTheme.colorScheme.secondary, CircleShape)
                     .clickable {
                         if (visibleViewPhotosButton)
-                            onViewPhotos(
-                                user.username,
-                                user.first_name,
-                                lastName,
-                                user.username
-                            )
+                            user.username?.let {
+                                onViewPhotos(
+                                    it,
+                                    user.firstName,
+                                    lastName,
+                                    user.username
+                                )
+                            }
                     },
                 Alignment.CenterStart,
                 contentScale = ContentScale.Crop

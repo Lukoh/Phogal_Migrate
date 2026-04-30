@@ -1,14 +1,15 @@
 package com.goforer.phogal.data.model.local.home.common
 
+import kotlinx.serialization.Serializable
 import android.os.Parcelable
-import androidx.compose.ui.graphics.painter.Painter
-import com.goforer.phogal.data.model.BaseModel
+import androidx.annotation.DrawableRes
 import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.RawValue
 
+@Serializable
 @Parcelize
 data class ProfileInfoItem(
     val text: String,
-    val painter: @RawValue Painter,
+    @DrawableRes
+    val iconResId: Int,
     val position: Int
-) : BaseModel(), Parcelable
+) : Parcelable

@@ -20,7 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.goforer.base.designsystem.animation.animateIconScale
 import com.goforer.phogal.R
-import com.goforer.phogal.data.model.remote.response.gallery.common.User
+import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.UserInfoUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserInfoUiState
 import com.goforer.phogal.presentation.ui.theme.DarkGreenGray10
@@ -55,7 +55,7 @@ fun UserInfoBottomSheet(
                 horizontalAlignment = Alignment.Start,
             ) {
                 ProfileItem(
-                    image = user.profile_image.medium,
+                    image = user.profileImage.medium,
                     name = user.name,
                     nameColor = DarkGreenGray10,
                     position = 9,
@@ -66,7 +66,7 @@ fun UserInfoBottomSheet(
                     UserInfoItem(
                         text = item.text,
                         textColor = DarkGreenGray10,
-                        painter = item.painter,
+                        iconResId = item.iconResId,
                         position = item.position
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -95,7 +95,7 @@ fun UserInfoBottomSheet(
                         scope = userInfoUiState.scope,
                         bottomSheetState = userInfoUiState.bottomSheetState,
                         openBottomSheetState = userInfoUiState.openBottomSheetState,
-                        firstName = user.first_name,
+                        firstName = user.firstName,
                         onDismissedRequest = onDismissedRequest
                     )
                 }

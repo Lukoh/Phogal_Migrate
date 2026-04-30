@@ -40,7 +40,7 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.goforer.base.designsystem.component.state.rememberLazyListState
 import com.goforer.phogal.R
-import com.goforer.phogal.data.model.remote.response.gallery.common.User
+import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.FollowingUserSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserItemUiState
@@ -124,7 +124,7 @@ fun FollowingUsersSection(
                                         ),
                                         followingUserItemUiState = rememberFollowingUserItemUiState(
                                             indexState = rememberSaveable { mutableIntStateOf(index) },
-                                            userState = rememberSaveable { mutableStateOf(users[index]!!) },
+                                            userState = rememberSaveable { mutableStateOf(users[index]!!.toString()) },
                                             visibleViewButtonState = rememberSaveable { mutableStateOf(true) },
                                             followedState = rememberSaveable { mutableStateOf(true) }
                                         ),

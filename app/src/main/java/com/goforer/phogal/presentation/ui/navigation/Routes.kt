@@ -55,7 +55,7 @@ object Routes {
         val name: String,
         val firstName: String,
         val lastName: String,
-        val username: String
+        val username: String? = null
     ) : NavKey
 
     @Serializable data class WebViewRoute(

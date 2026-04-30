@@ -1,16 +1,16 @@
-package com.goforer.phogal.data.model.remote.response.gallery.common
+package com.goforer.phogal.data.model.remote.response.gallery.common.photo
 
-import kotlinx.serialization.Serializable
 import android.os.Parcelable
+import com.goforer.phogal.data.model.remote.response.gallery.common.CurrentUserCollection
+import com.goforer.phogal.data.model.remote.response.gallery.common.Urls
 import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
-import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Exif
-import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Location
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-data class CoverPhoto(
+data class Photo(
     val id: String,
     @SerialName("created_at") val createdAt: String,
     @SerialName("updated_at") val updatedAt: String,
@@ -19,7 +19,9 @@ data class CoverPhoto(
     val color: String?,
     @SerialName("blur_hash") val blurHash: String?,
     val description: String?,
+    val user: User,
+    @SerialName("current_user_collections") val currentUserCollections: List<CurrentUserCollection>,
     val urls: Urls,
-    val links: Links,
-    val user: User
+    val links: PhotoLinks,
+    var alreadySearched: Boolean = false
 ) : Parcelable

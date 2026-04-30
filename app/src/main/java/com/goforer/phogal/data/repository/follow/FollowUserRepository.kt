@@ -1,7 +1,7 @@
 package com.goforer.phogal.data.repository.follow
 
 import androidx.paging.PagingData
-import com.goforer.phogal.data.model.remote.response.gallery.common.User
+import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
 import kotlinx.coroutines.flow.Flow
 
 /**

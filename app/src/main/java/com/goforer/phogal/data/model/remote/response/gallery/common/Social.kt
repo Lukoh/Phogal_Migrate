@@ -1,13 +1,15 @@
 package com.goforer.phogal.data.model.remote.response.gallery.common
 
 import android.os.Parcelable
-import com.goforer.phogal.data.model.BaseModel
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Parcelize
 data class Social(
-    val instagram_username: String,
-    val paypal_email: String? = null,
-    val portfolio_url: String,
-    val twitter_username: String
-) : BaseModel(), Parcelable
+    @SerialName("instagram_username") val instagramUsername: String?,
+    @SerialName("paypal_email") val paypalEmail: String?,
+    @SerialName("portfolio_url") val portfolioUrl: String?,
+    @SerialName("twitter_username")val twitterUsername: String?
+) : Parcelable

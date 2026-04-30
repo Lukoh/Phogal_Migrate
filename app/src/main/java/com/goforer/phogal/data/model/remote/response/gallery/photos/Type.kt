@@ -1,11 +1,13 @@
 package com.goforer.phogal.data.model.remote.response.gallery.photos
 
+import kotlinx.serialization.Serializable
 import android.os.Parcelable
-import com.goforer.phogal.data.model.BaseModel
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
 
+@Serializable
 @Parcelize
 data class Type(
-    val pretty_slug: String,
+    @SerialName("pretty_slug") val prettySlug: String,
     val slug: String
-) : BaseModel(), Parcelable
+) : Parcelable

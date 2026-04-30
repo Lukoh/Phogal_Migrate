@@ -1,9 +1,10 @@
 package com.goforer.phogal.data.model.remote.response.setting
 
+import kotlinx.serialization.Serializable
 import android.os.Parcelable
-import com.goforer.phogal.data.model.BaseModel
 import kotlinx.parcelize.Parcelize
 
+@Serializable
 @Parcelize
 data class Profile(
     val id: Int,
@@ -19,4 +20,4 @@ data class Profile(
     val birthday: String,
     val reputation: String,
     var deleted: Boolean
-) : BaseModel(), Parcelable
+) : Parcelable

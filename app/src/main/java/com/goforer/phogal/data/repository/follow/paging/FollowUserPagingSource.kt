@@ -2,7 +2,7 @@ package com.goforer.phogal.data.repository.follow.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.goforer.phogal.data.model.remote.response.gallery.common.User
+import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
 
 import retrofit2.HttpException
 import java.io.IOException

@@ -79,7 +79,7 @@ class PictureViewModel @Inject constructor(
         val current = (_pictureUiState.value as? UiState.Success)?.data ?: return
         if (_likeActionState.value is UiState.Loading) return
 
-        val wasLiked = current.liked_by_user
+        val wasLiked = current.likedByUser
         val pictureId = current.id
 
         _likeActionState.value = UiState.Loading
@@ -95,7 +95,7 @@ class PictureViewModel @Inject constructor(
                     // Atomic patch of the nested state — avoids races with a concurrent loadPicture.
                     _pictureUiState.update { state ->
                         if (state is UiState.Success && state.data.id == pictureId) {
-                            UiState.Success(state.data.copy(liked_by_user = !wasLiked))
+                            UiState.Success(state.data.copy(likedByUser = !wasLiked))
                         } else state
                     }
                     _likeActionState.value = UiState.Success(Unit)

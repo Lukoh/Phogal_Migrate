@@ -1,13 +1,14 @@
 package com.goforer.phogal.data.model.local.home.gallery
 
+import kotlinx.serialization.Serializable
 import android.os.Parcelable
-import com.goforer.phogal.data.model.BaseModel
 import kotlinx.parcelize.Parcelize
 
+@Serializable
 @Parcelize
 data class NameArgument(
     val name: String,
     val firstName: String,
     val lastName: String,
-    val username: String
-) : BaseModel(), Parcelable
+    val username: String?
+) : Parcelable

@@ -1,13 +1,13 @@
-package com.goforer.phogal.data.model.remote.response.gallery.common
+package com.goforer.phogal.data.model.remote.response.gallery.common.photo
 
-import kotlinx.serialization.Serializable
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-data class Links(
+data class PhotoLinks(
     val self: String,
     val html: String,
     val download: String,

@@ -26,7 +26,7 @@ import androidx.paging.compose.LazyPagingItems
 import com.goforer.base.designsystem.animation.GenericCubicAnimationShape
 import com.goforer.base.designsystem.component.Chips
 import com.goforer.phogal.R
-import com.goforer.phogal.data.model.remote.response.gallery.common.Photo
+import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberPermissionState
