@@ -32,7 +32,9 @@ import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.business.home.popularphotos.PopularPhotosViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.popularphotos.PopularPhotosViewModel.Companion.POPULAR
 import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.PopularPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.PopularPhotosSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.rememberPopularPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.rememberPopularPhotosSectionUiState
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import kotlinx.coroutines.launch
 

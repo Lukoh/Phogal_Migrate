@@ -184,18 +184,18 @@ private fun LazyListScope.renderLoadState(
 ) {
     val loadState = photos.loadState
 
-    when {
-        loadState.refresh is LoadState.Loading -> {
+    when (loadState.refresh) {
+        is LoadState.Loading -> {
             item { LoadingRow() }
         }
 
-        loadState.refresh is LoadState.NotLoading && photos.itemCount == 0 -> {
+        is LoadState.NotLoading if photos.itemCount == 0 -> {
             onLoadSuccess(false)
             sectionUiState.visibleUpButtonState.value = false
             item { EmptyState() }
         }
 
-        loadState.refresh is LoadState.NotLoading -> {
+        is LoadState.NotLoading -> {
             onLoadSuccess(true)
             photoItems(
                 photos = photos,
@@ -207,7 +207,7 @@ private fun LazyListScope.renderLoadState(
             )
         }
 
-        loadState.refresh is LoadState.Error -> {
+        is LoadState.Error -> {
             onLoadSuccess(false)
             val error = (loadState.refresh as LoadState.Error).error
             item { ErrorRow(throwable = error, onRetry = { photos.retry() }) }
