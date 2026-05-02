@@ -123,10 +123,10 @@ fun FollowingUsersSection(
                                             tween(durationMillis = 250)
                                         ),
                                         followingUserItemUiState = rememberFollowingUserItemUiState(
-                                            indexState = rememberSaveable { mutableIntStateOf(index) },
-                                            userState = rememberSaveable { mutableStateOf(users[index]!!.toString()) },
-                                            visibleViewButtonState = rememberSaveable { mutableStateOf(true) },
-                                            followedState = rememberSaveable { mutableStateOf(true) }
+                                            index = rememberSaveable { mutableIntStateOf(index) },
+                                            user = rememberSaveable { mutableStateOf(users[index]!!.toString()) },
+                                            visibleViewButton = rememberSaveable { mutableStateOf(true) },
+                                            followed = rememberSaveable { mutableStateOf(true) }
                                         ),
                                         onViewPhotos = onViewPhotos,
                                         onOpenWebView = onOpenWebView,
@@ -198,20 +198,20 @@ fun FollowingUsersSection(
         if (!lazyListState.isScrollInProgress) {
             ShowUpButton(
                 modifier = Modifier.align(Alignment.BottomEnd),
-                visible = sectionUiState.visibleUpButtonState.value,
+                visible = sectionUiState.visibleUpButton,
                 onClick = {
-                    sectionUiState.clickedState.value = true
+                    sectionUiState.setClicked(true)
                 }
             )
         }
 
-        LaunchedEffect(lazyListState, true, sectionUiState.clickedState.value) {
-            if (sectionUiState.clickedState.value) {
+        LaunchedEffect(lazyListState, true, sectionUiState.clicked) {
+            if (sectionUiState.clicked) {
                 lazyListState.animateScrollToItem (0)
-                sectionUiState.visibleUpButtonState.value = false
+                sectionUiState.setVisibleUpButton(false)
             }
 
-            sectionUiState.clickedState.value = false
+            sectionUiState.setClicked(false)
         }
     }
 }

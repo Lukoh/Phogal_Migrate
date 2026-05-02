@@ -7,19 +7,42 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 
+/**
+ * UI-local state holder for the popular photos screen's scrollable section.
+ *
+ * ### Hoisting refactor (April 2026)
+ *
+ * Previously this holder exposed both flags as public `MutableState<Boolean>`,
+ * which let any consumer write `state.clickedState.value = true` from anywhere
+ * in the composable tree. The new shape exposes **read-only `Boolean`** values
+ * and **typed callbacks** for the two transitions that actually happen:
+ *
+ *  - `onUpButtonClicked()`             — user tapped the "scroll-to-top" FAB
+ *  - `onUpButtonVisibilityChanged(visible)` — visibility derived from scroll state
+ *  - `onScrollConsumed()`              — clear the "click consumed" flag after scrollToTop animation
+ *
+ * Read-only properties (`clicked`, `visibleUpButton`) are stable from
+ * Compose's perspective: the value flips, the holder identity does not, and
+ * children that consume only one of them recompose only when that one
+ * actually changes.
+ */
 @Stable
-class PopularPhotosSectionUiState(
-    val clickedState: MutableState<Boolean>,
-    val visibleUpButtonState: MutableState<Boolean>
-)
+class PopularPhotosSectionUiState internal constructor(
+    private val _clicked: MutableState<Boolean>,
+    private val _visibleUpButton: MutableState<Boolean>
+) {
+    val clicked: Boolean get() = _clicked.value
+    val visibleUpButton: Boolean get() = _visibleUpButton.value
+
+    fun setUpButtonClicked() { _clicked.value = true }
+    fun setScrollConsumed() { _clicked.value = false }
+    fun setUpButtonVisibilityChanged(visible: Boolean) { _visibleUpButton.value = visible }
+}
 
 @Composable
 fun rememberPopularPhotosSectionUiState(
-    clickedState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    visibleUpButtonState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
-): PopularPhotosSectionUiState = remember(clickedState) {
-    PopularPhotosSectionUiState(
-        clickedState = clickedState,
-        visibleUpButtonState = visibleUpButtonState
-    )
+    clicked: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+    visibleUpButton: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
+): PopularPhotosSectionUiState = remember(clicked, visibleUpButton) {
+    PopularPhotosSectionUiState(_clicked = clicked, _visibleUpButton = visibleUpButton)
 }

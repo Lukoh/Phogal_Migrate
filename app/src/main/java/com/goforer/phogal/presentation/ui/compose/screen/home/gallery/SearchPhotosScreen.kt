@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
@@ -41,7 +42,6 @@ import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.business.home.gallery.GalleryViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchSectionUiState
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
@@ -49,15 +49,25 @@ import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 import kotlinx.coroutines.launch
 
 /**
- * Top-level screen for photo search.
+ * Top-level **Stateful** screen for photo search.
  *
- * Responsibilities are split across three private composables:
- *  - [SearchTopBar]        — title + menu/favorite actions
- *  - [SearchSnackbarHost]  — branded snackbar host
- *  - [ObserveLifecycle]    — side-effect for ON_START / ON_STOP callbacks
+ * ### Hoisting layers (top-down)
  *
- * Keeping them separated means each can recompose independently and each is
- * trivially previewable.
+ * 1. `SearchPhotosScreen` (this file)             — **Stateful**: owns the
+ *    [SearchPhotosContentUiState], the snackbar host, and the lambdas that
+ *    bridge the UI to [GalleryViewModel].
+ *
+ * 2. `SearchTopBar`, `SearchSnackbarHost`         — **Stateless**: receive
+ *    primitives (`Boolean` flags) and lambda callbacks, no holders.
+ *
+ * 3. `SearchPhotosContent`                        — **Stateless**: receives
+ *    the holder as input but never writes to it. All state mutations go
+ *    upward via callbacks.
+ *
+ * The previous version mixed these layers — children received `MutableState<T>`
+ * and wrote to it directly, which technically worked but defeated the purpose
+ * of hoisting. This refactor enforces strict read-only flow downward and
+ * callback-based events upward.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,7 +75,6 @@ fun SearchPhotosScreen(
     modifier: Modifier = Modifier,
     galleryViewModel: GalleryViewModel,
     contentUiState: SearchPhotosContentUiState = rememberSearchPhotosContentUiState(galleryViewModel),
-    sectionUiState: SearchSectionUiState = rememberSearchSectionUiState(enabledState = contentUiState.enabledState),
     onItemClicked: (id: String) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
@@ -73,20 +82,27 @@ fun SearchPhotosScreen(
     onStop: () -> Unit = {}
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-    // Stable lambdas — created once per VM instance so child composables
-    // don't see a new reference on every recomposition.
-    val onSearch: (String) -> Unit = remember(galleryViewModel, contentUiState.galleryUiState.currentQuery, contentUiState) {
+
+    // Stable lambdas. The capture set is the bare minimum needed for the
+    // operation, which keeps Compose from invalidating these on every parent
+    // recomposition.
+    val onSearch: (String) -> Unit = remember(galleryViewModel, contentUiState) {
         { keyword ->
             if (keyword.isNotEmpty() && keyword != contentUiState.galleryUiState.currentQuery) {
                 contentUiState.baseUiState.keyboardController?.hide()
                 galleryViewModel.onQueryChanged(keyword)
                 galleryViewModel.commitSearch()
-                contentUiState.triggeredState.value = true
+                contentUiState.setSearchTriggered()
             }
         }
     }
 
-    val onChipClicked: (String) -> Unit = remember(galleryViewModel, contentUiState, sectionUiState) {
+    // Note: SearchSection text input is now hoisted into rememberSearchSectionUiState
+    // alongside the screen, so the chip-tap path goes through the same channel as
+    // typed input. This collapses two state mutation paths into one.
+    val sectionUiState = rememberSearchSectionUiState(enabled = remember { mutableStateOf(false) })
+
+    val onChipClicked: (String) -> Unit = remember(galleryViewModel, sectionUiState, contentUiState) {
         { keyword ->
             sectionUiState.editableInputState.textState = keyword
             contentUiState.baseUiState.keyboardController?.hide()
@@ -110,7 +126,7 @@ fun SearchPhotosScreen(
         snackbarHost = { SearchSnackbarHost(snackbarHostState) },
         topBar = {
             SearchTopBar(
-                showFavoriteAction = contentUiState.visibleActionsState.value,
+                showFavoriteAction = contentUiState.visibleActions,
                 onMenuClick = { /* TODO */ },
                 onFavoriteClick = { /* TODO */ }
             )
@@ -118,9 +134,7 @@ fun SearchPhotosScreen(
         content = { paddingValues ->
             ScaffoldContent(topInterval = 8.dp) {
                 SearchPhotosContent(
-                    modifier = modifier.padding(
-                        top = paddingValues.calculateTopPadding()
-                    ),
+                    modifier = modifier.padding(top = paddingValues.calculateTopPadding()),
                     photosContentUiState = contentUiState,
                     onSearch = onSearch,
                     onChipClicked = onChipClicked,
@@ -132,7 +146,7 @@ fun SearchPhotosScreen(
                         }
                     },
                     onOpenWebView = onOpenWebView,
-                    onSuccess = { contentUiState.visibleActionsState.value = it }
+                    onLoadSuccess = contentUiState::setActionsVisibilityChanged
                 )
             }
         }
@@ -140,7 +154,7 @@ fun SearchPhotosScreen(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  Extracted composables
+//  Stateless sub-composables
 // ─────────────────────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -236,6 +250,9 @@ fun SearchPhotosScreenPreview() {
         Scaffold(
             contentColor = Color.White,
             topBar = {
+                // Notice: previewing a stateless TopBar requires only a Boolean
+                // and two empty lambdas. No need to construct a holder, no
+                // need to wrap a MutableState — pure input/output.
                 SearchTopBar(
                     showFavoriteAction = true,
                     onMenuClick = {},

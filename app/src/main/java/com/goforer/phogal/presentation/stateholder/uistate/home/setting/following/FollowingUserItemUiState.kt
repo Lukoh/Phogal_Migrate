@@ -10,27 +10,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 
 @Stable
-class FollowingUserItemUiState(
-    val indexState: MutableState<Int>,
-    val userState: MutableState<String>,
-    val visibleViewButtonState: MutableState<Boolean>,
-    val clickedState: MutableState<Boolean>,
-    val followedState: MutableState<Boolean>
-)
+class FollowingUserItemUiState internal constructor(
+    private val _index: MutableState<Int>,
+    private val _user: MutableState<String>,
+    private val _visibleViewButton: MutableState<Boolean>,
+    private val _clicked: MutableState<Boolean>,
+    private val _followed: MutableState<Boolean>
+) {
+    val index: Int get() = _index.value
+    val user: String get() = _user.value
+    val visibleViewButton: Boolean get() = _visibleViewButton.value
+    val clicked: Boolean get() = _clicked.value
+    val followed: Boolean get() = _followed.value
+}
 
 @Composable
 fun rememberFollowingUserItemUiState(
-    indexState: MutableState<Int> = rememberSaveable { mutableIntStateOf(0) },
-    userState: MutableState<String> = remember { mutableStateOf("") },
-    visibleViewButtonState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    clickedState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    followedState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
-): FollowingUserItemUiState = remember(indexState, userState, visibleViewButtonState, clickedState) {
+    index: MutableState<Int> = rememberSaveable { mutableIntStateOf(0) },
+    user: MutableState<String> = remember { mutableStateOf("") },
+    visibleViewButton: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+    clicked: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+    followed: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
+): FollowingUserItemUiState = remember(index, user, visibleViewButton, clicked) {
     FollowingUserItemUiState(
-        indexState = indexState,
-        userState = userState,
-        visibleViewButtonState = visibleViewButtonState,
-        clickedState = clickedState,
-        followedState = followedState
+        _index = index,
+        _user = user,
+        _visibleViewButton = visibleViewButton,
+        _clicked = clicked,
+        _followed = followed
     )
 }

@@ -68,8 +68,8 @@ fun PictureItem(
     onShowSnackBar: (text: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit
 ) {
-    val picture = photoItemUiState.photoState.value as Picture
-    val verticalPadding = if (photoItemUiState.indexState.value == 0)
+    val picture = photoItemUiState.photo as Picture
+    val verticalPadding = if (photoItemUiState.index == 0)
         2.dp
     else
         0.5.dp
@@ -88,7 +88,7 @@ fun PictureItem(
             colors = CardDefaults.cardColors(
                 contentColor = MaterialTheme.colorScheme.primary,
                 containerColor =
-                if (photoItemUiState.clickedState.value)
+                if (photoItemUiState.clicked)
                     MaterialTheme.colorScheme.primaryContainer
                 else
                     MaterialTheme.colorScheme.surfaceVariant,
@@ -139,8 +139,8 @@ fun PictureItem(
                     )
                     .clip(RoundedCornerShape(1.dp))
                     .clickable {
-                        photoItemUiState.clickedState.value = true
-                        onItemClicked.invoke(picture, photoItemUiState.indexState.value)
+                        photoItemUiState.setClicked(true)
+                        onItemClicked.invoke(picture, photoItemUiState.index)
                     }
                     .scale(.8f + (.2f * transition))
                     .graphicsLayer { rotationX = (1f - transition) * 5f }
@@ -156,11 +156,11 @@ fun PictureItem(
                 UserContainer(
                     modifier = Modifier,
                     state = rememberUserContainerUiState(
-                        userState = rememberSaveable { mutableStateOf(picture.user.toString()) },
-                        profileSizeState = rememberSaveable { mutableDoubleStateOf(36.0) },
-                        colorsState = remember { mutableStateOf(listOf(Color.White, Color.White, Blue70, Blue75, Blue50, ColorSnowWhite)) },
-                        visibleViewButtonState = photoItemUiState.visibleViewButtonState,
-                        fromItemState = rememberSaveable { mutableStateOf(true) }
+                        user = rememberSaveable { mutableStateOf(picture.user.toString()) },
+                        profileSize = rememberSaveable { mutableDoubleStateOf(36.0) },
+                        colors = remember { mutableStateOf(listOf(Color.White, Color.White, Blue70, Blue75, Blue50, ColorSnowWhite)) },
+                        visibleViewButton = rememberSaveable { mutableStateOf(photoItemUiState.visibleViewButton) },
+                        fromItem = rememberSaveable { mutableStateOf(true) }
                     ),
                     onViewPhotos = onViewPhotos,
                     onShowSnackBar = onShowSnackBar,

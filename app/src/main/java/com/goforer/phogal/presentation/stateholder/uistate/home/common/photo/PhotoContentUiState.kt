@@ -18,31 +18,49 @@ import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
  * truth duplication that made the legacy `LikeResponseHandle` logic fragile.
  */
 @Stable
-class PhotoContentUiState(
+class PhotoContentUiState internal constructor(
     val baseUiState: BaseUiState,
-    val idState: MutableState<String>,
-    val visibleViewButtonState: MutableState<Boolean>,
-    val enabledBookmarkState: MutableState<Boolean>,
-    val visibleActionsState: MutableState<Boolean>
-)
+
+    private val _id: MutableState<String>,
+    private val _visibleViewButton: MutableState<Boolean>,
+    private val _enabledBookmark: MutableState<Boolean>,
+    private val _visibleActions: MutableState<Boolean>
+) {
+    val id: String get() = _id.value
+    val visibleViewButton: Boolean get() = _visibleViewButton.value
+    val enabledBookmark: Boolean get() = _enabledBookmark.value
+    val visibleActions: Boolean get() = _visibleActions.value
+
+    fun onId(id: String) {
+        _id.value = id
+    }
+
+    fun setVisibleViewButton(visibleViewButton: Boolean) {
+        _visibleViewButton.value = visibleViewButton
+    }
+
+    fun setEnabledBookmark(enabledBookmark: Boolean) {
+        _enabledBookmark.value = enabledBookmark
+    }
+
+    fun setVisibleActions(visibleActions: Boolean) {
+        _visibleActions.value = visibleActions
+    }
+}
 
 @Composable
 fun rememberPhotoContentUiState(
     baseUiState: BaseUiState = rememberBaseUiState(),
-    idState: MutableState<String> = rememberSaveable { mutableStateOf("") },
-    visibleViewButtonState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    enabledBookmarkState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    visibleActionsState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
-): PhotoContentUiState = remember(
-    baseUiState,
-    idState,
-    visibleViewButtonState
-) {
-    PhotoContentUiState(
-        baseUiState = baseUiState,
-        idState = idState,
-        visibleViewButtonState = visibleViewButtonState,
-        enabledBookmarkState = enabledBookmarkState,
-        visibleActionsState = visibleActionsState
-    )
-}
+    id: MutableState<String> = rememberSaveable { mutableStateOf("") },
+    visibleViewButton: MutableState<Boolean> = rememberSaveable() { mutableStateOf(false) },
+    enabledBookmark: MutableState<Boolean> = rememberSaveable() { mutableStateOf(false) },
+    visibleActions: MutableState<Boolean> = rememberSaveable() { mutableStateOf(false) }
+): PhotoContentUiState = remember(baseUiState, id, visibleViewButton, enabledBookmark, visibleActions) {
+        PhotoContentUiState(
+            baseUiState = baseUiState,
+            _id = id,
+            _visibleViewButton = visibleViewButton,
+            _enabledBookmark = enabledBookmark,
+            _visibleActions = visibleActions
+        )
+    }

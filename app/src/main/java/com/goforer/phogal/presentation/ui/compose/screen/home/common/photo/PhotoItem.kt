@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -74,7 +75,7 @@ fun PhotoItem(
     onShowSnackBar: (text: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit
 ) {
-    val photo = state.photoState.value as Photo
+    val photo = state.photo as Photo
 
     photo.alreadySearched = true
     AnimatedVisibility(
@@ -91,7 +92,7 @@ fun PhotoItem(
             colors = CardDefaults.cardColors(
                 contentColor = MaterialTheme.colorScheme.primary,
                 containerColor =
-                if (state.clickedState.value)
+                if (state.clicked)
                     MaterialTheme.colorScheme.primaryContainer
                 else
                     MaterialTheme.colorScheme.surfaceVariant,
@@ -143,8 +144,8 @@ fun PhotoItem(
                     )
                     .clip(RoundedCornerShape(1.dp))
                     .clickable {
-                        state.clickedState.value = true
-                        onItemClicked.invoke(photo, state.indexState.value)
+                        state.setClicked(true)
+                        onItemClicked.invoke(photo, state.index)
                     }
                     .scale(.8f + (.2f * transition))
                     .graphicsLayer { rotationX = (1f - transition) * 5f }
@@ -159,7 +160,7 @@ fun PhotoItem(
                         colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(transition) })
                     )
 
-                    if (state.bookmarkedState.value) {
+                    if (state.bookmarked) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_bookmark_on),
                             contentDescription = "Bookmark",
@@ -171,15 +172,17 @@ fun PhotoItem(
                     }
                 }
 
+                val state = rememberUserContainerUiState()
+
+                state.setUser(photo.user.toString())
+                state.setProfileSize(36.0)
+                state.setColors(listOf(Color.White, Color.White, Blue70, Blue75, Blue50, ColorSnowWhite))
+                state.setVisibleViewButton(state.visibleViewButton)
+                state.setFromItem(true)
+
                 UserContainer(
                     modifier = Modifier,
-                    state = rememberUserContainerUiState(
-                        userState = rememberSaveable { mutableStateOf(photo.user.toString()) },
-                        profileSizeState = rememberSaveable { mutableDoubleStateOf(36.0) },
-                        colorsState = remember { mutableStateOf(listOf(Color.White, Color.White, Blue70, Blue75, Blue50, ColorSnowWhite)) },
-                        visibleViewButtonState = state.visibleViewButtonState,
-                        fromItemState = rememberSaveable { mutableStateOf(true) }
-                    ),
+                    state = state,
                     onViewPhotos = onViewPhotos,
                     onShowSnackBar = onShowSnackBar,
                     onOpenWebView = onOpenWebView

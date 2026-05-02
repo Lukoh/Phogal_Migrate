@@ -121,10 +121,10 @@ fun PopularPhotosScreen(
                     },
                     onOpenWebView = onOpenWebView,
                     onSuccess = {
-                        contentUiState.visibleActionsState.value = it
+                        contentUiState.setVisibleActions(it)
                     },
                     onLoadedPhotos = {
-                        contentUiState.loadedPhotosState.value = it
+                        contentUiState.setLoadedPhotos(it)
                     }
                 )
             }

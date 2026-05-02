@@ -125,9 +125,9 @@ fun BookmarkedPhotosSection(
                                             tween(durationMillis = 250)
                                         ),
                                         photoItemUiState = rememberPhotoItemUiState(
-                                            indexState = rememberSaveable { mutableIntStateOf(index) },
-                                            photoState = rememberSaveable { mutableStateOf(photos[index]!!)},
-                                            visibleViewButtonState = rememberSaveable { mutableStateOf(true) }
+                                            index = rememberSaveable { mutableIntStateOf(index) },
+                                            photo = rememberSaveable { mutableStateOf(photos[index]!!)},
+                                            visibleViewButton = rememberSaveable { mutableStateOf(true) }
                                         ),
                                         onItemClicked = onItemClicked,
                                         onViewPhotos = onViewPhotos,
@@ -199,20 +199,20 @@ fun BookmarkedPhotosSection(
         if (!lazyListState.isScrollInProgress) {
             ShowUpButton(
                 modifier = Modifier.align(Alignment.BottomEnd),
-                visible = sectionUiState.visibleUpButtonState.value,
+                visible = sectionUiState.visibleUpButton,
                 onClick = {
-                    sectionUiState.clickedState.value = true
+                    sectionUiState.setUpButtonClicked()
                 }
             )
         }
 
-        LaunchedEffect(lazyListState, true, sectionUiState.clickedState.value) {
-            if (sectionUiState.clickedState.value) {
+        LaunchedEffect(lazyListState, true, sectionUiState.clicked) {
+            if (sectionUiState.clicked) {
                 lazyListState.animateScrollToItem (0)
-                sectionUiState.visibleUpButtonState.value = false
+                sectionUiState.setUpButtonVisibilityChanged(false)
             }
 
-            sectionUiState.clickedState.value = false
+            sectionUiState.setScrollConsumed()
         }
     }
 }

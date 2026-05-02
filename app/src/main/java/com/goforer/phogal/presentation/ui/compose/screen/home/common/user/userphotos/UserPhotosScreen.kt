@@ -102,7 +102,7 @@ fun UserPhotosScreen(
             CustomCenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "${contentUiState.firstNameState.value}${" "}${stringResource(id = R.string.picture_photos)}",
+                        text = "${contentUiState.firstName}${" "}${stringResource(id = R.string.picture_photos)}",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontFamily = FontFamily.SansSerif,
@@ -122,7 +122,7 @@ fun UserPhotosScreen(
                     }
                 },
                 actions = {
-                    if (contentUiState.visibleActionsState.value) {
+                    if (contentUiState.visibleActions) {
                         IconButton(onClick = { /* doSomething() */ }) {
                             Icon(
                                 imageVector = Icons.Filled.Favorite,
@@ -134,9 +134,9 @@ fun UserPhotosScreen(
             )
         }, content = { paddingValues ->
             // Kick off the Paging stream whenever the target user changes.
-            LaunchedEffect(contentUiState.nameState.value) {
-                if (contentUiState.nameState.value.isNotBlank()) {
-                    userPhotosViewModel.loadFor(contentUiState.nameState.value)
+            LaunchedEffect(contentUiState.name) {
+                if (contentUiState.name.isNotBlank()) {
+                    userPhotosViewModel.loadFor(contentUiState.name)
                 }
             }
 
@@ -155,7 +155,7 @@ fun UserPhotosScreen(
                         }
                     },
                     onSuccess = { isSuccessful ->
-                        contentUiState.visibleActionsState.value = isSuccessful
+                        contentUiState.setVisibleAction(isSuccessful)
                     }
                 )
             }

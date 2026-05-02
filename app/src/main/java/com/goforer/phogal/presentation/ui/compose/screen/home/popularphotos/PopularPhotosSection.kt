@@ -113,7 +113,7 @@ fun PopularPhotosSection(
                     }
                     refresh is LoadState.NotLoading -> {
                         if (photos.itemCount == 0 ) {
-                            sectionUiState.visibleUpButtonState.value = false
+                            sectionUiState.setUpButtonVisibilityChanged(false)
                             onSuccess(false)
                             item {
                                 Spacer(modifier = Modifier.height(320.dp))
@@ -133,6 +133,7 @@ fun PopularPhotosSection(
                                 ),
                                 contentType = photos.itemContentType()
                             ) { index ->
+                                val state  = rememberPhotoItemUiState()
                                 val padding = if (index == 0)
                                     2.dp
                                 else
@@ -141,7 +142,11 @@ fun PopularPhotosSection(
                                 // This behavior/issue is resetting the LazyListState scroll position.
                                 // Below is a workaround. More info: https://issuetracker.google.com/issues/177245496.
                                 // If this bug will got fixed... then have to be removed below code
-                                sectionUiState.visibleUpButtonState.value = visibleUpButton(index)
+                                sectionUiState.setUpButtonVisibilityChanged(visibleUpButton(index))
+                                state.setIndex(index)
+                                state.setPhoto(photos[index]!!)
+                                state.setVisibleViewButton(true)
+                                state.setBookmark(bookmarkViewModel.isPhotoBookmarked(photos[index]!!.id))
 
                                 if (index == photos.itemCount - 1)
                                     onLoadedPhotos(true)
@@ -151,10 +156,10 @@ fun PopularPhotosSection(
                                         .padding(top = padding)
                                         .animateItem(tween(durationMillis = 250)),
                                     state = rememberPhotoItemUiState(
-                                        indexState = rememberSaveable { mutableIntStateOf(index) },
-                                        photoState = rememberSaveable { mutableStateOf(photos[index]!!.toString()) },
-                                        visibleViewButtonState = rememberSaveable { mutableStateOf(true) },
-                                        bookmarkedState = rememberSaveable { mutableStateOf(bookmarkViewModel.isPhotoBookmarked(photos[index]!!.id)) }
+                                        index = rememberSaveable { mutableIntStateOf(index) },
+                                        photo = rememberSaveable { mutableStateOf(photos[index]!!) },
+                                        visibleViewButton = rememberSaveable { mutableStateOf(true) },
+                                        bookmarked = rememberSaveable { mutableStateOf(bookmarkViewModel.isPhotoBookmarked(photos[index]!!.id)) }
                                     ),
                                     onItemClicked = onItemClicked,
                                     onViewPhotos = onViewPhotos,
@@ -227,20 +232,20 @@ fun PopularPhotosSection(
         if (!lazyListState.isScrollInProgress) {
             ShowUpButton(
                 modifier = Modifier.align(Alignment.BottomEnd),
-                visible = sectionUiState.visibleUpButtonState.value,
+                visible = sectionUiState.visibleUpButton,
                 onClick = {
-                    sectionUiState.clickedState.value = true
+                    sectionUiState.setUpButtonClicked()
                 }
             )
         }
 
-        LaunchedEffect(lazyListState, true, sectionUiState.clickedState.value) {
-            if (sectionUiState.clickedState.value) {
+        LaunchedEffect(lazyListState, true, sectionUiState.clicked) {
+            if (sectionUiState.clicked) {
                 lazyListState.animateScrollToItem (0)
-                sectionUiState.visibleUpButtonState.value = false
+                sectionUiState.setUpButtonVisibilityChanged(false)
             }
 
-            sectionUiState.clickedState.value = false
+            sectionUiState.setScrollConsumed()
         }
     }
 }

@@ -99,8 +99,8 @@ fun PictureScreen(
 
     // Kick off the load whenever the id changes (canonical replacement for the
     // legacy `enabledLoadState` one-shot gate).
-    LaunchedEffect(state.idState.value) {
-        pictureViewModel.loadPicture(state.idState.value)
+    LaunchedEffect(state.id) {
+        pictureViewModel.loadPicture(state.id)
     }
 
     // Top-bar icons read from the authoritative pictureUiState.
@@ -143,7 +143,7 @@ fun PictureScreen(
                     }
                 },
                 actions = {
-                    if (state.visibleActionsState.value && currentPicture != null) {
+                    if (state.visibleActions && currentPicture != null) {
                         IconButton(
                             colors = IconButtonDefaults.iconButtonColors(
                                 contentColor = if (isLikedByUser) Red60 else Color.Black
@@ -162,7 +162,7 @@ fun PictureScreen(
 
                         IconButton(
                             colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = if (state.enabledBookmarkState.value) {
+                                contentColor = if (state.enabledBookmark) {
                                     Red60
                                 } else {
                                     Color.Black
@@ -170,11 +170,11 @@ fun PictureScreen(
                             ),
                             onClick = {
                                 bookmarkViewModel.setBookmarkPicture(currentPicture)
-                                state.enabledBookmarkState.value = !state.enabledBookmarkState.value
+                                state.setEnabledBookmark(!state.enabledBookmark)
                             }
                         ) {
                             Icon(
-                                imageVector = if (state.enabledBookmarkState.value) {
+                                imageVector = if (state.enabledBookmark) {
                                     ImageVector.vectorResource(id = R.drawable.ic_bookmark_on)
                                 } else {
                                     ImageVector.vectorResource(id = R.drawable.ic_bookmark_off)
@@ -200,12 +200,12 @@ fun PictureScreen(
                         }
                     },
                     onShownPhoto = { picture ->
-                        state.visibleActionsState.value = true
-                        state.enabledBookmarkState.value = bookmarkViewModel.isPhotoBookmarked(picture)
+                        state.setVisibleActions(true)
+                        state.setEnabledBookmark(bookmarkViewModel.isPhotoBookmarked(picture))
                     },
                     onOpenWebView = onOpenWebView,
                     onSuccess = { isSuccessful ->
-                        if (!isSuccessful) state.visibleActionsState.value = false
+                        if (!isSuccessful) state.setVisibleActions(false)
                     }
                 )
             }

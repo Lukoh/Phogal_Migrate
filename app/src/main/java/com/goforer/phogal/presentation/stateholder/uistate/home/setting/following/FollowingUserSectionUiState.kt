@@ -6,18 +6,29 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 
-class FollowingUserSectionUiState(
-    val clickedState: MutableState<Boolean>,
-    val visibleUpButtonState: MutableState<Boolean>
-)
+class FollowingUserSectionUiState internal constructor(
+    private val _clicked: MutableState<Boolean>,
+    private val _visibleUpButton: MutableState<Boolean>
+) {
+    val clicked: Boolean get() = _clicked.value
+    val visibleUpButton: Boolean get() = _visibleUpButton.value
+
+    fun setClicked(clicked: Boolean) {
+        _clicked.value = clicked
+    }
+
+    fun setVisibleUpButton(visibleUpButton: Boolean) {
+        _visibleUpButton.value = visibleUpButton
+    }
+}
 
 @Composable
 fun rememberFollowingUserSectionUiState(
-    clickedState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    visibleUpButtonState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
-): FollowingUserSectionUiState = remember(clickedState) {
+    clicked: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+    visibleUpButton: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
+): FollowingUserSectionUiState = remember(clicked) {
     FollowingUserSectionUiState(
-        clickedState = clickedState,
-        visibleUpButtonState = visibleUpButtonState
+        _clicked = clicked,
+        _visibleUpButton = visibleUpButton
     )
 }

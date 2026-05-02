@@ -12,7 +12,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -28,10 +27,6 @@ import com.goforer.base.designsystem.component.Chips
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchSectionUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberPermissionState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosSectionUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchSectionUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.InitScreen
 import com.goforer.phogal.presentation.ui.theme.Black
 import com.goforer.phogal.presentation.ui.theme.Blue70
@@ -42,13 +37,21 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 /**
- * Gallery search screen body.
+ * Gallery search screen body — **stateless** with respect to the holder.
  *
- * This file is split into small composables so that recomposition stays scoped:
- *  - [SearchPhotosContent]      — container + wiring
- *  - [RecentWordsChips]         — animated chips row of recent searches
- *  - [PhotosOrInitScreen]       — switch between paging list and empty "type to search" state
- *  - [PermissionHandler]        — permission flow + rationale bottom sheet
+ * ### Hoisting contract
+ *
+ * This composable accepts `photosContentUiState` to *read* state. It never
+ * mutates the holder directly. Every state transition is expressed as a
+ * call to a typed method on the holder (e.g. `onScrollingChanged(true)`)
+ * or a callback from a sub-composable.
+ *
+ * In Compose terms: this function depends on the holder's *values* but not
+ * its *identity* — meaning the Stability checker can mark it skippable
+ * when the relevant fields haven't changed.
+ *
+ * Sub-composables ([RecentWordsChips], [PhotosOrInitScreen]) take only
+ * primitives and lambdas; they don't see the holder at all.
  */
 @OptIn(
     ExperimentalComposeUiApi::class,
@@ -59,16 +62,13 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 fun SearchPhotosContent(
     modifier: Modifier = Modifier,
     photosContentUiState: SearchPhotosContentUiState,
-    searchUiState: SearchSectionUiState = rememberSearchSectionUiState(
-        enabledState = photosContentUiState.enabledState
-    ),
     onSearch: (String) -> Unit,
     onChipClicked: (String) -> Unit,
     onItemClicked: (id: String) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
-    onSuccess: (isSuccessful: Boolean) -> Unit
+    onLoadSuccess: (isSuccessful: Boolean) -> Unit
 ) {
     Column(
         modifier = modifier.clickable {
@@ -77,15 +77,18 @@ fun SearchPhotosContent(
     ) {
         SearchSection(
             modifier = Modifier.padding(2.dp, 0.dp, 2.dp, 0.dp),
-            sectionUiState = searchUiState,
+            sectionUiState = com.goforer.phogal.presentation.stateholder.uistate.home.gallery
+                .rememberSearchSectionUiState(),
             onSearched = onSearch
         )
 
+        // Sub-composables are stateless: they receive the values they need and
+        // emit events back via callbacks. The holder is hidden from them.
         RecentWordsChips(
             recentWords = photosContentUiState.galleryUiState.recentWords,
-            isScrolling = photosContentUiState.scrollingState.value,
-            triggered = photosContentUiState.triggeredState.value,
-            onTriggeredConsumed = { photosContentUiState.triggeredState.value = false },
+            isScrolling = photosContentUiState.scrolling,
+            triggered = photosContentUiState.triggered,
+            onTriggeredConsumed = photosContentUiState::setTriggerConsumed,
             onChipClicked = onChipClicked
         )
 
@@ -95,26 +98,32 @@ fun SearchPhotosContent(
             onItemClicked = { photo, _ -> onItemClicked(photo.id) },
             onViewPhotos = onViewPhotos,
             onShowSnackBar = onShowSnackBar,
-            onLoadSuccess = onSuccess,
-            onScroll = { photosContentUiState.scrollingState.value = it },
+            onLoadSuccess = onLoadSuccess,
+            onScroll = photosContentUiState::setScrollingChanged,
             onOpenWebView = onOpenWebView
         )
     }
 
     PermissionHandler(
         permissions = photosContentUiState.permissions,
-        photosContentState = photosContentUiState
+        permissionVisible = photosContentUiState.permissionVisible,
+        rationaleText = photosContentUiState.rationaleText,
+        onPermissionGranted = photosContentUiState::setPermissionGranted,
+        onPermissionDenied = photosContentUiState::setPermissionDenied,
+        onDialogDismissed = photosContentUiState::setPermissionDialogDismissed,
+        onDialogConfirmed = photosContentUiState::setPermissionDialogConfirmed
     )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  Sub-composables
+//  Stateless sub-composables
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Animated row of recent search keywords. Hidden while scrolling. When a
- * `triggered` signal arrives, only the most recent keyword is shown (UX requirement
- * so the newly-committed keyword is highlighted without the full history noise).
+ * `triggered` signal arrives, only the most recent keyword is shown (UX
+ * requirement so the newly-committed keyword is highlighted without the full
+ * history noise).
  */
 @Composable
 private fun RecentWordsChips(
@@ -151,8 +160,8 @@ private fun RecentWordsChips(
 }
 
 /**
- * Renders the paginated photo list when a query is active, or the "tap to search"
- * hint when the query is blank.
+ * Renders the paginated photo list when a query is active, or the
+ * "tap to search" hint when the query is blank.
  */
 @Composable
 private fun ColumnScope.PhotosOrInitScreen(
@@ -171,7 +180,8 @@ private fun ColumnScope.PhotosOrInitScreen(
                 .padding(top = 0.5.dp)
                 .weight(1f),
             photos = photos,
-            sectionUiState = rememberSearchPhotosSectionUiState(),
+            sectionUiState = com.goforer.phogal.presentation.stateholder.uistate.home.gallery
+                .rememberSearchPhotosSectionUiState(),
             onItemClicked = onItemClicked,
             onViewPhotos = onViewPhotos,
             onShowSnackBar = onShowSnackBar,
@@ -190,45 +200,40 @@ private fun ColumnScope.PhotosOrInitScreen(
 }
 
 /**
- * Permission flow for the gallery screen.
- * Separated out so permission UX can evolve independently of the main layout.
+ * Permission flow — **stateless**. Receives the visibility/text values and a
+ * fan of typed callbacks for each transition. The previous version took the
+ * full `SearchPhotosContentUiState` and wrote `.value = ...` against four of
+ * its `MutableState` fields; that coupling is gone.
  */
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun PermissionHandler(
     permissions: List<String>,
-    photosContentState: SearchPhotosContentUiState
+    permissionVisible: Boolean,
+    rationaleText: String,
+    onPermissionGranted: () -> Unit,
+    onPermissionDenied: (rationale: String) -> Unit,
+    onDialogDismissed: () -> Unit,
+    onDialogConfirmed: () -> Unit
 ) {
     val multiplePermissionsState: MultiplePermissionsState =
         rememberMultiplePermissionsState(permissions)
 
-    with(photosContentState) {
-        CheckPermission(
-            multiplePermissionsState = multiplePermissionsState,
-            onPermissionGranted = {
-                enabledState.value = true
-                permissionState.value = false
-            },
-            onPermissionNotGranted = { rationale ->
-                rationaleTextState.value = rationale
-                enabledState.value = false
-                permissionState.value = true
+    CheckPermission(
+        multiplePermissionsState = multiplePermissionsState,
+        onPermissionGranted = onPermissionGranted,
+        onPermissionNotGranted = onPermissionDenied
+    )
+
+    if (permissionVisible) {
+        PermissionBottomSheet(
+            rationaleText = rationaleText,
+            onDismissedRequest = onDialogDismissed,
+            onClicked = {
+                multiplePermissionsState.launchMultiplePermissionRequest()
+                onDialogConfirmed()
             }
         )
-
-        if (permissionState.value) {
-            PermissionBottomSheet(
-                state = rememberPermissionState(rationaleTextState = rationaleTextState),
-                onDismissedRequest = {
-                    enabledState.value = false
-                    permissionState.value = false
-                },
-                onClicked = {
-                    multiplePermissionsState.launchMultiplePermissionRequest()
-                    permissionState.value = false
-                }
-            )
-        }
     }
 }
 
@@ -247,17 +252,16 @@ private fun PermissionHandler(
 fun PhotosContentPreview(modifier: Modifier = Modifier) {
     PhogalTheme {
         BoxWithConstraints(modifier = modifier) {
-            // 1. 화면 너비에 따른 상태 정의 (Scope 참조로 경고 해결)
             val isWideScreen = maxWidth > 600.dp
             val dynamicHorizontalPadding = if (isWideScreen) 16.dp else 8.dp
             val dynamicTextStyle = if (isWideScreen) {
-                typography.headlineSmall // 넓은 화면에서는 더 큰 폰트
+                typography.headlineSmall
             } else {
                 typography.titleMedium
             }
 
             Column(
-                modifier = Modifier.fillMaxSize(), // 부모 Box의 modifier 대신 fillMaxSize 권장
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 SearchSection(

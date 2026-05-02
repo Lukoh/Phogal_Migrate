@@ -14,12 +14,24 @@ import com.goforer.phogal.presentation.stateholder.uistate.BaseUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 
 @Stable
-class PopularPhotosContentUiState(
+class PopularPhotosContentUiState internal constructor(
     val baseUiState: BaseUiState,
     val popularPhotosUiState: PopularPhotosUiState,
-    val visibleActionsState: MutableState<Boolean>,
-    val loadedPhotosState: MutableState<Boolean>
-)
+
+    private val _visibleActions: MutableState<Boolean>,
+    private val _loadedPhotos: MutableState<Boolean>
+) {
+    val visibleActions: Boolean get() = _visibleActions.value
+    val loadedPhotos: Boolean get() = _loadedPhotos.value
+
+    fun setVisibleActions(visibleActions: Boolean) {
+        _visibleActions.value = visibleActions
+    }
+
+    fun setLoadedPhotos(loadedPhotos: Boolean) {
+        _loadedPhotos.value = loadedPhotos
+    }
+}
 
 @Stable
 class PopularPhotosUiState(
@@ -30,8 +42,8 @@ class PopularPhotosUiState(
 fun rememberPopularPhotosContentUiState(
     popularPhotosViewModel: PopularPhotosViewModel,
     baseUiState: BaseUiState = rememberBaseUiState(),
-    visibleActionsState: MutableState<Boolean> = rememberSaveable { mutableStateOf(true) },
-    loadedPhotosState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+    visibleActions: MutableState<Boolean> = rememberSaveable { mutableStateOf(true) },
+    loadedPhotos: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
 ): PopularPhotosContentUiState {
     val popularPhotosUiState = rememberPopularPhotosUiState(popularPhotosViewModel)
 
@@ -39,8 +51,8 @@ fun rememberPopularPhotosContentUiState(
         PopularPhotosContentUiState(
             baseUiState = baseUiState,
             popularPhotosUiState = popularPhotosUiState,
-            visibleActionsState = visibleActionsState,
-            loadedPhotosState = loadedPhotosState
+            _visibleActions = visibleActions,
+            _loadedPhotos = loadedPhotos
         )
     }
 }

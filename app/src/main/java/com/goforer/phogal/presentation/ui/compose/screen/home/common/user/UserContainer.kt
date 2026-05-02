@@ -87,12 +87,12 @@ fun UserContainer(
     onShowSnackBar: (text: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit
 ) {
-    val user = state.userState.value.toUser()
+    val user = state.user.toUser()
     val lastName = user.lastName ?: stringResource(id = R.string.picture_no_last_name)
     var showUserInfoBottomSheet by rememberSaveable { mutableStateOf(false) }
 
     Column(
-        modifier = modifier.background(state.colorsState.value[2]),
+        modifier = modifier.background(state.colors[2]),
         verticalArrangement = Arrangement.Top
     ) {
         Row(
@@ -108,10 +108,10 @@ fun UserContainer(
                 },
         ) {
             ShowProfileImage(
-                profileImageSize = state.profileSizeState.value.dp,
+                profileImageSize = state.profileSize.dp,
                 user = user,
                 lastName = lastName,
-                visibleViewPhotosButton = state.visibleViewButtonState.value,
+                visibleViewPhotosButton = state.visibleViewButton,
                 onViewPhotos = onViewPhotos
             )
             Spacer(modifier = Modifier.width(14.dp))
@@ -121,7 +121,7 @@ fun UserContainer(
             ) {
                 Text(
                     text = user.name,
-                    color = state.colorsState.value[0],
+                    color = state.colors[0],
                     fontFamily = FontFamily.SansSerif,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
@@ -136,7 +136,7 @@ fun UserContainer(
                     fontFamily = FontFamily.SansSerif,
                     fontSize = 12.sp,
                     fontStyle = FontStyle.Normal,
-                    color = state.colorsState.value[1],
+                    color = state.colors[1],
                     style = MaterialTheme.typography.titleSmall
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -145,7 +145,7 @@ fun UserContainer(
                     fontFamily = FontFamily.SansSerif,
                     fontSize = 12.sp,
                     fontStyle = FontStyle.Normal,
-                    color = state.colorsState.value[1],
+                    color = state.colors[1],
                     style = MaterialTheme.typography.titleSmall
                 )
             }
@@ -153,19 +153,19 @@ fun UserContainer(
             Spacer(modifier = Modifier.width(10.dp))
             ShowFollowButton(
                 modifier = modifier,
-                followColor = state.colorsState.value[4],
+                followColor = state.colors[4],
                 followViewModel.isUserFollowed(user)
             ) {
                 followViewModel.setUserFollow(user)
             }
         }
 
-        if (state.visibleViewButtonState.value) {
+        if (state.visibleViewButton) {
             Text(
                 "${stringResource(id = R.string.picture_view_photos)}${" "}${user.totalPhotos}${" "}${stringResource(id = R.string.picture_photos, user.name)}",
                 modifier = Modifier
                     .padding(
-                        start = if (state.fromItemState.value)
+                        start = if (state.fromItem)
                             56.dp
                         else
                             66.dp
@@ -180,7 +180,7 @@ fun UserContainer(
                             )
                         }
                     },
-                color = if (state.fromItemState.value)
+                color = if (state.fromItem)
                     Color.White
                 else
                     DarkGreen60,
@@ -277,9 +277,9 @@ fun ShowProfileImage(
 fun ShowPortfolioButton(
     scope: CoroutineScope,
     bottomSheetState: SheetState,
-    openBottomSheetState: MutableState<Boolean>,
     firstName: String,
-    onDismissedRequest: (Boolean) -> Unit
+    onDismissedRequest: (Boolean) -> Unit,
+    onOpenBottomSheet: (Boolean) -> Unit
 ) {
     IconButton(
         modifier = Modifier.padding(horizontal = 2.dp),
@@ -289,7 +289,7 @@ fun ShowPortfolioButton(
                 bottomSheetState.hide()
             }.invokeOnCompletion {
                 if (!bottomSheetState.isVisible) {
-                    openBottomSheetState.value = false
+                    onOpenBottomSheet(false)
                 }
             }
 

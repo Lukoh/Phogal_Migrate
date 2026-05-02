@@ -149,7 +149,7 @@ fun HandlePictureResponse(
                     BodyContent(
                         modifier = modifier,
                         picture = picture,
-                        visibleViewPhotosButton = state.visibleViewButtonState.value,
+                        visibleViewPhotosButton = state.visibleViewButton,
                         onViewPhotos = onViewPhotos,
                         onShowSnackBar = onShowSnackBar,
                         onShownPhoto = onShownPhoto,
@@ -192,7 +192,7 @@ fun HandlePictureResponse(
                         stringResource(id = R.string.error_dialog_title),
                     message = "${stringResource(id = R.string.error_get_picture)}${"\n\n"}${state1.message}",
                     onRetry = {
-                        pictureViewModel.loadPicture(state.idState.value)
+                        pictureViewModel.loadPicture(state.id)
                     }
                 )
             }
@@ -256,11 +256,11 @@ fun BodyContent(
             UserContainer(
                 modifier = Modifier,
                 state = rememberUserContainerUiState(
-                    userState = rememberSaveable { mutableStateOf(picture.user.toString()) },
-                    profileSizeState = rememberSaveable { mutableDoubleStateOf(48.0) },
-                    colorsState = remember { mutableStateOf(listOf(ColorSystemGray1, ColorSystemGray1, ColorSnowWhite, ColorSystemGray5, Blue75, DarkGreen60)) },
-                    visibleViewButtonState = rememberSaveable { mutableStateOf(visibleViewPhotosButton) },
-                    fromItemState = rememberSaveable { mutableStateOf(false) }
+                    user = rememberSaveable { mutableStateOf(picture.user.toString()) },
+                    profileSize = rememberSaveable { mutableDoubleStateOf(48.0) },
+                    colors = remember { mutableStateOf(listOf(ColorSystemGray1, ColorSystemGray1, ColorSnowWhite, ColorSystemGray5, Blue75, DarkGreen60)) },
+                    visibleViewButton = rememberSaveable { mutableStateOf(visibleViewPhotosButton) },
+                    fromItem = rememberSaveable { mutableStateOf(false) }
                 ),
                 onViewPhotos = onViewPhotos,
                 onShowSnackBar = onShowSnackBar,

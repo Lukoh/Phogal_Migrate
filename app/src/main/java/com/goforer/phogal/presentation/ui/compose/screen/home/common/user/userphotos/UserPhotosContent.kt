@@ -40,7 +40,7 @@ fun UserPhotosContent(
     onShowSnackBar: (text: String) -> Unit,
     onSuccess: (isSuccessful: Boolean) -> Unit
 ) {
-    if (contentUiState.nameState.value.isNotBlank()) {
+    if (contentUiState.name.isNotBlank()) {
         UserPhotosSection(
             modifier = Modifier.padding(top = 0.5.dp),
             contentPadding = contentPadding,

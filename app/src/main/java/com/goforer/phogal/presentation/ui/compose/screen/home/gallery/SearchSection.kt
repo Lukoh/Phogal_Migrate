@@ -79,11 +79,11 @@ fun SearchSection(
                 sectionUiState.editableInputState.textState,
             onValueChange = {
                 if (!it.contains("\n")) {
-                    sectionUiState.wordChangedState.value = true
+                    sectionUiState.setWordChanged(true)
                     sectionUiState.editableInputState.textState = it
                 }
             },
-            enabled = sectionUiState.enabledState.value,
+            enabled = sectionUiState.enabled,
             leadingIcon = {
                 Icon(
                     modifier = Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp),
@@ -133,7 +133,7 @@ fun SearchSection(
             modifier = modifier.padding(horizontal = 2.dp),
             height = 42.dp,
             onClick = {
-                if (sectionUiState.wordChangedState.value)
+                if (sectionUiState.wordChanged)
                     onSearched(sectionUiState.editableInputState.textState)
             },
             icon = {

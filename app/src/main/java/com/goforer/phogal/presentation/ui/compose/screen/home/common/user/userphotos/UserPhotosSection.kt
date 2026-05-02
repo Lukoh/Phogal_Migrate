@@ -120,7 +120,7 @@ fun UserPhotosSection(
                     }
                     refresh is LoadState.NotLoading -> {
                         if (photos.itemCount == 0 ) {
-                            sectionUiState.visibleUpButtonState.value = false
+                            sectionUiState.setUpButtonVisibilityChanged(false)
                             onSuccess(false)
                             item {
                                 Spacer(modifier = Modifier.height(320.dp))
@@ -144,17 +144,12 @@ fun UserPhotosSection(
                                 // This behavior/issue is resetting the LazyListState scroll position.
                                 // Below is a workaround. More info: https://issuetracker.google.com/issues/177245496.
                                 // If this bug will got fixed... then have to be removed below code
-                                sectionUiState.visibleUpButtonState.value = visibleUpButton(index)
+                                sectionUiState.setUpButtonVisibilityChanged(visibleUpButton(index))
                                 PhotoItem(
                                     modifier.animateItem(
                                         placementSpec = tween(durationMillis = 250)
                                     ),
-                                    state = rememberPhotoItemUiState(
-                                        indexState = rememberSaveable { mutableIntStateOf(index) },
-                                        photoState = rememberSaveable { mutableStateOf(photos[index]!!) },
-                                        visibleViewButtonState = rememberSaveable { mutableStateOf(true) },
-                                        bookmarkedState = rememberSaveable { mutableStateOf(bookmarkViewModel.isPhotoBookmarked(photos[index]!!.id)) }
-                                    ),
+                                    state = rememberPhotoItemUiState(),
                                     onItemClicked = onItemClicked,
                                     onViewPhotos = onViewPhotos,
                                     onShowSnackBar = onShowSnackBar,
@@ -228,20 +223,20 @@ fun UserPhotosSection(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .navigationBarsPadding(),
-                visible = sectionUiState.visibleUpButtonState.value,
+                visible = sectionUiState.visibleUpButton,
                 onClick = {
-                    sectionUiState.clickedState.value = true
+                    sectionUiState.setUpButtonClicked(true)
                 }
             )
         }
 
-        LaunchedEffect(lazyListState, true, sectionUiState.clickedState.value) {
-            if (sectionUiState.clickedState.value) {
+        LaunchedEffect(lazyListState, true, sectionUiState.clicked) {
+            if (sectionUiState.clicked) {
                 lazyListState.animateScrollToItem (0)
-                sectionUiState.visibleUpButtonState.value = false
+                sectionUiState.setUpButtonVisibilityChanged(false)
             }
 
-            sectionUiState.clickedState.value = false
+            sectionUiState.setScrollConsumed(false)
         }
     }
 }

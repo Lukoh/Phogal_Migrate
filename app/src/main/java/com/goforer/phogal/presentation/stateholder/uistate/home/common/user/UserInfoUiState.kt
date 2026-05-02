@@ -17,27 +17,31 @@ import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Stable
-class UserInfoUiState(
+class UserInfoUiState internal constructor(
     val baseUiState: BaseUiState,
-    val openBottomSheetState: MutableState<Boolean>,
     val scope: CoroutineScope,
     val bottomSheetState: SheetState,
-)
+
+    private val _openBottomSheet: MutableState<Boolean>
+) {
+    val openBottomSheet: Boolean get() = _openBottomSheet.value
+    fun setOpenBottomSheet(openBottomSheet: Boolean) {
+        _openBottomSheet.value = openBottomSheet
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun rememberUserInfoUiState(
     baseUiState: BaseUiState = rememberBaseUiState(),
-    openBottomSheetState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    skipPartiallyExpanded: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     scope: CoroutineScope = rememberCoroutineScope(),
-    bottomSheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-): UserInfoUiState = remember(
-    baseUiState, openBottomSheetState, skipPartiallyExpanded, scope, bottomSheetState) {
-    UserInfoUiState(
-        baseUiState = baseUiState,
-        openBottomSheetState = openBottomSheetState,
-        scope = scope,
-        bottomSheetState = bottomSheetState
-    )
-}
+    bottomSheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
+    openBottomSheet: MutableState<Boolean> = remember { mutableStateOf(false) }
+): UserInfoUiState = remember(baseUiState, bottomSheetState, scope, openBottomSheet) {
+        UserInfoUiState(
+            baseUiState = baseUiState,
+            scope = scope,
+            bottomSheetState = bottomSheetState,
+            _openBottomSheet = openBottomSheet
+        )
+    }

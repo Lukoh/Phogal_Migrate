@@ -8,29 +8,56 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 
 @Stable
-class PhotoItemUiState(
-    val indexState:  MutableState<Int>,
-    val photoState: State<Any>,
-    val visibleViewButtonState: MutableState<Boolean>,
-    val clickedState: MutableState<Boolean>,
-    val bookmarkedState: MutableState<Boolean>
-)
+class PhotoItemUiState internal constructor(
+    private val _index:  MutableState<Int>,
+    private val _photo: MutableState<Any>,
+    private val _visibleViewButton: MutableState<Boolean>,
+    private val _clicked: MutableState<Boolean>,
+    private val _bookmarked: MutableState<Boolean>
+) {
+    val index: Int get() = _index.value
+    val photo: Any get() = _photo.value
+    val visibleViewButton: Boolean get() = _visibleViewButton.value
+    val clicked: Boolean get() = _clicked.value
+    val bookmarked: Boolean get() = _bookmarked.value
+
+    fun setIndex(index: Int) {
+        _index.value = index
+    }
+
+    fun setPhoto(photo: Any) {
+        _photo.value = photo
+    }
+
+    fun setClicked(clicked: Boolean) {
+        _clicked.value = clicked
+    }
+
+    fun setVisibleViewButton(visibleViewButton: Boolean) {
+        _visibleViewButton.value = visibleViewButton
+    }
+
+    fun setBookmark(bookmarked: Boolean) {
+        _bookmarked.value = bookmarked
+    }
+}
 
 @Composable
 fun rememberPhotoItemUiState(
-    indexState: MutableState<Int> = rememberSaveable { mutableIntStateOf(0) },
-    photoState: State<Any> = remember { mutableStateOf(Any()) },
-    visibleViewButtonState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    clickedState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    bookmarkedState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
-): PhotoItemUiState = remember(indexState, photoState, visibleViewButtonState, clickedState) {
-    PhotoItemUiState(
-        indexState = indexState,
-        photoState = photoState,
-        visibleViewButtonState = visibleViewButtonState,
-        clickedState = clickedState,
-        bookmarkedState = bookmarkedState
-    )
-}
+    index: MutableState<Int> = rememberSaveable { mutableIntStateOf(0) },
+    photo: MutableState<Any> = rememberSaveable { mutableStateOf(Any()) },
+    visibleViewButton: MutableState<Boolean> = rememberSaveable() { mutableStateOf(false) },
+    clicked : MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+    bookmarked: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
+): PhotoItemUiState = remember(index, photo, visibleViewButton, clicked, bookmarked) {
+        PhotoItemUiState(
+            _index = index,
+            _photo = photo,
+            _visibleViewButton = visibleViewButton,
+            _clicked = clicked,
+            _bookmarked = bookmarked
+        )
+    }

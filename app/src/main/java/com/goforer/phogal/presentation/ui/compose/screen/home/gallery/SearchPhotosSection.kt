@@ -146,18 +146,18 @@ fun SearchPhotosSection(
         if (!lazyListState.isScrollInProgress) {
             ShowUpButton(
                 modifier = Modifier.align(Alignment.BottomEnd),
-                visible = isScrolledPastThreshold && sectionUiState.visibleUpButtonState.value,
-                onClick = { sectionUiState.clickedState.value = true }
+                visible = isScrolledPastThreshold && sectionUiState.visibleUpButton,
+                onClick = { sectionUiState.setUpButtonClicked() }
             )
         }
     }
 
     // Animate scroll-to-top when the up-button was tapped.
-    LaunchedEffect(sectionUiState.clickedState.value) {
-        if (sectionUiState.clickedState.value) {
+    LaunchedEffect(sectionUiState.clicked) {
+        if (sectionUiState.clicked) {
             lazyListState.animateScrollToItem(0)
-            sectionUiState.visibleUpButtonState.value = false
-            sectionUiState.clickedState.value = false
+            sectionUiState.setUpButtonVisibilityChanged(false)
+            sectionUiState.setScrollConsumed()
         }
     }
 }
@@ -191,7 +191,7 @@ private fun LazyListScope.renderLoadState(
 
         is LoadState.NotLoading if photos.itemCount == 0 -> {
             onLoadSuccess(false)
-            sectionUiState.visibleUpButtonState.value = false
+            sectionUiState.setUpButtonVisibilityChanged(false)
             item { EmptyState() }
         }
 
@@ -252,10 +252,10 @@ private fun LazyListScope.photoItems(
         PhotoItem(
             modifier = Modifier.animateItem(tween(durationMillis = 250)),
             state = rememberPhotoItemUiState(
-                indexState = rememberSaveable { mutableIntStateOf(index) },
-                photoState = rememberSaveable { mutableStateOf(photo) },
-                visibleViewButtonState = rememberSaveable { mutableStateOf(true) },
-                bookmarkedState = rememberSaveable {
+                index = rememberSaveable { mutableIntStateOf(index) },
+                photo = rememberSaveable { mutableStateOf(photo) },
+                visibleViewButton = rememberSaveable { mutableStateOf(true) },
+                bookmarked = rememberSaveable {
                     mutableStateOf(bookmarkViewModel.isPhotoBookmarked(photo.id))
                 }
             ),

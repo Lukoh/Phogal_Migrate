@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -16,25 +17,61 @@ import com.goforer.phogal.presentation.stateholder.business.home.gallery.Gallery
 import com.goforer.phogal.presentation.stateholder.uistate.BaseUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 
-/**
- * UI-only holder for the gallery search screen.
- *
- * The legacy version carried `photosUiState: StateFlow<Any>` and `refreshingState:
- * StateFlow<Boolean>` directly. Both are gone: the screen now reads Paging state from
- * `GalleryViewModel.photos.collectAsLazyPagingItems()` and derives refresh state from
- * `lazyPagingItems.loadState.refresh`. That's the canonical Paging3 pattern.
- */
 @Stable
-class SearchPhotosContentUiState(
+class SearchPhotosContentUiState internal constructor(
     val baseUiState: BaseUiState,
     val galleryUiState: GalleryUiState,
-    val enabledState: MutableState<Boolean>,
-    val triggeredState: MutableState<Boolean>,
-    val permissionState: MutableState<Boolean>,
-    val rationaleTextState: MutableState<String>,
-    val scrollingState: MutableState<Boolean>,
-    val visibleActionsState: MutableState<Boolean>,
+
+    private val _enabled: MutableState<Boolean>,
+    private val _triggered: MutableState<Boolean>,
+    private val _permissionVisible: MutableState<Boolean>,
+    private val _rationaleText: MutableState<String>,
+    private val _scrolling: MutableState<Boolean>,
+    private val _visibleActions: MutableState<Boolean>,
 ) {
+    val enabled: Boolean get() = _enabled.value
+    val triggered: Boolean get() = _triggered.value
+    val permissionVisible: Boolean get() = _permissionVisible.value
+    val rationaleText: String get() = _rationaleText.value
+    val scrolling: Boolean get() = _scrolling.value
+    val visibleActions: Boolean get() = _visibleActions.value
+
+    fun setPermissionGranted() {
+        _enabled.value = true
+        _permissionVisible.value = false
+    }
+
+    fun setPermissionDenied(rationale: String) {
+        _rationaleText.value = rationale
+        _enabled.value = false
+        _permissionVisible.value = true
+    }
+
+    fun setPermissionDialogDismissed() {
+        _enabled.value = false
+        _permissionVisible.value = false
+    }
+
+    fun setPermissionDialogConfirmed() {
+        _permissionVisible.value = false
+    }
+
+    fun setTriggerConsumed() {
+        _triggered.value = false
+    }
+
+    fun setSearchTriggered() {
+        _triggered.value = true
+    }
+
+    fun setScrollingChanged(scrolling: Boolean) {
+        _scrolling.value = scrolling
+    }
+
+    fun setActionsVisibilityChanged(visible: Boolean) {
+        _visibleActions.value = visible
+    }
+
     val permissions = listOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -43,7 +80,7 @@ class SearchPhotosContentUiState(
 }
 
 @Stable
-class GalleryUiState(
+class GalleryUiState internal constructor(
     val photos: LazyPagingItems<Photo>,
     val currentQuery: String,
     val recentWords: List<String>
@@ -53,12 +90,12 @@ class GalleryUiState(
 fun rememberSearchPhotosContentUiState(
     galleryViewModel: GalleryViewModel,
     baseUiState: BaseUiState = rememberBaseUiState(),
-    enabledState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    triggeredState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    permissionState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    rationaleTextState: MutableState<String> = rememberSaveable { mutableStateOf("") },
-    scrollingState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    visibleActionsState: MutableState<Boolean> = rememberSaveable { mutableStateOf(true) },
+    enabled: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+    triggered: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+    permissionVisible: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+    rationaleText: MutableState<String> = rememberSaveable { mutableStateOf("") },
+    scrolling: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+    visibleActions: MutableState<Boolean> = rememberSaveable { mutableStateOf(true) }
 ): SearchPhotosContentUiState {
     val galleryUiState = rememberGalleryUiState(galleryViewModel)
 
@@ -66,13 +103,12 @@ fun rememberSearchPhotosContentUiState(
         SearchPhotosContentUiState(
             baseUiState = baseUiState,
             galleryUiState = galleryUiState,
-            enabledState = enabledState,
-            triggeredState = triggeredState,
-            permissionState = permissionState,
-            rationaleTextState = rationaleTextState,
-            scrollingState = scrollingState,
-            visibleActionsState = visibleActionsState
-
+            _enabled = enabled,
+            _triggered = triggered,
+            _permissionVisible = permissionVisible,
+            _rationaleText = rationaleText,
+            _scrolling = scrolling,
+            _visibleActions = visibleActions
         )
     }
 }

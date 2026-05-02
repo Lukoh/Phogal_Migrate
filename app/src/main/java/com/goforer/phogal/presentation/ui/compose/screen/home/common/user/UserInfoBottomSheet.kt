@@ -41,7 +41,7 @@ fun UserInfoBottomSheet(
                     userInfoUiState.bottomSheetState.hide()
                 }.invokeOnCompletion {
                     if (!userInfoUiState.bottomSheetState.isVisible) {
-                        userInfoUiState.openBottomSheetState.value = false
+                        userInfoUiState.setOpenBottomSheet(false)
                     }
                 }
 
@@ -94,9 +94,11 @@ fun UserInfoBottomSheet(
                     ShowPortfolioButton(
                         scope = userInfoUiState.scope,
                         bottomSheetState = userInfoUiState.bottomSheetState,
-                        openBottomSheetState = userInfoUiState.openBottomSheetState,
                         firstName = user.firstName,
-                        onDismissedRequest = onDismissedRequest
+                        onDismissedRequest = onDismissedRequest,
+                        onOpenBottomSheet = { openBottomSheet ->
+                            userInfoUiState.setOpenBottomSheet(openBottomSheet)
+                        }
                     )
                 }
 

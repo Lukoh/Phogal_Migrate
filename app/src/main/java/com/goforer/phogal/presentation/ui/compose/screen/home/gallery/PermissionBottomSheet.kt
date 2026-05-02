@@ -8,8 +8,11 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -24,32 +27,58 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.goforer.phogal.R
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.PermissionState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberPermissionState
 import com.goforer.phogal.presentation.ui.theme.Blue20
 import com.goforer.phogal.presentation.ui.theme.ColorSystemGray8
 import kotlinx.coroutines.launch
 
+/**
+ * Permission rationale modal bottom sheet — **stateless**.
+ *
+ * ### Hoisting refactor (April 2026)
+ *
+ * Previously this composable received the entire `PermissionState` holder and
+ * mutated `openBottomSheetState.value = false` inline. That made the function
+ * impossible to preview without constructing a `MutableState`, and made the
+ * `PermissionState` holder responsible for two unrelated concerns: (a) sheet
+ * animation control, (b) the boolean "is the dialog showing?".
+ *
+ * The new shape:
+ *  - Takes the rationale text as a plain `String`.
+ *  - Owns its own `SheetState` and `CoroutineScope` because they are
+ *    bottom-sheet-internal animation controllers, not application state.
+ *  - Reports dismissal/confirmation via callbacks. The parent decides what
+ *    "is the dialog showing?" means and toggles its own state.
+ *
+ * The `onDismissedRequest` and `onClicked` callbacks are invoked **after**
+ * the sheet animation completes, so the parent can rely on the visual
+ * transition being done by the time it removes the dialog from composition.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PermissionBottomSheet(
-    state: PermissionState = rememberPermissionState(),
+    rationaleText: String,
     onDismissedRequest: () -> Unit,
-    onClicked: () -> Unit
+    onClicked: () -> Unit,
+    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 ) {
+    val scope = rememberCoroutineScope()
+
+    // Splits the rationale text the same way the original did. Defensive —
+    // if "Setting" isn't present, fall back to showing the whole text in the
+    // "muted" style rather than crashing.
+    val splitIndex = rationaleText.indexOf("Setting").coerceAtLeast(0)
+    val highlightPart = rationaleText.substring(0, splitIndex)
+    val mutedPart = rationaleText.substring(splitIndex)
+
     ModalBottomSheet(
         onDismissRequest = {
-            state.scope.launch {
-                state.bottomSheetState.hide()
+            scope.launch {
+                sheetState.hide()
             }.invokeOnCompletion {
-                if (!state.bottomSheetState.isVisible) {
-                    state.openBottomSheetState.value = false
-                }
+                if (!sheetState.isVisible) onDismissedRequest()
             }
-
-            onDismissedRequest()
         },
-        sheetState = state.bottomSheetState,
+        sheetState = sheetState,
     ) {
         Column(
             modifier = Modifier.wrapContentHeight(),
@@ -70,13 +99,7 @@ fun PermissionBottomSheet(
                                 color = Blue20,
                                 baselineShift = BaselineShift.Superscript
                             )
-                        ) {
-                            append(
-                                state.rationaleTextState.value.substring(
-                                    0, state.rationaleTextState.value.indexOf("Setting")
-                                )
-                            )
-                        }
+                        ) { append(highlightPart) }
 
                         withStyle(
                             style = SpanStyle(
@@ -84,14 +107,7 @@ fun PermissionBottomSheet(
                                 fontSize = 16.sp,
                                 color = ColorSystemGray8
                             )
-                        ) {
-                            append(
-                                state.rationaleTextState.value.substring(
-                                    state.rationaleTextState.value.indexOf("Setting"),
-                                    state.rationaleTextState.value.length
-                                )
-                            )
-                        }
+                        ) { append(mutedPart) }
                     }
                 },
                 modifier = Modifier.padding(16.dp),
@@ -99,16 +115,10 @@ fun PermissionBottomSheet(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                // Note: If you provide logic outside of onDismissRequest to remove the sheet,
-                // you must additionally handle intended state cleanup, if any.
                 onClick = {
-                    state.scope.launch { state.bottomSheetState.hide() }.invokeOnCompletion {
-                        if (!state.bottomSheetState.isVisible) {
-                            state.openBottomSheetState.value = false
-                        }
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) onClicked()
                     }
-
-                    onClicked()
                 }
             ) {
                 Text(text = stringResource(id = R.string.permission_request))

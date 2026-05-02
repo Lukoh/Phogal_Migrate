@@ -119,8 +119,8 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
         PictureScreen(
             pictureViewModel = pictureViewModel,
             state = rememberPhotoContentUiState(
-                idState = rememberSaveable { mutableStateOf(key.id) },
-                visibleViewButtonState = rememberSaveable {
+                id = rememberSaveable { mutableStateOf(key.id) },
+                visibleViewButton = rememberSaveable {
                     mutableStateOf(key.showViewPhotosButton)
                 }
             ),
@@ -147,8 +147,8 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
             userPhotosViewModel = userPhotosViewModel,
             contentUiState = rememberUserPhotosContentUiState(
                 baseUiState = rememberBaseUiState(),
-                nameState = rememberSaveable { mutableStateOf(key.name) },
-                firstNameState = rememberSaveable { mutableStateOf(key.firstName) }
+                name = rememberSaveable { mutableStateOf(key.name) },
+                firstName = rememberSaveable { mutableStateOf(key.firstName) }
             ),
             onItemClicked = { id ->
                 navigationState.push(Routes.PictureRoute(id = id, showViewPhotosButton = false))
