@@ -201,7 +201,9 @@ fun PictureScreen(
                     },
                     onShownPhoto = { picture ->
                         state.setVisibleActions(true)
-                        state.setEnabledBookmark(bookmarkViewModel.isPhotoBookmarked(picture))
+                        state.baseUiState.scope.launch {
+                            state.setEnabledBookmark(bookmarkViewModel.isPhotoBookmarked(picture))
+                        }
                     },
                     onOpenWebView = onOpenWebView,
                     onSuccess = { isSuccessful ->

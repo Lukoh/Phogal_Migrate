@@ -83,7 +83,7 @@ private const val SCROLL_OFFSET_SIGNAL = 35
 fun SearchPhotosSection(
     modifier: Modifier = Modifier,
     photos: LazyPagingItems<Photo>,
-    sectionUiState: SearchPhotosSectionUiState = rememberSearchPhotosSectionUiState(),
+    sectionUiState: SearchPhotosSectionUiState = rememberSearchPhotosSectionUiState(rememberSaveable { mutableStateOf(true) }),
     bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
     onItemClicked: (item: Photo, index: Int) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
@@ -161,10 +161,6 @@ fun SearchPhotosSection(
         }
     }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  LoadState rendering — split per state so each branch has its own recompose scope
-// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Dispatches the current [LoadState] of [photos] into the appropriate sub-renderer.
@@ -271,10 +267,6 @@ private fun LazyListScope.photoItems(
         }
     }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Small state composables
-// ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun LoadingRow(modifier: Modifier = Modifier) {

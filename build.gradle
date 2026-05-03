@@ -23,7 +23,7 @@ plugins {
 }
 
 // Global dependency resolution tweaks
-// - protobuf-lite / protobuf-java exclusions: Firebase/gRPC 충돌 방지
+// - protobuf-lite / protobuf-java exclusions: Firebase/gRPC Collision Avoidance
 subprojects {
     configurations.configureEach {
         exclude group: 'com.google.protobuf', module: 'protobuf-lite'

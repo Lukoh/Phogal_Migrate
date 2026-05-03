@@ -135,7 +135,7 @@ fun SearchPhotosScreen(
             ScaffoldContent(topInterval = 8.dp) {
                 SearchPhotosContent(
                     modifier = modifier.padding(top = paddingValues.calculateTopPadding()),
-                    photosContentUiState = contentUiState,
+                    contentUiState = contentUiState,
                     onSearch = onSearch,
                     onChipClicked = onChipClicked,
                     onItemClicked = onItemClicked,
@@ -152,10 +152,6 @@ fun SearchPhotosScreen(
         }
     )
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Stateless sub-composables
-// ─────────────────────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -230,10 +226,6 @@ private fun ObserveLifecycle(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Preview
-// ─────────────────────────────────────────────────────────────────────────────
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview(name = "Light Mode")

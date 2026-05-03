@@ -57,7 +57,7 @@ class SearchPhotosContentUiState internal constructor(
     }
 
     fun setTriggerConsumed() {
-        _triggered.value = false
+        _triggered.value = true
     }
 
     fun setSearchTriggered() {
@@ -70,6 +70,10 @@ class SearchPhotosContentUiState internal constructor(
 
     fun setActionsVisibilityChanged(visible: Boolean) {
         _visibleActions.value = visible
+    }
+
+    fun setEnabled(enabled: Boolean) {
+        _enabled.value = enabled
     }
 
     val permissions = listOf(

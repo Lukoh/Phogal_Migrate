@@ -151,6 +151,7 @@ fun UserContainer(
             }
 
             Spacer(modifier = Modifier.width(10.dp))
+            state.baseUiState.scope
             ShowFollowButton(
                 modifier = modifier,
                 followColor = state.colors[4],

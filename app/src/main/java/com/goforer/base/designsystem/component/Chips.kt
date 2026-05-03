@@ -1,7 +1,9 @@
 package com.goforer.base.designsystem.component
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,35 +34,38 @@ import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Chips(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier, // 외부에서 넘어오는 padding, graphicsLayer 등
     items: List<String>,
     textColor: Color,
     leadingIconTint: Color,
     onClicked: (String) -> Unit
 ) {
-
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
         LazyRow(
-            modifier = modifier
-                .padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
+            contentPadding = PaddingValues(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp), // Spacer 대신 간격 설정
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp)
         ) {
-            items(items) {
+            items(
+                items = items,
+                key = { it } // 고유 키를 설정하여 리컴포지션 성능 최적화
+            ) { item ->
                 InputChip(
                     selected = true,
-                    onClick = {
-                        onClicked(it)
-                    },
+                    onClick = { onClicked(item) },
                     enabled = true,
                     label = {
                         Text(
-                            text = it,
+                            text = item,
                             color = textColor,
                             fontStyle = FontStyle.Normal,
                             style = MaterialTheme.typography.bodyMedium
                         )
-                     },
+                    },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.ImageSearch,
@@ -70,8 +75,6 @@ fun Chips(
                         )
                     }
                 )
-                if (items.size > 1)
-                    Spacer(modifier = Modifier.width(8.dp))
             }
         }
     }

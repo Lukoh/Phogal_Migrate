@@ -12,6 +12,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -27,6 +30,8 @@ import com.goforer.base.designsystem.component.Chips
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosSectionUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchSectionUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.InitScreen
 import com.goforer.phogal.presentation.ui.theme.Black
 import com.goforer.phogal.presentation.ui.theme.Blue70
@@ -61,7 +66,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 @Composable
 fun SearchPhotosContent(
     modifier: Modifier = Modifier,
-    photosContentUiState: SearchPhotosContentUiState,
+    contentUiState: SearchPhotosContentUiState,
     onSearch: (String) -> Unit,
     onChipClicked: (String) -> Unit,
     onItemClicked: (id: String) -> Unit,
@@ -72,52 +77,47 @@ fun SearchPhotosContent(
 ) {
     Column(
         modifier = modifier.clickable {
-            photosContentUiState.baseUiState.keyboardController?.hide()
+            contentUiState.baseUiState.keyboardController?.hide()
         }
     ) {
         SearchSection(
             modifier = Modifier.padding(2.dp, 0.dp, 2.dp, 0.dp),
-            sectionUiState = com.goforer.phogal.presentation.stateholder.uistate.home.gallery
-                .rememberSearchSectionUiState(),
+            sectionUiState = rememberSearchSectionUiState(enabled = rememberSaveable { mutableStateOf(true) }),
             onSearched = onSearch
         )
 
         // Sub-composables are stateless: they receive the values they need and
         // emit events back via callbacks. The holder is hidden from them.
         RecentWordsChips(
-            recentWords = photosContentUiState.galleryUiState.recentWords,
-            isScrolling = photosContentUiState.scrolling,
-            triggered = photosContentUiState.triggered,
-            onTriggeredConsumed = photosContentUiState::setTriggerConsumed,
+            recentWords = contentUiState.galleryUiState.recentWords,
+            isScrolling = contentUiState.scrolling,
+            triggered = contentUiState.triggered,
+            onTriggeredConsumed = contentUiState::setTriggerConsumed,
             onChipClicked = onChipClicked
         )
 
         PhotosOrInitScreen(
-            query = photosContentUiState.galleryUiState.currentQuery,
-            photos = photosContentUiState.galleryUiState.photos,
+            query = contentUiState.galleryUiState.currentQuery,
+            photos = contentUiState.galleryUiState.photos,
             onItemClicked = { photo, _ -> onItemClicked(photo.id) },
             onViewPhotos = onViewPhotos,
             onShowSnackBar = onShowSnackBar,
             onLoadSuccess = onLoadSuccess,
-            onScroll = photosContentUiState::setScrollingChanged,
+            onScroll = contentUiState::setScrollingChanged,
             onOpenWebView = onOpenWebView
         )
     }
 
     PermissionHandler(
-        permissions = photosContentUiState.permissions,
-        permissionVisible = photosContentUiState.permissionVisible,
-        rationaleText = photosContentUiState.rationaleText,
-        onPermissionGranted = photosContentUiState::setPermissionGranted,
-        onPermissionDenied = photosContentUiState::setPermissionDenied,
-        onDialogDismissed = photosContentUiState::setPermissionDialogDismissed,
-        onDialogConfirmed = photosContentUiState::setPermissionDialogConfirmed
+        permissions = contentUiState.permissions,
+        permissionVisible = contentUiState.permissionVisible,
+        rationaleText = contentUiState.rationaleText,
+        onPermissionGranted = contentUiState::setPermissionGranted,
+        onPermissionDenied = contentUiState::setPermissionDenied,
+        onDialogDismissed = contentUiState::setPermissionDialogDismissed,
+        onDialogConfirmed = contentUiState::setPermissionDialogConfirmed
     )
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Stateless sub-composables
-// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Animated row of recent search keywords. Hidden while scrolling. When a
@@ -135,11 +135,15 @@ private fun RecentWordsChips(
 ) {
     GenericCubicAnimationShape(
         visible = !isScrolling,
-        duration = 250
+        duration = 100
     ) { animatedShape, visible ->
         if (!visible || recentWords.isEmpty()) return@GenericCubicAnimationShape
 
-        val items = if (triggered) listOf(recentWords.first()) else recentWords
+        val items = if (triggered) {
+            listOf(recentWords.first())
+        } else {
+            recentWords
+        }
 
         Chips(
             modifier = Modifier
@@ -154,8 +158,11 @@ private fun RecentWordsChips(
             onClicked = onChipClicked
         )
 
-        // triggered is transient — reset it once the single-chip state is painted.
-        if (triggered) onTriggeredConsumed()
+        if (triggered) {
+            SideEffect {
+                onTriggeredConsumed()
+            }
+        }
     }
 }
 
@@ -180,8 +187,7 @@ private fun ColumnScope.PhotosOrInitScreen(
                 .padding(top = 0.5.dp)
                 .weight(1f),
             photos = photos,
-            sectionUiState = com.goforer.phogal.presentation.stateholder.uistate.home.gallery
-                .rememberSearchPhotosSectionUiState(),
+            sectionUiState = rememberSearchPhotosSectionUiState(rememberSaveable { mutableStateOf(true) }),
             onItemClicked = onItemClicked,
             onViewPhotos = onViewPhotos,
             onShowSnackBar = onShowSnackBar,
@@ -236,10 +242,6 @@ private fun PermissionHandler(
         )
     }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Preview
-// ─────────────────────────────────────────────────────────────────────────────
 
 @Preview(name = "Light Mode")
 @Preview(

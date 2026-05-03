@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -234,11 +235,10 @@ fun BodyContent(
         )
 
         if (painter.state is AsyncImagePainter.State.Loading) {
-            val configuration = LocalConfiguration.current
-            val screenHeight = configuration.screenHeightDp
+            val screenHeight = LocalWindowInfo.current.containerSize
             val holderModifier = Modifier
                 .fillMaxWidth()
-                .height(screenHeight.dp)
+                .height(screenHeight.height.dp)
                 .align(Alignment.CenterHorizontally)
                 .background(ColorSystemGray7)
                 // In-house shimmer (replaces Accompanist placeholder, EOL 2024).
@@ -282,8 +282,7 @@ fun BodyContent(
             BehaviorItem(700, 700, 700)
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = picture.description ?: "None"
-                ?: stringResource(id = R.string.picture_no_description),
+                text = picture.description ?: "None",
                 modifier = Modifier.padding(8.dp, 4.dp),
                 color = ColorText4,
                 fontFamily = FontFamily.SansSerif,

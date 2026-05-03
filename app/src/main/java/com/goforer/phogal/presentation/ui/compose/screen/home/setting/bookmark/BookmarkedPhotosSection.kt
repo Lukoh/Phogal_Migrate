@@ -195,7 +195,6 @@ fun BookmarkedPhotosSection(
             }
         }
 
-        // PullToRefreshBox renders its own default Indicator — no separate one needed.
         if (!lazyListState.isScrollInProgress) {
             ShowUpButton(
                 modifier = Modifier.align(Alignment.BottomEnd),

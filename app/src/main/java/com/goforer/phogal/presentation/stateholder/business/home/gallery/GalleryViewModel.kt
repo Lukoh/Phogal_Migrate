@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.goforer.phogal.data.datasource.local.LocalDataSource
 import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
+import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.data.repository.gallery.PhotosRepository
 import com.goforer.phogal.di.dispatcher.IoDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.text.toMutableList
 
 /**
  * ViewModel for the gallery search screen.
@@ -56,14 +58,16 @@ class GalleryViewModel @Inject constructor(
     @IoDispatcher
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
-
-    // ---------------- State ----------------
-
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
 
     private val _recentWords = MutableStateFlow<List<String>>(emptyList())
-    val recentWords: StateFlow<List<String>> = _recentWords.asStateFlow()
+    val recentWords: StateFlow<List<String>> = localDataSource.searchWordsFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000), // UI가 활성화될 때만 데이터 수집
+            initialValue = emptyList()
+        )
 
     /**
      * Stream of paged photos. Switches every time [query] changes (debounced, distinct).
@@ -93,8 +97,6 @@ class GalleryViewModel @Inject constructor(
         refreshRecentWords()
     }
 
-    // ---------------- Intents ----------------
-
     fun onQueryChanged(newQuery: String) {
         _query.value = newQuery
     }
@@ -109,12 +111,12 @@ class GalleryViewModel @Inject constructor(
 
         viewModelScope.launch {
             val updated = withContext(ioDispatcher) {
-                val current = localDataSource.getSearchWords().orEmpty().toMutableList()
-                if (keyword in current) return@withContext null
+                val currentKeywords = recentWords.value.toMutableList()
 
-                if (current.size >= MAX_HISTORY_SIZE) current.removeAt(0)
-                current += keyword
-                val snapshot = current.toList()
+                if (keyword in recentWords.value) return@withContext null
+                if (currentKeywords.size >= MAX_HISTORY_SIZE) currentKeywords.removeAt(0)
+                currentKeywords += keyword
+                val snapshot = currentKeywords.toList()
                 localDataSource.setSearchWords(snapshot)
                 snapshot
             } ?: return@launch
@@ -127,7 +129,7 @@ class GalleryViewModel @Inject constructor(
     private fun refreshRecentWords() {
         viewModelScope.launch {
             _recentWords.value = withContext(ioDispatcher) {
-                localDataSource.getSearchWords()?.asReversed().orEmpty()
+                _recentWords.value.asReversed()
             }
         }
     }

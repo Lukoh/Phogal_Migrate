@@ -182,6 +182,10 @@ dependencies {
     implementation libs.androidx.ui
     implementation(libs.kotlinx.serialization.core)
 
+    // --- Data Store  (1.2.1, stable) ---
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore)
+
     // --- Paging ---
     implementation libs.androidx.paging.common.ktx
     implementation libs.androidx.paging.runtime.ktx
