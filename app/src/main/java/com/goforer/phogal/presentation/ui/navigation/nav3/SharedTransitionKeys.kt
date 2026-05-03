@@ -4,37 +4,6 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.staticCompositionLocalOf
 
-/**
- * CompositionLocal that exposes the `SharedTransitionScope` from the
- * `SharedTransitionLayout` that wraps our `NavDisplay`. Any descendant
- * composable can read this to build `Modifier.sharedElement(...)` without
- * having to thread the scope through every composable signature.
- *
- * For the paired `AnimatedContentScope` — which is the second argument every
- * shared element modifier also needs — use the Nav3-provided
- * `androidx.navigation3.ui.LocalNavAnimatedContentScope`. Nav3 1.1.0 sets
- * that local automatically inside every `NavEntry` content slot, so you do
- * **not** need to define a custom version of it.
- *
- * ## Usage (inside any screen composable)
- *
- * ```
- * val sharedScope = LocalSharedTransitionScope.current ?: return
- * val animatedScope = LocalNavAnimatedContentScope.current
- *
- * with(sharedScope) {
- *     Image(
- *         painter = ...,
- *         modifier = Modifier.sharedElement(
- *             sharedContentState = rememberSharedContentState(
- *                 key = photoSharedElementKey(photoId)
- *             ),
- *             animatedVisibilityScope = animatedScope
- *         )
- *     )
- * }
- * ```
- */
 @OptIn(ExperimentalSharedTransitionApi::class)
 val LocalSharedTransitionScope = staticCompositionLocalOf<SharedTransitionScope?> { null }
 

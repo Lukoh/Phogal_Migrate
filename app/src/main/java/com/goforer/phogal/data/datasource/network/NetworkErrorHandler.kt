@@ -6,21 +6,6 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Decodes server-side error envelopes and dispatches based on the error type.
- *
- * The decoding contract: input is a JSON string in the shape declared by
- * [NetworkError], and we route on the first entry's `type` field.
- *
- * ### Migrated to kotlinx.serialization (April 2026)
- *
- * The previous implementation used `Gson().fromJson(...)` per call, which
- * created a fresh `Gson` instance on every error — small inefficiency, but
- * also meant the parsing rules diverged from the rest of the app. Now we
- * inject the project's shared [Json] instance, so all four loci that decode
- * JSON (Retrofit responses, error envelopes here, persisted local data,
- * one-off conversions) use identical configuration.
- */
 @Singleton
 class NetworkErrorHandler
 @Inject

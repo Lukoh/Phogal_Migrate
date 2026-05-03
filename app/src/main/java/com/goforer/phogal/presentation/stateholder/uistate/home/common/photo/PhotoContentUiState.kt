@@ -9,14 +9,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.goforer.phogal.presentation.stateholder.uistate.BaseUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 
-/**
- * UI-only holder for the single-picture screen.
- *
- * Unlike the legacy version, this class does not carry a mutable `picture: Picture?`
- * field — the picture now lives in `PictureViewModel.pictureUiState` as a proper
- * `StateFlow<UiState<Picture>>`. Keeping it out of this holder eliminates a source of
- * truth duplication that made the legacy `LikeResponseHandle` logic fragile.
- */
 @Stable
 class PhotoContentUiState internal constructor(
     val baseUiState: BaseUiState,

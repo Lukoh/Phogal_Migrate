@@ -25,10 +25,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-/**
- * Exposes the list of locally-followed users. Pure local-storage VM; no network.
- * I/O is dispatched to [ioDispatcher] so the main thread never blocks on disk.
- */
 @HiltViewModel
 class FollowViewModel @Inject constructor(
     private val localDataSource: LocalDataSource,

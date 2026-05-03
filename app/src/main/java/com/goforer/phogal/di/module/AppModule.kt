@@ -48,34 +48,6 @@ object AppModule {
     @Provides
     fun provideConnectivityManagerNetworkMonitor(context: Context) = ConnectivityManagerNetworkMonitor(context)
 
-    /**
-     * Provides the project's `Json` instance for both Retrofit serialization
-     * and ad-hoc JSON encode/decode (e.g. inside `LocalDataSource` for
-     * persisted lists).
-     *
-     * ### Configuration choices
-     *
-     * - **`ignoreUnknownKeys = true`** — the Unsplash API returns fields we
-     *   don't model (analytics fields, beta features). Without this, every
-     *   new field they ship would crash the app on parse. This is the single
-     *   most important production setting.
-     *
-     * - **`coerceInputValues = true`** — when the server sends `null` for a
-     *   property that has a default value, use the default rather than
-     *   throwing. Catches a class of compatibility bugs that would otherwise
-     *   reach end users.
-     *
-     * - **`isLenient = true`** — accept slightly malformed JSON (unquoted
-     *   keys, trailing commas). Conservative trade-off; we accept input that
-     *   may be technically invalid because real-world APIs sometimes are.
-     *
-     * - **`explicitNulls = false`** — when serializing OUT, omit properties
-     *   whose value is `null`. Reduces request payload size and matches what
-     *   most server-side validators expect.
-     *
-     * Replaces the previous `provideGSon()` as part of the Gson →
-     * kotlinx.serialization migration.
-     */
     @Singleton
     @Provides
     fun provideJson(): Json = Json {

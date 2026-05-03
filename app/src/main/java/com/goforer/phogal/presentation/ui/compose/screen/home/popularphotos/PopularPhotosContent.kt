@@ -16,11 +16,6 @@ import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.rememberPopularPhotosSectionUiState
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 
-/**
- * Popular-photos feed body. The VM's `photos: StateFlow<PagingData<Photo>>` is
- * started eagerly (see `PopularPhotosViewModel`), so all this composable does is
- * collect it into `LazyPagingItems` and pass it down.
- */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PopularPhotosContent(

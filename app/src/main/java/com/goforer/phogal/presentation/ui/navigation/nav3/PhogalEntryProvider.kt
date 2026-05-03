@@ -39,33 +39,6 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.setting.following.
 import com.goforer.phogal.presentation.ui.compose.screen.home.setting.notification.NotificationSettingScreen
 import com.goforer.phogal.presentation.ui.navigation.Routes
 
-/**
- * Nav3 1.1.0 entry provider for Phogal.
- *
- * ## 1.1.0 scene-strategy metadata
- *
- *  - **[ListDetailSceneStrategy.listPane] / [ListDetailSceneStrategy.detailPane]**
- *    — tag entries so the adaptive strategy can lay them out side-by-side on
- *    wide screens. `SearchPhotosRoute` is the list, `PictureRoute` is the
- *    detail. On phones the strategy falls back to push navigation.
- *
- *  - **[DialogSceneStrategy.dialog]** — tags [Routes.PermissionDialogRoute]
- *    so it renders in a real `Dialog` instance. Predictive back, rotation,
- *    and process-death restoration all work for free.
- *
- * ## Per-entry scope
- * With `rememberSaveableStateHolderNavEntryDecorator` +
- * `rememberViewModelStoreNavEntryDecorator` attached to the `NavDisplay`, every
- * `entry<T>` block gets its own isolated:
- *   - `ViewModelStoreOwner` → `hiltViewModel()` returns a VM unique to THIS entry.
- *   - `SaveableStateHolder`  → `rememberSaveable` inside the block is per-entry.
- *
- * ## Shared Element Transitions
- * [LocalSharedTransitionScope] is provided by `HomeScreen`, and each NavEntry
- * content slot auto-provides `androidx.navigation3.ui.LocalNavAnimatedContentScope`.
- * Screens can compose these two locals with [photoSharedElementKey] to get
- * hero animations — see the docs for a minimal example.
- */
 fun EntryProviderScope<NavKey>.phogalEntries(navState: NavigationState) {
     galleryTabEntries(navState)
     popularTabEntries(navState)

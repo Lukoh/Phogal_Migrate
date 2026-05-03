@@ -17,13 +17,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-/**
- * ViewModel for "photos by user" screen.
- *
- * Username is treated as state (via [loadFor]) so the same VM instance can serve
- * multiple users without re-creation. `distinctUntilChanged` prevents re-triggering
- * a Pager when the same username is set twice (e.g. on config change + restore).
- */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class UserPhotosViewModel @Inject constructor(

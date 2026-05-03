@@ -50,7 +50,6 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.gallery.LoadingPho
 import com.goforer.phogal.presentation.ui.theme.ColorSystemGray7
 import timber.log.Timber
 
-/** Matches `PopularPhotosViewModel.PAGE_SIZE`. */
 private const val PAGE_SIZE_HINT = 10
 
 @OptIn(ExperimentalFoundationApi::class)

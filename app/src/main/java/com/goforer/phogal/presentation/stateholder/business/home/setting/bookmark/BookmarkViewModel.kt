@@ -21,13 +21,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-/**
- * Exposes the list of locally-bookmarked pictures and lets the UI toggle bookmark state.
- *
- * All local-storage reads/writes are dispatched to [ioDispatcher] so the main thread
- * is never blocked. The StateFlow is a cached view of local storage — we refresh it
- * after every mutation so subscribers see the new value without re-querying.
- */
 @HiltViewModel
 class BookmarkViewModel @Inject constructor(
     private val localDataSource: LocalDataSource,

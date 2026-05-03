@@ -24,12 +24,6 @@ import com.goforer.phogal.presentation.ui.theme.ColorSystemGray7
 import com.goforer.phogal.presentation.ui.theme.DarkGreen10
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 
-/**
- * Placeholder list of loading photo cards.
- *
- * Replaces the previous Accompanist `.placeholder(...)` usage with the
- * in-house [shimmer] modifier.
- */
 @Composable
 fun LoadingPhotos(
     modifier: Modifier = Modifier,

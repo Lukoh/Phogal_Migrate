@@ -15,12 +15,6 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.BottomNavRoute
 import com.goforer.phogal.presentation.ui.compose.screen.home.HomeScreen
 import com.goforer.phogal.presentation.ui.compose.screen.home.OfflineScreen
 
-/**
- * App entry composable. This project uses **Navigation 3 1.1.0 exclusively**
- * (Nav2 has been fully removed). All navigation state is owned by
- * [com.goforer.phogal.presentation.ui.navigation.nav3.NavigationState], threaded
- * through [com.goforer.phogal.presentation.stateholder.uistate.MainScreenUiState].
- */
 @Composable
 fun MainScreen(
     networkMonitor: ConnectivityManagerNetworkMonitor,

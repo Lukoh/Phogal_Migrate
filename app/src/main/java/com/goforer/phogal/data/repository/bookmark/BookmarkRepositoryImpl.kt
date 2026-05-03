@@ -11,7 +11,6 @@ import javax.inject.Singleton
 
 @Singleton
 class BookmarkRepositoryImpl @Inject constructor() : BookmarkRepository {
-
     override fun bookmarks(bookmarks: List<Picture>, pageSize: Int): Flow<PagingData<Picture>> {
         val bookmarkPagingFlow = Pager(
             config = PagingConfig(pageSize = pageSize, enablePlaceholders = false),

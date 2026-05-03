@@ -19,11 +19,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-/**
- * ViewModel for the popular-photos feed. No param switching — the feed is static
- * from the client's perspective — so the repository stream is created eagerly and
- * held as a single [StateFlow].
- */
 @HiltViewModel
 class PopularPhotosViewModel @Inject constructor(
     popularPhotosRepository: PopularPhotosRepository

@@ -24,13 +24,6 @@ import com.goforer.phogal.presentation.ui.theme.ColorSystemGray7
 import com.goforer.phogal.presentation.ui.theme.DarkGreen10
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 
-/**
- * Placeholder card shown while a picture is loading.
- *
- * Replaces the previous Accompanist `.placeholder(...)` usage with the
- * in-house [shimmer] modifier. Behavior is visually equivalent: a gray
- * card with a sweeping highlight gradient.
- */
 @Composable
 fun LoadingPicture(
     modifier: Modifier = Modifier,

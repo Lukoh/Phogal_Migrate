@@ -41,23 +41,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
-/**
- * Gallery search screen body — **stateless** with respect to the holder.
- *
- * ### Hoisting contract
- *
- * This composable accepts `photosContentUiState` to *read* state. It never
- * mutates the holder directly. Every state transition is expressed as a
- * call to a typed method on the holder (e.g. `onScrollingChanged(true)`)
- * or a callback from a sub-composable.
- *
- * In Compose terms: this function depends on the holder's *values* but not
- * its *identity* — meaning the Stability checker can mark it skippable
- * when the relevant fields haven't changed.
- *
- * Sub-composables ([RecentWordsChips], [PhotosOrInitScreen]) take only
- * primitives and lambdas; they don't see the holder at all.
- */
 @OptIn(
     ExperimentalComposeUiApi::class,
     ExperimentalPermissionsApi::class,

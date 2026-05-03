@@ -3,11 +3,7 @@ package com.goforer.phogal.data.repository.common.photo.info
 import com.goforer.phogal.data.datasource.network.NetworkResult
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 
-/**
- * Repository for fetching a single Picture by id.
- */
 interface PictureRepository {
-
     /**
      * @param id Unsplash photo id
      * @return a [NetworkResult] wrapping the [Picture] on success

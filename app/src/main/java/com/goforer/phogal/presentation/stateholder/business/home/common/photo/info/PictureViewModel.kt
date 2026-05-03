@@ -19,23 +19,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * ViewModel for the single-picture screen.
- *
- * ## State (observed)
- *  - [pictureUiState] : top-level [UiState] for fetching the picture.
- *  - [likeActionState]: secondary [UiState] for the in-flight like/unlike request.
- *    Kept independent because a failed "like" shouldn't wipe out the already-loaded picture.
- *
- * ## Events (one-shot)
- *  - [events] : like-success / like-failure one-shot signals (for snackbars, haptics).
- *
- * ## Intents
- *  - [loadPicture] — idempotent; calling twice re-runs the request.
- *  - [toggleLike]  — no-op if the picture hasn't loaded yet. Ignored while a like request
- *                    is already in flight (prevents double-submit).
- *  - [consumeLikeAction] — resets transient like-action state back to Idle.
- */
 @HiltViewModel
 class PictureViewModel @Inject constructor(
     private val pictureRepository: PictureRepository,

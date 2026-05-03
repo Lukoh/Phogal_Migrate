@@ -48,27 +48,6 @@ import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 import kotlinx.coroutines.launch
 
-/**
- * Top-level **Stateful** screen for photo search.
- *
- * ### Hoisting layers (top-down)
- *
- * 1. `SearchPhotosScreen` (this file)             — **Stateful**: owns the
- *    [SearchPhotosContentUiState], the snackbar host, and the lambdas that
- *    bridge the UI to [GalleryViewModel].
- *
- * 2. `SearchTopBar`, `SearchSnackbarHost`         — **Stateless**: receive
- *    primitives (`Boolean` flags) and lambda callbacks, no holders.
- *
- * 3. `SearchPhotosContent`                        — **Stateless**: receives
- *    the holder as input but never writes to it. All state mutations go
- *    upward via callbacks.
- *
- * The previous version mixed these layers — children received `MutableState<T>`
- * and wrote to it directly, which technically worked but defeated the purpose
- * of hoisting. This refactor enforces strict read-only flow downward and
- * callback-based events upward.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchPhotosScreen(

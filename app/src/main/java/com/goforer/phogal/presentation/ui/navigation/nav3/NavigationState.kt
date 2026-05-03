@@ -15,33 +15,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import com.goforer.phogal.presentation.ui.compose.screen.home.BottomNavRoute
 import com.goforer.phogal.presentation.ui.navigation.Routes
 
-/**
- * Phogal's top-level navigation state — **Navigation 3 1.1.0 only**.
- *
- * ## What changed vs. the previous version
- *
- * The tab identity type moved from an `enum class BottomNavDestination` to a
- * `sealed interface BottomNavRoute : NavKey`. For this state holder the change
- * is almost cosmetic — tab switching, per-tab back stacks, and persistence all
- * work the same — but the new type is itself a [NavKey], which opens up a few
- * options for later (e.g. putting a tab switch onto the back stack if the
- * product team ever wants "back from Setting returns to previous tab").
- *
- * ## Multi-backstack design
- *  - One [NavBackStack] per tab, seeded with its tab's screen root.
- *  - [currentRoute] tracks which tab is active; [backStackForCurrentRoute] returns
- *    that tab's live back stack — this is what you feed to `NavDisplay`.
- *  - Switching tabs preserves the previous tab's stack verbatim.
- *  - System back pops within the current tab. At the tab root it bubbles up
- *    to exit the app.
- *
- * ## Persistence
- *  - Per-tab back stacks are persisted by [rememberNavBackStack] itself
- *    (config change + process death).
- *  - [currentRoute] is persisted via a small [Saver] that stores a short string
- *    key — sealed-interface objects don't have an `ordinal` like enum values,
- *    so we map each object to a stable key manually.
- */
 @Stable
 class NavigationState internal constructor(
     startRoute: BottomNavRoute,

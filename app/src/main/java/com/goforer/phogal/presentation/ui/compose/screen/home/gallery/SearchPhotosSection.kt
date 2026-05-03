@@ -58,26 +58,10 @@ import com.goforer.phogal.presentation.ui.theme.ColorSystemGray7
 import kotlinx.coroutines.flow.distinctUntilChanged
 import timber.log.Timber
 
-/** Matches `GalleryViewModel.PAGE_SIZE`. Kept local so the section stays decoupled. */
 private const val PAGE_SIZE_HINT = 10
-
-/** Threshold for toggling the "up" button visibility based on the first visible item index. */
 private const val UP_BUTTON_THRESHOLD = 4
-
-/** Scroll offset threshold (px) for signalling "user is scrolling" to the parent. */
 private const val SCROLL_OFFSET_SIGNAL = 35
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Public entry point
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Paginated photo list with pull-to-refresh and scroll-to-top.
- *
- * This composable is intentionally thin: it wires state together and delegates
- * all LoadState rendering to three private composables below. This keeps each
- * recomposition scope small and makes the LoadState branches independently testable.
- */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SearchPhotosSection(

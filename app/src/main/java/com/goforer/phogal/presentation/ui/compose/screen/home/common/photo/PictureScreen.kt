@@ -57,14 +57,6 @@ import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rem
 import com.goforer.phogal.presentation.ui.theme.Red60
 import kotlinx.coroutines.launch
 
-/**
- * Single-picture screen.
- *
- * Compared to the legacy version, all three ViewModels (`Picture`, `PictureLike`,
- * `PictureUnlike`) have been collapsed into one `PictureViewModel`. The top bar's
- * like/bookmark icons read state directly from `pictureUiState`, and the
- * error dialog for a failed like/unlike is driven by a single `likeActionState`.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PictureScreen(

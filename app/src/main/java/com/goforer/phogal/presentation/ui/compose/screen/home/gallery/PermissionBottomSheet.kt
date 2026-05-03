@@ -31,28 +31,6 @@ import com.goforer.phogal.presentation.ui.theme.Blue20
 import com.goforer.phogal.presentation.ui.theme.ColorSystemGray8
 import kotlinx.coroutines.launch
 
-/**
- * Permission rationale modal bottom sheet — **stateless**.
- *
- * ### Hoisting refactor (April 2026)
- *
- * Previously this composable received the entire `PermissionState` holder and
- * mutated `openBottomSheetState.value = false` inline. That made the function
- * impossible to preview without constructing a `MutableState`, and made the
- * `PermissionState` holder responsible for two unrelated concerns: (a) sheet
- * animation control, (b) the boolean "is the dialog showing?".
- *
- * The new shape:
- *  - Takes the rationale text as a plain `String`.
- *  - Owns its own `SheetState` and `CoroutineScope` because they are
- *    bottom-sheet-internal animation controllers, not application state.
- *  - Reports dismissal/confirmation via callbacks. The parent decides what
- *    "is the dialog showing?" means and toggles its own state.
- *
- * The `onDismissedRequest` and `onClicked` callbacks are invoked **after**
- * the sheet animation completes, so the parent can rely on the visual
- * transition being done by the time it removes the dialog from composition.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PermissionBottomSheet(

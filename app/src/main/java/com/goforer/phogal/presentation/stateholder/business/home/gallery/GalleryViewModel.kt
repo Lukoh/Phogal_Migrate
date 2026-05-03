@@ -31,25 +31,6 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.text.toMutableList
 
-/**
- * ViewModel for the gallery search screen.
- *
- * ## State (observed by UI)
- *  - [query]       : current text in the search box (writable via [onQueryChanged])
- *  - [photos]      : paginated results, derived reactively from [query]
- *  - [recentWords] : search history (local-storage backed)
- *
- * ## Events (one-shot, not replayed)
- *  - [events] : transient signals like "search committed" — use this for navigation,
- *               snackbars, keyboard dismissal. State flows are for persistent data;
- *               events are for things that happen once and shouldn't re-fire on rotation.
- *
- * ## Design notes
- *  - I/O (LocalDataSource) is dispatched to [ioDispatcher] so the main thread isn't blocked.
- *  - [recentWords] is backed by a MutableStateFlow that is updated explicitly rather than
- *    re-read on every commit — local storage is the source of truth, the flow is a cache.
- *  - The repository is only invoked when [query] is non-blank.
- */
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class GalleryViewModel @Inject constructor(

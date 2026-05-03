@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
  * Repository for loading all photos uploaded by a specific Unsplash user, paged.
  */
 interface UserPhotosRepository {
-
     /**
      * @param username  Unsplash username, not the display name
      * @param pageSize  page size for [androidx.paging.PagingConfig]

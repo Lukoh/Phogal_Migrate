@@ -14,26 +14,38 @@ import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Stable
-class PermissionState(
-    val openBottomSheetState: MutableState<Boolean>,
+class PermissionState internal constructor(
     val scope: CoroutineScope,
     val bottomSheetState: SheetState,
-    val rationaleTextState: MutableState<String>
-)
+
+    private val _openBottomSheet: MutableState<Boolean>,
+    private val _rationaleText: MutableState<String>
+) {
+    val openBottomSheet: Boolean get() = _openBottomSheet.value
+    val rationaleText: String get() = _rationaleText.value
+
+    fun setOpenBottomSheet(openBottomSheet: Boolean) {
+        _openBottomSheet.value = openBottomSheet
+    }
+
+    fun setRationaleText(rationaleText: String) {
+        _rationaleText.value = rationaleText
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun rememberPermissionState(
-    openBottomSheetState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+    openBottomSheet: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     skipPartiallyExpanded: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     scope: CoroutineScope = rememberCoroutineScope(),
     bottomSheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
-    rationaleTextState: MutableState<String> = rememberSaveable { mutableStateOf("") }
-): PermissionState = remember(openBottomSheetState, skipPartiallyExpanded, scope, bottomSheetState, rationaleTextState) {
+    rationaleText: MutableState<String> = rememberSaveable { mutableStateOf("") }
+): PermissionState = remember(openBottomSheet, skipPartiallyExpanded, scope, bottomSheetState, rationaleText) {
     PermissionState(
-        openBottomSheetState = openBottomSheetState,
+        _openBottomSheet = openBottomSheet,
         scope = scope,
         bottomSheetState = bottomSheetState,
-        rationaleTextState = rationaleTextState
+        _rationaleText = rationaleText
     )
 }
