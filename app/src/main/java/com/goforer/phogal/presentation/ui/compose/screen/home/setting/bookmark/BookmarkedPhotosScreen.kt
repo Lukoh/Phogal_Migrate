@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,7 +52,9 @@ import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 fun BookmarkedPhotosScreen(
     modifier: Modifier = Modifier,
     bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
-    bookmarkContentUiState: BookmarkContentUiState  = rememberBookmarkContentUiState(bookmarkViewModel),
+    bookmarkContentUiState: BookmarkContentUiState  = rememberBookmarkContentUiState(
+        bookmarkViewModel = bookmarkViewModel, enabledLoadPhotos = rememberSaveable { mutableStateOf(true) }
+    ),
     onItemClicked: (item: Picture, index: Int) -> Unit,
     onBackPressed: () -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
@@ -66,7 +69,6 @@ fun BookmarkedPhotosScreen(
     val currentOnStart by rememberUpdatedState(onStart)
     val currentOnStop by rememberUpdatedState(onStop)
     val snackbarHostState = remember { SnackbarHostState() }
-    val enabledLoadPhotosState = remember { mutableStateOf(true) }
     val backHandlingEnabled by remember { mutableStateOf(true) }
 
     BackHandler(backHandlingEnabled) {
@@ -116,7 +118,7 @@ fun BookmarkedPhotosScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            enabledLoadPhotosState.value = false
+                            bookmarkContentUiState.setEnabledLoadPhotos(false)
                             onBackPressed()
                         }
                     ) {
@@ -133,7 +135,7 @@ fun BookmarkedPhotosScreen(
                     modifier = modifier,
                     bookmarkedPictures = bookmarkContentUiState.bookmarkUiState.bookmarkedPictures,
                     contentPadding = paddingValues,
-                    enabledLoadPhotosState = enabledLoadPhotosState,
+                    enabledLoadPhotos = bookmarkContentUiState.enabledLoadPhotos,
                     onItemClicked = onItemClicked,
                     onViewPhotos = onViewPhotos,
                     onOpenWebView = onOpenWebView

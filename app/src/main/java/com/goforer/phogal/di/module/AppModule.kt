@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.os.Build
 import com.orhanobut.logger.Logger
-import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
@@ -108,9 +107,6 @@ object AppModule {
             .writeTimeout(timeout_write, TimeUnit.SECONDS)
 
         if (BuildConfig.DEBUG) {
-            if ("robolectric" != Build.FINGERPRINT)
-                ok.addNetworkInterceptor(StethoInterceptor())
-
             val httpLoggingInterceptor =
                 HttpLoggingInterceptor(object : HttpLoggingInterceptor.Logger {
                     override fun log(message: String) {

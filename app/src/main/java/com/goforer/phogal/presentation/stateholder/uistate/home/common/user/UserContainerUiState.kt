@@ -63,7 +63,7 @@ fun rememberUserContainerUiState(
             baseUiState = baseUiState,
             _user = user,
             _profileSize = profileSize,
-            _colors = colors as MutableState<List<Color>>,
+            _colors = colors,
             _visibleViewButton = visibleViewButton,
             _fromItem = fromItem
         )

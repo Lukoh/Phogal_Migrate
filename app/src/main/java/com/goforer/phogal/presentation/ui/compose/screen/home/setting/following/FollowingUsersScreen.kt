@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -45,7 +46,9 @@ import kotlinx.coroutines.launch
 fun FollowingUsersScreen(
     modifier: Modifier = Modifier,
     followViewModel: FollowViewModel = hiltViewModel(),
-    followingUserContentUiState: FollowingUserContentUiState = rememberFollowingUserContentUiState(followViewModel),
+    followingUserContentUiState: FollowingUserContentUiState = rememberFollowingUserContentUiState(
+        followViewModel = followViewModel, enabledLoadPhotos = rememberSaveable { mutableStateOf(true) }
+    ),
     onBackPressed: () -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
@@ -59,7 +62,6 @@ fun FollowingUsersScreen(
     val currentOnStart by rememberUpdatedState(onStart)
     val currentOnStop by rememberUpdatedState(onStop)
     val snackbarHostState = remember { SnackbarHostState() }
-    val enabledLoadPhotosState = remember { mutableStateOf(true) }
     val backHandlingEnabled by remember { mutableStateOf(true) }
 
     BackHandler(backHandlingEnabled) {
@@ -109,6 +111,7 @@ fun FollowingUsersScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
+                            followingUserContentUiState.setEnabledLoadPhotos(false)
                             onBackPressed()
                         }
                     ) {
@@ -127,7 +130,7 @@ fun FollowingUsersScreen(
                     modifier = modifier,
                     users = followingUserContentUiState.followingUserUiState.users,
                     contentPadding = paddingValues,
-                    enabledLoadPhotosState = enabledLoadPhotosState,
+                    enabledLoadPhotos = followingUserContentUiState.enabledLoadPhotos,
                     onViewPhotos = onViewPhotos,
                     onOpenWebView = { firstName, url ->
                         url.isNull({

@@ -20,7 +20,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.goforer.base.utils.connect.ConnectivityManagerNetworkMonitor
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.goforer.phogal.presentation.ui.compose.screen.MainScreen
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,7 +34,7 @@ class MainActivity : ComponentActivity() {
     lateinit var connectivityManagerNetworkMonitor: ConnectivityManagerNetworkMonitor
 
     companion object {
-        internal const val SplashWaitTime = 2000L
+        internal const val SPLASH_WAIT_TIME = 2000L
     }
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -47,7 +46,7 @@ class MainActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                delay(SplashWaitTime)
+                delay(SPLASH_WAIT_TIME)
                 keepOnSplash = true
             }
         }

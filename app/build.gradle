@@ -17,14 +17,10 @@ android {
     compileSdk = 36  // 기존 'compileSdk 36'에서 '=' 추가
 
     defaultConfig {
-        targetSdk = 36
-    }
-
-    defaultConfig {
         applicationId "com.goforer.phogal"
         minSdk 28
         //noinspection OldTargetApi
-        targetSdk 34
+        targetSdk 36
         versionCode 1
         versionName "1.0"
 
@@ -231,10 +227,7 @@ dependencies {
     implementation libs.kotlinx.serialization.json
 
     // --- Accompanist ---
-    implementation libs.accompanist.placeholder.material
     implementation libs.accompanist.webview
-    implementation libs.accompanist.navigation.animation
-    implementation libs.accompanist.systemuicontroller
     implementation libs.accompanist.permissions
 
     // --- Firebase ---
@@ -253,10 +246,6 @@ dependencies {
     implementation libs.okhttp
     implementation libs.okhttp.logging.interceptor
     implementation libs.okio
-
-    // --- Debugging (Stetho) ---
-    implementation libs.stetho
-    implementation libs.stetho.okhttp3
 
     // --- Cookies / Logging ---
     implementation libs.persistent.cookie.jar

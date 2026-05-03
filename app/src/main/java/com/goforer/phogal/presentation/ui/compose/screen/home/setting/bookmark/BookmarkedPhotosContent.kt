@@ -20,7 +20,7 @@ fun BookmarkedPhotosContent(
     modifier: Modifier = Modifier,
     bookmarkedPictures: LazyPagingItems<Picture>,
     contentPadding: PaddingValues = PaddingValues(4.dp),
-    enabledLoadPhotosState: MutableState<Boolean>,
+    enabledLoadPhotos: Boolean,
     onItemClicked: (item: Picture, index: Int) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit
@@ -35,7 +35,7 @@ fun BookmarkedPhotosContent(
             onOpenWebView = onOpenWebView
         )
     } else {
-        if (enabledLoadPhotosState.value) {
+        if (enabledLoadPhotos) {
             BoxWithConstraints(
                 modifier = modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center

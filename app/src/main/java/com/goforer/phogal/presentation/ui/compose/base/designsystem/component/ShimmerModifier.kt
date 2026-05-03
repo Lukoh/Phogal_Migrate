@@ -16,59 +16,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 
-/**
- * An in-house shimmer placeholder modifier that replaces the discontinued
- * **Accompanist placeholder** library (`com.google.accompanist:accompanist-placeholder-material`),
- * which was retired by Google in 2024.
- *
- * Why we rolled our own rather than switch to a fork:
- *  - Zero new external dependencies — one fewer thing to track during future
- *    Compose BOM upgrades.
- *  - Short enough to audit (<60 lines) and tweak to match our own motion spec.
- *  - The old Accompanist call sites used a large surface of options we never
- *    actually exercised; distilling to the one shape we need keeps call sites
- *    readable.
- *
- * ## Visual spec (matches the Accompanist default we were using)
- *  - Base: a flat surface color the consumer passes in (commonly
- *    [MaterialTheme.colorScheme] for light sections or
- *    `ColorSystemGray7` for the photo grid).
- *  - Highlight: a diagonal linear gradient of `baseColor → highlightColor → baseColor`
- *    that sweeps from the top-left to the bottom-right of the composable
- *    infinitely, producing the familiar "metal sheen" effect.
- *  - Duration per sweep: ~1,200 ms, reversing so the motion never resets
- *    abruptly.
- *
- * ## Usage
- * ```
- * if (isLoading) {
- *     Box(
- *         Modifier
- *             .fillMaxWidth()
- *             .height(256.dp)
- *             .shimmer(baseColor = ColorSystemGray7)
- *     )
- * }
- * ```
- *
- * ## Migration from Accompanist (reference)
- * Old:
- * ```
- * .placeholder(
- *     visible = true,
- *     color = MaterialTheme.colorScheme.surface,
- *     highlight = PlaceholderHighlight.shimmer(...)
- * )
- * ```
- * New:
- * ```
- * .shimmer(baseColor = MaterialTheme.colorScheme.surface)
- * ```
- *
- * The old Accompanist `.placeholder(visible = ...)` also gated rendering on
- * a boolean. With this modifier, the call site does the gating with a simple
- * `if (isLoading) { ... }` wrapper — which, in practice, is what we already do.
- */
 @Composable
 fun Modifier.shimmer(
     baseColor: Color = MaterialTheme.colorScheme.surfaceVariant,

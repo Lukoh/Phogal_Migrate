@@ -22,7 +22,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieAnimatable
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.goforer.phogal.R
-import com.goforer.phogal.presentation.ui.MainActivity.Companion.SplashWaitTime
+import com.goforer.phogal.presentation.ui.MainActivity.Companion.SPLASH_WAIT_TIME
 import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -32,7 +32,7 @@ fun LandingScreen(modifier: Modifier = Modifier, onTimeout: () -> Unit) {
         val currentOnTimeout by rememberUpdatedState(onTimeout)
 
         LaunchedEffect(true) {
-            delay(SplashWaitTime) // Simulates loading things
+            delay(SPLASH_WAIT_TIME) // Simulates loading things
             currentOnTimeout()
         }
 

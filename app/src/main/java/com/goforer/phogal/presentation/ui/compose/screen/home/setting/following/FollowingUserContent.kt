@@ -20,7 +20,7 @@ fun FollowingUsersContent(
     modifier: Modifier = Modifier,
     users: LazyPagingItems<User>,
     contentPadding: PaddingValues = PaddingValues(4.dp),
-    enabledLoadPhotosState: MutableState<Boolean>,
+    enabledLoadPhotos: Boolean,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String?) -> Unit,
     onFollow: (user: User) -> Unit
@@ -35,7 +35,7 @@ fun FollowingUsersContent(
             onFollow = onFollow
         )
     } else {
-        if (enabledLoadPhotosState.value) {
+        if (enabledLoadPhotos) {
             BoxWithConstraints(
                 modifier = modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
