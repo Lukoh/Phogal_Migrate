@@ -49,7 +49,7 @@
 **Phogal** is a photo-browsing and bookmarking Android app built on the Unsplash API. It originated as a **reference project** — a place where developers could see how the official Android guidelines translate into a real codebase.
 
 - **August 2023 version** — Shipped on Kotlin 1.8.21, Compose BOM 2023.04.01, and Navigation 2. Applied Clean Architecture + MVVM + Hilt with the tooling that was state-of-the-art at the time.
-- **April 2026 version** — Now running on Kotlin 2.0.21, Compose BOM 2026.3.01, **Navigation 3 1.1.0 stable**, Material 3 Adaptive, and the current set of official Android recommendations for April 2026.
+- **April 2026 version** — Now running on Kotlin 2.3.21, Compose BOM 2026.4.01, **Navigation 3 1.0.0 stable**, Material 3 Adaptive, and the current set of official Android recommendations for April 2026.
 
 > A reference project that stops keeping up with the ecosystem turns from a guide into a trap. Bringing Phogal back up to date was, above all, a response to that fact.
 
@@ -59,16 +59,16 @@
 
 | Dimension | **August 2023** | **April 2026** | Why it matters |
 |-----------|-----------------|----------------|----------------|
-| **Kotlin** | 1.8.21 | **2.0.21** | K2 compiler by default, significantly faster builds |
+| **Kotlin** | 1.8.21 | **2.3.21** | K2 compiler by default, significantly faster builds |
 | **Compose Compiler** | `kotlinCompilerExtensionVersion = "1.4.7"` | **Kotlin Compose Compiler Plugin** (`org.jetbrains.kotlin.plugin.compose`) | No more hand-matching Compose Compiler to Kotlin |
-| **Compose BOM** | 2023.04.01 | **2026.3.01** | 36+ Compose libraries versioned as one |
+| **Compose BOM** | 2023.04.01 | **2026.4.01** | 36+ Compose libraries versioned as one |
 | **Material 3** | early 1.x | **1.3.1** + **Material 3 Adaptive** | Tablet and foldable layouts are now first-class |
-| **Navigation** | **Nav 2** (NavHostController + string routes) | **Nav 3 1.1.0 stable** (NavBackStack + typed NavKey) | A fundamentally different navigation model |
+| **Navigation** | **Nav 2** (NavHostController + string routes) | **Nav 3 1.0.0 stable** (NavBackStack + typed NavKey) | A fundamentally different navigation model |
 | **Dialog navigation** | Compose state (`remember`) | **`DialogSceneStrategy`** (back-stack entry) | Survives rotation and process death |
 | **List-Detail layout** | Hand-rolled | **`ListDetailSceneStrategy`** | Automatic 2-pane on tablets |
 | **Shared elements** | Introduced in Compose 1.7 | **Nav 3 + `SharedTransitionLayout`** integrated | Hero animations across scene changes |
-| **Hilt** | 2.x early | **2.58** (+ `hilt-navigation-compose` 1.3.0) | Kotlin 2.0 + KSP 2.0.21 compatible |
-| **DI annotation processor** | **kapt** | **KSP 2.0.21-1.0.28** | Kotlin-native, ~2–3× faster |
+| **Hilt** | 2.x early | **2.58** (+ `hilt-navigation-compose` 1.3.0) | Kotlin 2.0 + KSP 2.3.2 compatible |
+| **DI annotation processor** | **kapt** | **KSP 2.3.2-1** | Kotlin-native, ~2–3× faster |
 | **Dependency management** | Inline in `build.gradle` | **Version Catalog** (`libs.versions.toml`) | One source of truth, type-safe |
 | **Tab destination** | `enum class BottomNavDestination` | **`sealed interface BottomNavRoute : NavKey`** | The tab identity itself is a NavKey |
 | **Deep-link readiness** | String routes | **`@Serializable` + NavKey** | KMP- and deep-link-ready by construction |
@@ -139,7 +139,7 @@ Screen hierarchy is nearly identical. Clean-architecture separation was already 
 
 ## 4. Modern Compose Adoption
 
-### 4.1 The Kotlin 2.0 Compose Compiler Plugin
+### 4.1 The Kotlin 2.3.2 Compose Compiler Plugin
 
 In 2023 the Compose BOM and Kotlin itself moved on **independent release cycles**, which made "which BOM works with which Kotlin?" an ongoing puzzle. Kotlin 2.0 ships a **Compose Compiler Gradle Plugin** that ends this:
 
@@ -157,7 +157,7 @@ plugins {
 
 **The effect**: upgrading Kotlin no longer requires matching a separate Compose Compiler version, which **substantially reduces upgrade risk**.
 
-### 4.2 Compose BOM 2026.3.01
+### 4.2 Compose BOM 2026.4.01
 
 More than 36 Compose libraries (`ui`, `foundation`, `material3`, `animation`, `runtime`, …) are pinned by the BOM. You manage one version:
 
@@ -240,7 +240,7 @@ Every `collectAsState()` from the 2023 build is now `collectAsStateWithLifecycle
 
 ### 5.1 The Nav 2 → Nav 3 paradigm shift
 
-| Concept | Nav 2 (2023) | Nav 3 1.1.0 (2026) |
+| Concept | Nav 2 (2023) | Nav 3 1.0.0 (2026) |
 |---------|--------------|----------------------|
 | **Controller** | `NavHostController` (stateful object) | `NavBackStack` (a `SnapshotStateList<NavKey>`) |
 | **Route definition** | `const val route = "picture/{id}"` (string) | `@Serializable data class PictureRoute(val id: String)` |
