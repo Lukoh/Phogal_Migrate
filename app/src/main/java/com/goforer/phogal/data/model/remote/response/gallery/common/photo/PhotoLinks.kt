@@ -12,4 +12,13 @@ data class PhotoLinks(
     val html: String,
     val download: String,
     @SerialName("download_location") val downloadLocation: String
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = PhotoLinks(
+            self = "",
+            html = "",
+            download = "",
+            downloadLocation = ""
+        )
+    }
+}

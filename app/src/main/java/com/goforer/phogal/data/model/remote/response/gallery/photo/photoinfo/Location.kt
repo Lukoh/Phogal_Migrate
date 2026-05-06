@@ -11,4 +11,13 @@ data class Location(
     val country: String?,
     val name: String?,
     val position: Position
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Location(
+            city = null,
+            country = null,
+            name = null,
+            position = Position.empty() // Position 클래스에도 empty() 구현 권장
+        )
+    }
+}

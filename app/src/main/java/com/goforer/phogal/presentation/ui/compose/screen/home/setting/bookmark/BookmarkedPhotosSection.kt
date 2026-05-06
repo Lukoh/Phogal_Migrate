@@ -44,6 +44,7 @@ import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Pic
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.bookmark.BookmarkSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.bookmark.rememberBookmarkSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPictureItemUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.error.ErrorContent
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.ShowUpButton
 import com.goforer.phogal.presentation.ui.compose.screen.home.gallery.LoadingPhotos
@@ -123,10 +124,8 @@ fun BookmarkedPhotosSection(
                                         modifier = modifier.animateItem(
                                             tween(durationMillis = 250)
                                         ),
-                                        photoItemUiState = rememberPhotoItemUiState(
-                                            index = rememberSaveable { mutableIntStateOf(index) },
-                                            photo = rememberSaveable { mutableStateOf(photos[index]!!)},
-                                            visibleViewButton = rememberSaveable { mutableStateOf(true) }
+                                        pictureItemUiState = rememberPictureItemUiState(
+                                            picture = rememberSaveable { mutableStateOf(photos[index]!!)}
                                         ),
                                         onItemClicked = onItemClicked,
                                         onViewPhotos = onViewPhotos,

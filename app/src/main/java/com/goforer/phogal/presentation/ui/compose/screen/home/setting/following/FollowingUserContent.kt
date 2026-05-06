@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -23,7 +22,7 @@ fun FollowingUsersContent(
     enabledLoadPhotos: Boolean,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String?) -> Unit,
-    onFollow: (user: User) -> Unit
+    onFollow: (userUiState: User) -> Unit
 ) {
     if (users.itemCount > 0) {
         FollowingUsersSection(

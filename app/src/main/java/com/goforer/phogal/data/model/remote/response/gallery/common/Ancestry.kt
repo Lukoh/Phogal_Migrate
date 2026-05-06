@@ -13,4 +13,12 @@ data class Ancestry(
     val category: Category?,
     val subcategory: Subcategory?,
     val type: Type?
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Ancestry(
+            category = null,
+            subcategory = null,
+            type = null
+        )
+    }
+}

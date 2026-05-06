@@ -132,7 +132,13 @@ fun PopularPhotosSection(
                                 ),
                                 contentType = photos.itemContentType()
                             ) { index ->
-                                val state  = rememberPhotoItemUiState()
+                                val photo = photos[index] ?: return@items
+                                val state  = rememberPhotoItemUiState(
+                                    index = rememberSaveable { mutableIntStateOf(index) },
+                                    photo = rememberSaveable { mutableStateOf(photo) },
+                                    visibleViewButton = rememberSaveable { mutableStateOf(true) },
+                                    bookmarked = rememberSaveable { mutableStateOf(bookmarkViewModel.isPhotoBookmarked(photo.id)) }
+                                )
                                 val padding = if (index == 0)
                                     2.dp
                                 else
@@ -154,12 +160,7 @@ fun PopularPhotosSection(
                                     modifier = modifier
                                         .padding(top = padding)
                                         .animateItem(tween(durationMillis = 250)),
-                                    state = rememberPhotoItemUiState(
-                                        index = rememberSaveable { mutableIntStateOf(index) },
-                                        photo = rememberSaveable { mutableStateOf(photos[index]!!) },
-                                        visibleViewButton = rememberSaveable { mutableStateOf(true) },
-                                        bookmarked = rememberSaveable { mutableStateOf(bookmarkViewModel.isPhotoBookmarked(photos[index]!!.id)) }
-                                    ),
+                                    state = state,
                                     onItemClicked = onItemClicked,
                                     onViewPhotos = onViewPhotos,
                                     onShowSnackBar = onShowSnackBar,

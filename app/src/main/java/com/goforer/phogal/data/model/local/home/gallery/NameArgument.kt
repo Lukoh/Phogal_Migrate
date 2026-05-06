@@ -11,4 +11,13 @@ data class NameArgument(
     val firstName: String,
     val lastName: String,
     val username: String?
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = NameArgument(
+            name = "",
+            firstName = "",
+            lastName = "",
+            username = null
+        )
+    }
+}

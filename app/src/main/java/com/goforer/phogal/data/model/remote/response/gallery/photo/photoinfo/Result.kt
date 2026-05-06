@@ -6,7 +6,6 @@ import com.goforer.phogal.data.model.remote.response.gallery.common.CoverPhoto
 import com.goforer.phogal.data.model.remote.response.gallery.common.Links
 import com.goforer.phogal.data.model.remote.response.gallery.common.Tag
 import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
-import com.goforer.phogal.data.model.remote.response.gallery.common.user.UserLinks
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 

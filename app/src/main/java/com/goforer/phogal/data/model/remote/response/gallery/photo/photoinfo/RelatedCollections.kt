@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
 @Serializable
 @Parcelize
 data class RelatedCollections(
-    val results: List<Result>,
+    val result: List<Result>,
     val total: Long,
     val type: String
 ) : Parcelable

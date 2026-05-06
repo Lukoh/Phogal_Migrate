@@ -9,4 +9,11 @@ import kotlinx.parcelize.Parcelize
 data class SettingItem(
     val text: String,
     val drawable: Int
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = SettingItem(
+            text = "",
+            drawable = 0
+        )
+    }
+}

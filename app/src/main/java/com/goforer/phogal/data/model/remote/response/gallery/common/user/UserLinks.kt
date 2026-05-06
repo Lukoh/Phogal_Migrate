@@ -10,4 +10,12 @@ data class UserLinks(
     val self: String,
     val html: String,
     val photos: String
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = UserLinks(
+            self = "",
+            html = "",
+            photos = ""
+        )
+    }
+}

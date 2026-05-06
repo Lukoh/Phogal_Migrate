@@ -32,4 +32,28 @@ data class Picture(
     val user: User,
     @SerialName("liked_by_user") val likedByUser: Boolean,
     var bookmarked: Boolean
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Picture(
+            id = "",
+            createdAt = "",
+            updatedAt = "",
+            width = 0,
+            height = 0,
+            color = null,
+            blurHash = null,
+            downloads = 0,
+            publicDomain = false,
+            description = null,
+            exif = null,     // Nullable 필드는 null로 초기화
+            location = null, // Nullable 필드는 null로 초기화
+            tags = null,
+            currentUserCollections = null,
+            urls = Urls.empty(),
+            links = Links.empty(),
+            user = User.empty(),
+            likedByUser = false,
+            bookmarked = false
+        )
+    }
+}

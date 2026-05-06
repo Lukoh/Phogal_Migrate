@@ -10,4 +10,12 @@ data class Tag(
     val source: Source?,
     val title: String?,
     val type: String?
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Tag(
+            source = null, // 또는 Source.empty()
+            title = "",
+            type = ""
+        )
+    }
+}

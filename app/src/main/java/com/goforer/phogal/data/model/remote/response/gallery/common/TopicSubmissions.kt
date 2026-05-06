@@ -8,4 +8,10 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class TopicSubmissions(
     val wallpapers: Wallpapers?
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = TopicSubmissions(
+            wallpapers = null // 또는 필요에 따라 Wallpapers.empty()
+        )
+    }
+}

@@ -12,4 +12,12 @@ data class PhotosResponse(
     val results: MutableList<Photo>,
     val total: Int,
     @SerialName("total_pages") val totalPages: Int
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = PhotosResponse(
+            results = mutableListOf(),
+            total = 0,
+            totalPages = 0
+        )
+    }
+}

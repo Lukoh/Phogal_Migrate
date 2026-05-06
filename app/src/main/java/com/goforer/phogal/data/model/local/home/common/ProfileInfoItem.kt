@@ -12,4 +12,12 @@ data class ProfileInfoItem(
     @DrawableRes
     val iconResId: Int,
     val position: Int
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = ProfileInfoItem(
+            text = "",
+            iconResId = 0,
+            position = 0
+        )
+    }
+}

@@ -12,4 +12,14 @@ data class Urls(
     val regular: String,
     val small: String,
     val thumb: String
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Urls(
+            raw = "",
+            full = "",
+            regular = "",
+            small = "",
+            thumb = ""
+        )
+    }
+}

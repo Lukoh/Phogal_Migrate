@@ -9,4 +9,11 @@ import kotlinx.parcelize.Parcelize
 data class TagsPreview(
     val title: String,
     val type: String
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = TagsPreview(
+            title = "",
+            type = ""
+        )
+    }
+}

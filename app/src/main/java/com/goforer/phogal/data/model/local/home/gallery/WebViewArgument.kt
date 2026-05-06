@@ -9,4 +9,11 @@ import kotlinx.parcelize.Parcelize
 data class WebViewArgument(
     val firstName: String,
     val url: String
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = WebViewArgument(
+            firstName = "",
+            url = ""
+        )
+    }
+}

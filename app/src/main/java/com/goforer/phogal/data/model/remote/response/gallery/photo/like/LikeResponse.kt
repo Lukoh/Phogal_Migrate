@@ -11,4 +11,11 @@ import kotlinx.parcelize.Parcelize
 data class LikeResponse(
     val photo: Photo,
     val user: User
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = LikeResponse(
+            photo = Photo.empty(), // 하위 객체들의 empty()를 연쇄 호출
+            user = User.empty()
+        )
+    }
+}

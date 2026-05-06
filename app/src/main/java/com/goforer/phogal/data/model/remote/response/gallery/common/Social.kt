@@ -12,4 +12,13 @@ data class Social(
     @SerialName("paypal_email") val paypalEmail: String?,
     @SerialName("portfolio_url") val portfolioUrl: String?,
     @SerialName("twitter_username")val twitterUsername: String?
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Social(
+            instagramUsername = null,
+            paypalEmail = null,
+            portfolioUrl = null,
+            twitterUsername = null
+        )
+    }
+}

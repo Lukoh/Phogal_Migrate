@@ -16,4 +16,16 @@ data class CurrentUserCollection(
     @SerialName("updated_at") val updatedAt: String,
     @SerialName("cover_photo") val coverPhoto: CoverPhoto?,
     val user: User?
-): Parcelable
+): Parcelable {
+    companion object {
+        fun empty() = CurrentUserCollection(
+            id = 0,
+            title = "",
+            publishedAt = "",
+            lastCollectedAt = "",
+            updatedAt = "",
+            coverPhoto = null,
+            user = null
+        )
+    }
+}

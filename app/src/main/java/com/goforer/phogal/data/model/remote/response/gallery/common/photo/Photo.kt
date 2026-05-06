@@ -24,4 +24,22 @@ data class Photo(
     val urls: Urls,
     val links: PhotoLinks,
     var alreadySearched: Boolean = false
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Photo(
+            id = "",
+            createdAt = "",
+            updatedAt = "",
+            width = 0,
+            height = 0,
+            color = null,
+            blurHash = null,
+            description = null,
+            user = User.empty(), // 하위 클래스들도 empty() 구현 권장
+            currentUserCollections = emptyList(),
+            urls = Urls.empty(),
+            links = PhotoLinks.empty()
+        )
+    }
+}
+

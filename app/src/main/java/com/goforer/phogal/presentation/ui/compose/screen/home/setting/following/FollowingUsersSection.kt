@@ -59,7 +59,7 @@ fun FollowingUsersSection(
     users: LazyPagingItems<User>,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String?) -> Unit,
-    onFollow: (user: User) -> Unit
+    onFollow: (userUiState: User) -> Unit
 ) {
     val lazyListState = users.rememberLazyListState()
     val isRefreshing = users.loadState.refresh is LoadState.Loading

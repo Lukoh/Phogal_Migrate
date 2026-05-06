@@ -8,4 +8,8 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class Meta(
     val index: Boolean
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Meta(index = false)
+    }
+}

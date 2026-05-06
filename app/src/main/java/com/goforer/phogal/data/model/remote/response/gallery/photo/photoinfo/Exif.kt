@@ -15,4 +15,16 @@ data class Exif(
     val make: String?,
     val model: String?,
     val name: String?
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Exif(
+            aperture = null,
+            exposureTime = null,
+            focalLength = null,
+            iso = null,
+            make = null,
+            model = null,
+            name = null
+        )
+    }
+}

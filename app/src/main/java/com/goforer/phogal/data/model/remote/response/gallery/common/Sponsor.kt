@@ -18,7 +18,7 @@ data class Sponsor(
     val links: Links,
     val location: String?,
     val name: String,
-    val portfolio_url: String?,
+    @SerialName("portfolio_url") val portfolioUrl: String?,
     @SerialName("profile_image") val profileImage: ProfileImage,
     val social: Social,
     @SerialName("total_collections") val totalCollections: Int,
@@ -27,4 +27,28 @@ data class Sponsor(
     @SerialName("twitter_username") val twitterUsername: String?,
     @SerialName("updated_at") val updatedAt: String,
     val username: String
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Sponsor(
+            acceptedTos = false,
+            bio = "",
+            firstName = "",
+            forHire = false,
+            id = "",
+            instagramUsername = null,
+            last_name = null,
+            links = Links.empty(),
+            location = null,
+            name = "",
+            portfolioUrl = null,
+            profileImage = ProfileImage.empty(),
+            social = Social.empty(),
+            totalCollections = 0,
+            totalLikes = 0,
+            totalPhotos = 0,
+            twitterUsername = null,
+            updatedAt = "",
+            username = ""
+        )
+    }
+}

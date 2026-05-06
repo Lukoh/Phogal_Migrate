@@ -8,4 +8,10 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class Errors(
     val errors: List<String>
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Errors(
+            errors = emptyList()
+        )
+    }
+}

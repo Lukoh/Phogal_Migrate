@@ -25,8 +25,8 @@ class PictureViewModel @Inject constructor(
     private val pictureLikeRepository: PictureLikeRepository
 ) : ViewModel() {
 
-    private val _pictureUiState = MutableStateFlow<UiState<Picture>>(UiState.Idle)
-    val pictureUiState: StateFlow<UiState<Picture>> = _pictureUiState.asStateFlow()
+    private val _pictureUiStateUiState = MutableStateFlow<UiState<Picture>>(UiState.Idle)
+    val pictureUiState: StateFlow<UiState<Picture>> = _pictureUiStateUiState.asStateFlow()
 
     private val _likeActionState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
     val likeActionState: StateFlow<UiState<Unit>> = _likeActionState.asStateFlow()
@@ -43,9 +43,9 @@ class PictureViewModel @Inject constructor(
      */
     fun loadPicture(id: String) {
         if (id.isBlank()) return
-        _pictureUiState.value = UiState.Loading
+        _pictureUiStateUiState.value = UiState.Loading
         viewModelScope.launch {
-            _pictureUiState.value = pictureRepository.getPicture(id).toUiStateStrict()
+            _pictureUiStateUiState.value = pictureRepository.getPicture(id).toUiStateStrict()
         }
     }
 
@@ -59,7 +59,7 @@ class PictureViewModel @Inject constructor(
      * On success, patches the in-memory Picture atomically via [update].
      */
     fun toggleLike() {
-        val current = (_pictureUiState.value as? UiState.Success)?.data ?: return
+        val current = (_pictureUiStateUiState.value as? UiState.Success)?.data ?: return
         if (_likeActionState.value is UiState.Loading) return
 
         val wasLiked = current.likedByUser
@@ -76,7 +76,7 @@ class PictureViewModel @Inject constructor(
             when (result) {
                 is NetworkResult.Success, NetworkResult.Empty -> {
                     // Atomic patch of the nested state — avoids races with a concurrent loadPicture.
-                    _pictureUiState.update { state ->
+                    _pictureUiStateUiState.update { state ->
                         if (state is UiState.Success && state.data.id == pictureId) {
                             UiState.Success(state.data.copy(likedByUser = !wasLiked))
                         } else state

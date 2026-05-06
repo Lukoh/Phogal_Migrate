@@ -49,7 +49,9 @@ import coil.size.Size
 import com.goforer.base.designsystem.component.loadImagePainter
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.PhotoItemUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.PictureItemUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPictureItemUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserContainerUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.user.UserContainer
 import com.goforer.phogal.presentation.ui.theme.Blue50
@@ -62,14 +64,14 @@ import com.goforer.phogal.presentation.ui.theme.ColorSystemGray7
 @Composable
 fun PictureItem(
     modifier: Modifier = Modifier,
-    photoItemUiState: PhotoItemUiState = rememberPhotoItemUiState(),
+    pictureItemUiState: PictureItemUiState = rememberPictureItemUiState(),
     onItemClicked: (item: Picture, index: Int) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit
 ) {
-    val picture = photoItemUiState.photo as Picture
-    val verticalPadding = if (photoItemUiState.index == 0)
+    val picture = pictureItemUiState.picture
+    val verticalPadding = if (pictureItemUiState.index == 0)
         2.dp
     else
         0.5.dp
@@ -88,7 +90,7 @@ fun PictureItem(
             colors = CardDefaults.cardColors(
                 contentColor = MaterialTheme.colorScheme.primary,
                 containerColor =
-                if (photoItemUiState.clicked)
+                if (pictureItemUiState.clicked)
                     MaterialTheme.colorScheme.primaryContainer
                 else
                     MaterialTheme.colorScheme.surfaceVariant,
@@ -139,8 +141,8 @@ fun PictureItem(
                     )
                     .clip(RoundedCornerShape(1.dp))
                     .clickable {
-                        photoItemUiState.setClicked(true)
-                        onItemClicked.invoke(picture, photoItemUiState.index)
+                        pictureItemUiState.setClicked(true)
+                        onItemClicked.invoke(picture, pictureItemUiState.index)
                     }
                     .scale(.8f + (.2f * transition))
                     .graphicsLayer { rotationX = (1f - transition) * 5f }
@@ -159,7 +161,7 @@ fun PictureItem(
                         user = rememberSaveable { mutableStateOf(picture.user.toString()) },
                         profileSize = rememberSaveable { mutableDoubleStateOf(36.0) },
                         colors = remember { mutableStateOf(listOf(Color.White, Color.White, Blue70, Blue75, Blue50, ColorSnowWhite)) },
-                        visibleViewButton = rememberSaveable { mutableStateOf(photoItemUiState.visibleViewButton) },
+                        visibleViewButton = rememberSaveable { mutableStateOf(pictureItemUiState.visibleViewButton) },
                         fromItem = rememberSaveable { mutableStateOf(true) }
                     ),
                     onViewPhotos = onViewPhotos,

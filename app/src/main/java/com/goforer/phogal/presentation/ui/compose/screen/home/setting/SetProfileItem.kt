@@ -48,8 +48,8 @@ import com.goforer.phogal.presentation.ui.theme.ColorSystemGray1
 @Composable
 fun SetProfileItem(
     modifier: Modifier = Modifier,
-    profile: Profile,
-    onItemClicked: (profile: Profile) -> Unit
+    profileUiState: Profile,
+    onItemClicked: (profileUiState: Profile) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -60,13 +60,13 @@ fun SetProfileItem(
             .fillMaxWidth()
             .height(68.dp)
             .clickable {
-                onItemClicked(profile)
+                onItemClicked(profileUiState)
             }
     ) {
         IconContainer(64.dp) {
             Box {
                 val painter = loadImagePainter(
-                    data = profile.profileImage,
+                    data = profileUiState.profileImage,
                     size = Size.ORIGINAL
                 )
 
@@ -109,7 +109,7 @@ fun SetProfileItem(
             .widthIn(180.dp)
         ) {
             Text(
-                profile.name,
+                profileUiState.name,
                 modifier = Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp),
                 color = Black,
                 fontFamily = FontFamily.SansSerif,
@@ -120,7 +120,7 @@ fun SetProfileItem(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                profile.email,
+                profileUiState.email,
                 modifier = Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp),
                 color = ColorSystemGray1,
                 fontFamily = FontFamily.SansSerif,
@@ -149,7 +149,7 @@ fun SetProfileItem(
 )
 @Composable
 fun SetProfileItemPreview(modifier: Modifier = Modifier) {
-    val profile = Profile(0,"Lukoh", "남성",
+    val profileUiState = Profile(0,"Lukoh", "남성",
         favor = true,
         followed = true,
         email = "lukoh.nam@gmail.com",
@@ -176,7 +176,7 @@ fun SetProfileItemPreview(modifier: Modifier = Modifier) {
         IconContainer(64.dp) {
             Box {
                 val painter = loadImagePainter(
-                    data = profile.profileImage,
+                    data = profileUiState.profileImage,
                     size = Size.ORIGINAL
                 )
 
@@ -230,7 +230,7 @@ fun SetProfileItemPreview(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                profile.email,
+                profileUiState.email,
                 modifier = Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp),
                 color = ColorSystemGray1,
                 fontFamily = FontFamily.SansSerif,

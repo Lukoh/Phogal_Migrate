@@ -10,4 +10,11 @@ import kotlinx.serialization.SerialName
 data class Category(
     @SerialName("pretty_slug") val prettySlug: String,
     val slug: String
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Category(
+            prettySlug = "",
+            slug = ""
+        )
+    }
+}

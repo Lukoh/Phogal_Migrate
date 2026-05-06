@@ -48,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -102,7 +101,7 @@ fun PictureContent(
     pictureViewModel: PictureViewModel = hiltViewModel(),
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
-    onShownPhoto: (picture: Picture) -> Unit,
+    onShownPhoto: (pictureUiState: Picture) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
     onSuccess: (isSuccessful: Boolean) -> Unit
 ) {
@@ -127,7 +126,7 @@ fun HandlePictureResponse(
     state: PhotoContentUiState = rememberPhotoContentUiState(),
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
-    onShownPhoto: (picture: Picture) -> Unit,
+    onShownPhoto: (pictureUiState: Picture) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
     onSuccess: (isSuccessful: Boolean) -> Unit
 ) {
@@ -149,7 +148,7 @@ fun HandlePictureResponse(
                 ) {
                     BodyContent(
                         modifier = modifier,
-                        picture = picture,
+                        pictureUiState = picture,
                         visibleViewPhotosButton = state.visibleViewButton,
                         onViewPhotos = onViewPhotos,
                         onShowSnackBar = onShowSnackBar,
@@ -204,11 +203,11 @@ fun HandlePictureResponse(
 @Composable
 fun BodyContent(
     modifier: Modifier = Modifier,
-    picture: Picture,
+    pictureUiState: Picture,
     visibleViewPhotosButton: Boolean,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
-    onShownPhoto: (picture: Picture) -> Unit,
+    onShownPhoto: (pictureUiState: Picture) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit
 ) {
     var visiebleCameraInfo by remember { mutableStateOf(false) }
@@ -228,10 +227,10 @@ fun BodyContent(
         ),
         shape = RectangleShape
     ) {
-        val imageUrl = picture.urls.raw
+        val imageUrl = pictureUiState.urls.raw
         val painter = loadImagePainter(
             data = imageUrl,
-            size = Size(picture.width.div(8), picture.height.div(8))
+            size = Size(pictureUiState.width.div(8), pictureUiState.height.div(8))
         )
 
         if (painter.state is AsyncImagePainter.State.Loading) {
@@ -256,7 +255,7 @@ fun BodyContent(
             UserContainer(
                 modifier = Modifier,
                 state = rememberUserContainerUiState(
-                    user = rememberSaveable { mutableStateOf(picture.user.toString()) },
+                    user = rememberSaveable { mutableStateOf(pictureUiState.user.toString()) },
                     profileSize = rememberSaveable { mutableDoubleStateOf(48.0) },
                     colors = remember { mutableStateOf(listOf(ColorSystemGray1, ColorSystemGray1, ColorSnowWhite, ColorSystemGray5, Blue75, DarkGreen60)) },
                     visibleViewButton = rememberSaveable { mutableStateOf(visibleViewPhotosButton) },
@@ -282,7 +281,7 @@ fun BodyContent(
             BehaviorItem(700, 700, 700)
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = picture.description ?: "None",
+                text = pictureUiState.description ?: "None",
                 modifier = Modifier.padding(8.dp, 4.dp),
                 color = ColorText4,
                 fontFamily = FontFamily.SansSerif,
@@ -292,14 +291,14 @@ fun BodyContent(
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(10.dp))
-            picture.location?.let {
+            pictureUiState.location?.let {
                 LocationItem(it.name)
                 Spacer(modifier = Modifier.height(2.dp))
             }
 
-            DateItem(picture.createdAt)
+            DateItem(pictureUiState.createdAt)
             Spacer(modifier = Modifier.height(2.dp))
-            picture.exif?.let { exif ->
+            pictureUiState.exif?.let { exif ->
                 GenericCubicAnimationShape(
                     visible = visiebleCameraInfo,
                     duration = 550
@@ -311,7 +310,7 @@ fun BodyContent(
                                 clip = true
                                 shape = animatedShape
                             },
-                        exif = exif
+                        exifUiState = exif
                     )
                 }
             }
@@ -345,7 +344,7 @@ fun BodyContent(
             )
 
             Spacer(modifier = Modifier.height(70.dp))
-            onShownPhoto(picture)
+            onShownPhoto(pictureUiState)
         }
     }
 }
@@ -484,7 +483,7 @@ fun DateItem(createdAt: String) {
 @Composable
 fun ExifItem(
     modifier: Modifier = Modifier,
-    exif: Exif
+    exifUiState: Exif
 ) {
     Box(modifier) {
         Column {
@@ -494,14 +493,14 @@ fun ExifItem(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_camera),
-                    contentDescription = "Exif",
+                    contentDescription = "ExifUiState",
                     modifier = Modifier
                         .size(22.dp)
                         .padding(horizontal = 4.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = exif.name ?: stringResource(id = R.string.picture_no_camera_name),
+                    text = exifUiState.name ?: stringResource(id = R.string.picture_no_camera_name),
                     color = ColorBlackLight,
                     fontFamily = FontFamily.SansSerif,
                     fontWeight = FontWeight.Normal,
@@ -511,10 +510,10 @@ fun ExifItem(
                 )
             }
 
-            exif.name?.let {
+            exifUiState.name?.let {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${"Lens\n"}${"f/"}${exif.aperture}${"  "}${exif.focalLength}${"mm  "}${exif.exposureTime}${"s  iso "}${exif.iso}",
+                    text = "${"Lens\n"}${"f/"}${exifUiState.aperture}${"  "}${exifUiState.focalLength}${"mm  "}${exifUiState.exposureTime}${"s  iso "}${exifUiState.iso}",
                     modifier = Modifier.padding(horizontal = 28.dp),
                     color = ColorBlackLight,
                     fontFamily = FontFamily.SansSerif,
@@ -689,7 +688,7 @@ fun PictureContentPreview(modifier: Modifier = Modifier) {
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_camera),
-                        contentDescription = "Exif",
+                        contentDescription = "ExifUiState",
                         modifier = Modifier
                             .size(22.dp)
                             .padding(horizontal = 4.dp)

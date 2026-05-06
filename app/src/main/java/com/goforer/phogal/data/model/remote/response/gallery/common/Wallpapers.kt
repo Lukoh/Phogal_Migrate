@@ -10,4 +10,11 @@ import kotlinx.serialization.SerialName
 data class Wallpapers(
     @SerialName("approved_on") val approvedOn: String?,
     val status: String?
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Wallpapers(
+            approvedOn = null,
+            status = null
+        )
+    }
+}

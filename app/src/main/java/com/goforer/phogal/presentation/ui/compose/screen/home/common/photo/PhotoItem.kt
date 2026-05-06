@@ -26,10 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -75,9 +72,7 @@ fun PhotoItem(
     onShowSnackBar: (text: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit
 ) {
-    val photo = state.photo as Photo
-
-    photo.alreadySearched = true
+    state.photo.alreadySearched = true
     AnimatedVisibility(
         visible = true,
         modifier = modifier,
@@ -105,10 +100,10 @@ fun PhotoItem(
                 focusedElevation = 4.dp
             )
         ) {
-            val imageUrl = photo.urls.raw
+            val imageUrl = state.photo.urls.raw
             val painter = loadImagePainter(
                 data = imageUrl,
-                size = Size(photo.width.div(8), photo.height.div(8))
+                size = Size(state.photo.width.div(8), state.photo.height.div(8))
             )
             val transition by animateFloatAsState(
                 targetValue = if (painter.state is AsyncImagePainter.State.Success) 1f else 0f
@@ -145,7 +140,7 @@ fun PhotoItem(
                     .clip(RoundedCornerShape(1.dp))
                     .clickable {
                         state.setClicked(true)
-                        onItemClicked.invoke(photo, state.index)
+                        onItemClicked.invoke(state.photo, state.index)
                     }
                     .scale(.8f + (.2f * transition))
                     .graphicsLayer { rotationX = (1f - transition) * 5f }
@@ -172,17 +167,17 @@ fun PhotoItem(
                     }
                 }
 
-                val state = rememberUserContainerUiState()
+                val userState = rememberUserContainerUiState()
 
-                state.setUser(photo.user.toString())
-                state.setProfileSize(36.0)
-                state.setColors(listOf(Color.White, Color.White, Blue70, Blue75, Blue50, ColorSnowWhite))
-                state.setVisibleViewButton(state.visibleViewButton)
-                state.setFromItem(true)
+                userState.setUser(state.photo.user.toString())
+                userState.setProfileSize(36.0)
+                userState.setColors(listOf(Color.White, Color.White, Blue70, Blue75, Blue50, ColorSnowWhite))
+                userState.setVisibleViewButton(state.visibleViewButton)
+                userState.setFromItem(true)
 
                 UserContainer(
                     modifier = Modifier,
-                    state = state,
+                    state = userState,
                     onViewPhotos = onViewPhotos,
                     onShowSnackBar = onShowSnackBar,
                     onOpenWebView = onOpenWebView

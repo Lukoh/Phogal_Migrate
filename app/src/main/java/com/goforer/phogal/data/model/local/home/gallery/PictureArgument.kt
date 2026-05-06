@@ -9,4 +9,11 @@ import kotlinx.parcelize.Parcelize
 data class PictureArgument(
     val id: String,
     val visibleViewPhotosButton: Boolean
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = PictureArgument(
+            id = "",
+            visibleViewPhotosButton = false
+        )
+    }
+}

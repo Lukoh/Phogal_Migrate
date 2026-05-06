@@ -15,4 +15,16 @@ data class Source(
     @SerialName("meta_title") val metaTitle: String?,
     val subtitle: String?,
     val title: String?
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Source(
+            ancestry = null,
+            coverPhoto = null,
+            description = null,
+            metaDescription = null,
+            metaTitle = null,
+            subtitle = null,
+            title = null
+        )
+    }
+}

@@ -12,4 +12,13 @@ data class Links(
     val html: String,
     val download: String,
     @SerialName("download_location") val downloadLocation: String
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = Links(
+            self = "",
+            html = "",
+            download = "",
+            downloadLocation = ""
+        )
+    }
+}

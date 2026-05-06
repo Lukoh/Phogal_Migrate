@@ -42,4 +42,28 @@ data class User(
      * yourself instead of relying on `toString()`.
      */
     override fun toString(): String = Json.encodeToString(serializer(), this)
+
+    companion object {
+        fun empty() = User(
+            acceptedTos = false,
+            bio = null,
+            firstName = "",
+            forHire = false,
+            id = "",
+            instagramUsername = null,
+            lastName = null,
+            links = UserLinks.empty(), // 하위 클래스도 empty() 구현 권장
+            location = null,
+            name = "",
+            portfolioUrl = null,
+            profileImage = ProfileImage.empty(),
+            social = Social.empty(),
+            totalCollections = 0,
+            totalLikes = 0,
+            totalPhotos = 0,
+            twitterUsername = null,
+            updatedAt = "",
+            username = ""
+        )
+    }
 }

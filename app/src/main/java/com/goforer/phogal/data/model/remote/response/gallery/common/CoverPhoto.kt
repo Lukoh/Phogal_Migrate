@@ -3,8 +3,6 @@ package com.goforer.phogal.data.model.remote.response.gallery.common
 import kotlinx.serialization.Serializable
 import android.os.Parcelable
 import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
-import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Exif
-import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Location
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 

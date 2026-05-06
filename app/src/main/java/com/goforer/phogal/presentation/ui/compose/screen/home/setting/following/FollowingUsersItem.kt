@@ -69,7 +69,7 @@ fun FollowingUsersItem(
     followingUserItemUiState: FollowingUserItemUiState = rememberFollowingUserItemUiState(),
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String?) -> Unit,
-    onFollow: (user: User) -> Unit
+    onFollow: (userUiState: User) -> Unit
 ) {
     val user = followingUserItemUiState.user.toUser()
     val verticalPadding = if (followingUserItemUiState.index == 0)
@@ -237,7 +237,7 @@ fun FollowingUsersItemPreview(
         photos = "https://api.unsplash.com/photos/LBI7cgq3pbM/download"
         ).toString().toUserLinks()
 
-    val user = User(
+    val userUiState = User(
         acceptedTos = true,
         bio = null,
         firstName = "Ankush",
@@ -297,14 +297,14 @@ fun FollowingUsersItemPreview(
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
                 ProfileItem(
-                    image = user.profileImage.medium,
-                    name = user.name,
+                    image = userUiState.profileImage.medium,
+                    name = userUiState.name,
                     nameColor = Color.White,
                     position = 9,
                     onClicked = {}
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                getProfileInfoItems(user).forEachIndexed { _, item ->
+                getProfileInfoItems(userUiState).forEachIndexed { _, item ->
                     UserInfoItem(
                         text = item.text,
                         textColor = Color.White,
@@ -334,7 +334,7 @@ fun FollowingUsersItemPreview(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     ShowPortfolioButton(
-                        firstName = user.firstName,
+                        firstName = userUiState.firstName,
                         onOpenWebView = {}
                     )
                 }

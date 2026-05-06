@@ -140,6 +140,8 @@ fun UserPhotosSection(
                                 ),
                                 contentType = photos.itemContentType()
                             ) { index ->
+                                val photo = photos[index] ?: return@items
+
                                 // After recreation, LazyPagingItems first return 0 items, then the cached items.
                                 // This behavior/issue is resetting the LazyListState scroll position.
                                 // Below is a workaround. More info: https://issuetracker.google.com/issues/177245496.
@@ -149,7 +151,14 @@ fun UserPhotosSection(
                                     modifier.animateItem(
                                         placementSpec = tween(durationMillis = 250)
                                     ),
-                                    state = rememberPhotoItemUiState(),
+                                    state = rememberPhotoItemUiState(
+                                        index = rememberSaveable { mutableIntStateOf(index) },
+                                        photo = rememberSaveable { mutableStateOf(photo) },
+                                        visibleViewButton = rememberSaveable { mutableStateOf(true) },
+                                        bookmarked = rememberSaveable {
+                                            mutableStateOf(bookmarkViewModel.isPhotoBookmarked(photo.id))
+                                        }
+                                    ),
                                     onItemClicked = onItemClicked,
                                     onViewPhotos = onViewPhotos,
                                     onShowSnackBar = onShowSnackBar,

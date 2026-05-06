@@ -15,4 +15,15 @@ data class PreviewPhoto(
     val slug: String,
     @SerialName("updated_at") val updatedAt: String,
     val urls: Urls
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = PreviewPhoto(
+            blurHash = "",
+            createdAt = "",
+            id = "",
+            slug = "",
+            updatedAt = "",
+            urls = Urls.empty() // 하위 Urls 클래스 초기화 호출
+        )
+    }
+}

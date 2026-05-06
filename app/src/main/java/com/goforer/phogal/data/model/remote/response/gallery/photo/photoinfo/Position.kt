@@ -7,6 +7,13 @@ import kotlinx.parcelize.Parcelize
 @Serializable
 @Parcelize
 data class Position(
-    val latitude: Double,
-    val longitude: Double
-) : Parcelable
+    val latitude: Double?,
+    val longitude: Double?
+) : Parcelable {
+    companion object {
+        fun empty() = Position(
+            latitude = 0.0,
+            longitude = 0.0
+        )
+    }
+}

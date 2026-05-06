@@ -10,4 +10,12 @@ data class ProfileImage(
     val large: String,
     val medium: String,
     val small: String
-) : Parcelable
+) : Parcelable {
+    companion object {
+        fun empty() = ProfileImage(
+            large = "",
+            medium = "",
+            small = ""
+        )
+    }
+}

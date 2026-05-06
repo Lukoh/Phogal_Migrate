@@ -64,13 +64,13 @@ class BookmarkViewModel @Inject constructor(
     }
 
     /**
-     * Adds [picture] to bookmarks and refreshes the flow.
+     * Adds [pictureUiState] to bookmarks and refreshes the flow.
      * I/O is dispatched off the main thread.
      */
-    fun setBookmarkPicture(picture: Picture) {
+    fun setBookmarkPicture(pictureUiState: Picture) {
         viewModelScope.launch {
             withContext(ioDispatcher) {
-                localDataSource.toggleBookmarkPhoto(picture)
+                localDataSource.toggleBookmarkPhoto(pictureUiState)
             }
 
             refresh()
@@ -81,7 +81,7 @@ class BookmarkViewModel @Inject constructor(
      * Synchronous existence check. Cheap in-memory lookup; OK on main thread.
      * If the backing storage ever becomes truly async, convert this to `suspend`.
      */
-    fun isPhotoBookmarked(picture: Picture): Boolean = localDataSource.isPhotoBookmarkedFlow(picture).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false).value
+    fun isPhotoBookmarked(pictureUiState: Picture): Boolean = localDataSource.isPhotoBookmarkedFlow(pictureUiState).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false).value
 
     /** Synchronous existence check by id — same rationale as above. */
     fun isPhotoBookmarked(id: String): Boolean = localDataSource.isPhotoBookmarkedFlow(id).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false).value

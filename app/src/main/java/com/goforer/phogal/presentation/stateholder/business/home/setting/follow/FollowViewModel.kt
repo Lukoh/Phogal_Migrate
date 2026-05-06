@@ -6,7 +6,6 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.goforer.phogal.data.datasource.local.LocalDataSource
 import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
-import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.data.repository.follow.FollowUserRepository
 import com.goforer.phogal.di.dispatcher.IoDispatcher
 import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel.Companion.PAGE_SIZE
@@ -20,7 +19,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -66,14 +64,14 @@ class FollowViewModel @Inject constructor(
         }
     }
 
-    fun setUserFollow(user: User) {
+    fun setUserFollow(userUiState: User) {
         viewModelScope.launch {
             withContext(ioDispatcher) {
-                localDataSource.toggleFollowingUser(user)
+                localDataSource.toggleFollowingUser(userUiState)
             }
             refresh()
         }
     }
 
-    fun isUserFollowed(user: User): Boolean = localDataSource.isUserFollowedFlow(user).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false).value
+    fun isUserFollowed(userUiState: User): Boolean = localDataSource.isUserFollowedFlow(userUiState).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false).value
 }
