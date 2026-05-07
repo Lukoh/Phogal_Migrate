@@ -95,12 +95,12 @@ class GalleryViewModel @Inject constructor(
                 if (keyword in recentWords.value) return@withContext null
                 if (currentKeywords.size >= MAX_HISTORY_SIZE) currentKeywords.removeAt(0)
                 currentKeywords += keyword
-                val snapshot = currentKeywords.toList()
+                val snapshot = currentKeywords.toMutableList()
                 localDataSource.setSearchWords(snapshot)
                 snapshot
             } ?: return@launch
 
-            _recentWords.value = updated.asReversed()
+            _recentWords.value = updated
             _events.tryEmit(GalleryUiEvent.SearchCommitted(keyword))
         }
     }

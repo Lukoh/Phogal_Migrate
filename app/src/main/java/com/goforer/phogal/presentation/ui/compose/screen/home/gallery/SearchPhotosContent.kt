@@ -72,7 +72,7 @@ fun SearchPhotosContent(
         // Sub-composables are stateless: they receive the values they need and
         // emit events back via callbacks. The holder is hidden from them.
         RecentWordsChips(
-            recentWords = contentUiState.galleryUiState.recentWords,
+            recentWords = contentUiState.galleryUiState.recentWords.asReversed(),
             isScrolling = contentUiState.scrolling,
             triggered = contentUiState.triggered,
             onTriggeredConsumed = contentUiState::setTriggerConsumed,

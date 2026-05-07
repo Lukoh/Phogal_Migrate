@@ -56,7 +56,7 @@ class SearchPhotosContentUiState internal constructor(
     }
 
     fun setTriggerConsumed() {
-        _triggered.value = true
+        _triggered.value = false
     }
 
     fun setSearchTriggered() {
@@ -87,7 +87,9 @@ class GalleryUiState internal constructor(
     val photos: LazyPagingItems<Photo>,
     val currentQuery: String,
     val recentWords: List<String>
-)
+) {
+
+}
 
 @Composable
 fun rememberSearchPhotosContentUiState(
