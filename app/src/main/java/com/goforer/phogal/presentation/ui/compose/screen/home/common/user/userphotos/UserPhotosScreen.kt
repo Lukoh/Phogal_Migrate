@@ -40,6 +40,7 @@ import com.goforer.base.designsystem.component.CardSnackBar
 import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.phogal.R
+import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.presentation.stateholder.business.home.common.user.UserPhotosViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosContentUiState
@@ -142,6 +143,17 @@ fun UserPhotosScreen(
 
             val photos = userPhotosViewModel.photos.collectAsLazyPagingItems()
 
+            // Stable lambdas. The capture set is the bare minimum needed for the
+            // operation, which keeps Compose from invalidating these on every parent
+            // recomposition.
+            val onShowSnackBar: (String) -> Unit = remember(snackbarHostState, contentUiState) {
+                { text: String ->
+                    contentUiState.baseUiState.scope.launch {
+                        snackbarHostState.showSnackbar(text)
+                    }
+                }
+            }
+
             ScaffoldContent(topInterval = 2.dp) {
                 UserPhotosContent(
                     modifier = modifier,
@@ -149,12 +161,8 @@ fun UserPhotosScreen(
                     contentUiState = contentUiState,
                     photos = photos,
                     onItemClicked = onItemClicked,
-                    onShowSnackBar = {
-                        contentUiState.baseUiState.scope.launch {
-                            snackbarHostState.showSnackbar(it)
-                        }
-                    },
-                    onSuccess = { isSuccessful ->
+                    onShowSnackBar = onShowSnackBar,
+                    onSuccess = { isSuccessful: Boolean ->
                         contentUiState.setVisibleAction(isSuccessful)
                     }
                 )

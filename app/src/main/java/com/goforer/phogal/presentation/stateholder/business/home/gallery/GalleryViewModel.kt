@@ -64,8 +64,6 @@ class GalleryViewModel @Inject constructor(
             initialValue = PagingData.empty()
         )
 
-    // ---------------- One-shot events ----------------
-
     private val _events = MutableSharedFlow<GalleryUiEvent>(
         replay = 0,
         extraBufferCapacity = 1

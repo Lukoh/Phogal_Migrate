@@ -115,8 +115,6 @@ fun PhotoItem(
                     .height(256.dp)
                     .align(Alignment.CenterHorizontally)
                     .background(ColorSystemGray7)
-                    // In-house shimmer, replacing Accompanist placeholder (discontinued 2024).
-                    // See com.goforer.base.designsystem.component.state.ShimmerModifier.
                     .shimmer(
                         baseColor = ColorSystemGray7,
                         highlightColor = MaterialTheme.colorScheme.surface,

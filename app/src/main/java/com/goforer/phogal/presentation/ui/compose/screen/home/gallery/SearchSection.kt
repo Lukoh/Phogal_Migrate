@@ -129,13 +129,21 @@ fun SearchSection(
                     )
                 }
         )
+
+        // Note: SearchSection text input is now hoisted into rememberSearchSectionUiState
+        // alongside the screen, so the chip-tap path goes through the same channel as
+        // typed input. This collapses two state mutation paths into one.
+        val onClick = remember(sectionUiState) {
+            {
+                if (sectionUiState.wordChanged)
+                    onSearched(sectionUiState.editableInputState.textState)
+            }
+        }
+
         IconButton(
             modifier = modifier.padding(horizontal = 2.dp),
             height = 42.dp,
-            onClick = {
-                if (sectionUiState.wordChanged)
-                    onSearched(sectionUiState.editableInputState.textState)
-            },
+            onClick = onClick,
             icon = {
                 Icon(
                     imageVector = Icons.Default.Search,

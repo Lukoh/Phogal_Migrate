@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -30,7 +31,7 @@ fun PopularPhotosContent(
     PopularPhotosSection(
         modifier = modifier,
         photos = photos,
-        onItemClicked = { photo, _ -> onItemClicked(photo.id) },
+        onItemClicked = { photo: Photo, index: Int -> onItemClicked(photo.id) },
         onViewPhotos = onViewPhotos,
         onShowSnackBar = onShowSnackBar,
         onOpenWebView = onOpenWebView,

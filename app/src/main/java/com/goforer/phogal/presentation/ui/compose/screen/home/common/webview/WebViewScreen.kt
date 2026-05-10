@@ -88,14 +88,23 @@ fun WebViewScreen(
         }
     }
 
+    // Stable lambdas. The capture set is the bare minimum needed for the
+    // operation, which keeps Compose from invalidating these on every parent
+    // recomposition.
+    val snackbarHost = remember(snackbarHostState) {
+        @Composable {
+            SnackbarHost(
+                snackbarHostState,
+                snackbar = { snackbarData: SnackbarData ->
+                    CardSnackBar(modifier = Modifier, snackbarData)
+                }
+            )
+        }
+    }
+
     Scaffold(
         contentColor = ColorBgSecondary,
-        snackbarHost = { SnackbarHost(
-            snackbarHostState, snackbar = { snackbarData: SnackbarData ->
-                CardSnackBar(modifier = Modifier, snackbarData)
-            }
-        )
-        }, topBar = {
+        snackbarHost = snackbarHost, topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
@@ -110,9 +119,7 @@ fun WebViewScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = {
-                            onBackPressed()
-                        }
+                        onClick = onBackPressed
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,

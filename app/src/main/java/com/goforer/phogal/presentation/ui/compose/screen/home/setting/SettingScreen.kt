@@ -58,8 +58,8 @@ fun SettingScreen(
                 SettingContent(
                     modifier = modifier,
                     contentPadding = paddingValues,
-                    onItemClicked = {
-                        onItemClicked(baseUiState.context, it)
+                    onItemClicked = { index: Int ->
+                        onItemClicked(baseUiState.context, index)
                     }
                 )
             }

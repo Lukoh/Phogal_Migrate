@@ -49,6 +49,7 @@ import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.base.designsystem.component.dialog.ErrorDialog
 import com.goforer.phogal.R
+import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.common.photo.info.PictureViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.UiState
@@ -100,19 +101,26 @@ fun PictureScreen(
     val currentPicture = (pictureUiState as? UiState.Success)?.data
     val isLikedByUser = currentPicture?.likedByUser == true
 
-    // Observe like/unlike transient result so we can surface an error dialog.
-    LikeActionHandle(pictureViewModel = pictureViewModel)
-
-    Scaffold(
-        contentColor = Color.White,
-        snackbarHost = {
+    // Stable lambdas. The capture set is the bare minimum needed for the
+    // operation, which keeps Compose from invalidating these on every parent
+    // recomposition.
+    val snackbarHost = remember(snackbarHostState) {
+        @Composable {
             SnackbarHost(
                 snackbarHostState,
                 snackbar = { snackbarData: SnackbarData ->
                     CardSnackBar(modifier = Modifier, snackbarData)
                 }
             )
-        },
+        }
+    }
+
+    // Observe like/unlike transient result so we can surface an error dialog.
+    LikeActionHandle(pictureViewModel = pictureViewModel)
+
+    Scaffold(
+        contentColor = Color.White,
+        snackbarHost = snackbarHost,
         topBar = {
             CustomCenterAlignedTopAppBar(
                 title = {
@@ -136,11 +144,20 @@ fun PictureScreen(
                 },
                 actions = {
                     if (state.visibleActions && currentPicture != null) {
+                        // Stable lambdas. The capture set is the bare minimum needed for the
+                        // operation, which keeps Compose from invalidating these on every parent
+                        // recomposition.
+                        val onLikedClick = remember(pictureViewModel) {
+                            {
+                                pictureViewModel.toggleLike()
+                            }
+                        }
+
                         IconButton(
                             colors = IconButtonDefaults.iconButtonColors(
                                 contentColor = if (isLikedByUser) Red60 else Color.Black
                             ),
-                            onClick = { pictureViewModel.toggleLike() }
+                            onClick = onLikedClick
                         ) {
                             Icon(
                                 imageVector = if (isLikedByUser) {
@@ -152,6 +169,16 @@ fun PictureScreen(
                             )
                         }
 
+                        // Stable lambdas. The capture set is the bare minimum needed for the
+                        // operation, which keeps Compose from invalidating these on every parent
+                        // recomposition.
+                        val onEnabledClick = remember(bookmarkViewModel, state) {
+                            {
+                                bookmarkViewModel.setBookmarkPicture(currentPicture)
+                                state.setEnabledBookmark(!state.enabledBookmark)
+                            }
+                        }
+
                         IconButton(
                             colors = IconButtonDefaults.iconButtonColors(
                                 contentColor = if (state.enabledBookmark) {
@@ -160,10 +187,7 @@ fun PictureScreen(
                                     Color.Black
                                 }
                             ),
-                            onClick = {
-                                bookmarkViewModel.setBookmarkPicture(currentPicture)
-                                state.setEnabledBookmark(!state.enabledBookmark)
-                            }
+                            onClick = onEnabledClick
                         ) {
                             Icon(
                                 imageVector = if (state.enabledBookmark) {
@@ -180,25 +204,39 @@ fun PictureScreen(
         },
         content = { paddingValues ->
             ScaffoldContent(topInterval = 0.dp) {
+                // Stable lambdas. The capture set is the bare minimum needed for the
+                // operation, which keeps Compose from invalidating these on every parent
+                // recomposition.
+                val onShowSnackBar: (String) -> Unit = remember(state, snackbarHostState) {
+                    { text: String ->
+                        state.baseUiState.scope.launch {
+                            snackbarHostState.showSnackbar(text)
+                        }
+                    }
+                }
+
+                // Stable lambdas. The capture set is the bare minimum needed for the
+                // operation, which keeps Compose from invalidating these on every parent
+                // recomposition.
+                val onShownPhoto: (Picture) -> Unit = remember(bookmarkViewModel, state) {
+                    { picture: Picture ->
+                        state.setVisibleActions(true)
+                        state.baseUiState.scope.launch {
+                            state.setEnabledBookmark(bookmarkViewModel.isPhotoBookmarked(picture))
+                        }
+                    }
+                }
+
                 PictureContent(
                     modifier = modifier,
                     contentPadding = paddingValues,
                     pictureViewModel = pictureViewModel,
                     state = state,
                     onViewPhotos = onViewPhotos,
-                    onShowSnackBar = {
-                        state.baseUiState.scope.launch {
-                            snackbarHostState.showSnackbar(it)
-                        }
-                    },
-                    onShownPhoto = { picture ->
-                        state.setVisibleActions(true)
-                        state.baseUiState.scope.launch {
-                            state.setEnabledBookmark(bookmarkViewModel.isPhotoBookmarked(picture))
-                        }
-                    },
+                    onShowSnackBar = onShowSnackBar,
+                    onShownPhoto = onShownPhoto,
                     onOpenWebView = onOpenWebView,
-                    onSuccess = { isSuccessful ->
+                    onSuccess = { isSuccessful: Boolean ->
                         if (!isSuccessful) state.setVisibleActions(false)
                     }
                 )

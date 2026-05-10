@@ -81,12 +81,15 @@ fun SearchPhotosScreen(
     // typed input. This collapses two state mutation paths into one.
     val sectionUiState = rememberSearchSectionUiState(enabled = remember { mutableStateOf(false) })
 
-    val onChipClicked: (String) -> Unit = remember(galleryViewModel, sectionUiState, contentUiState) {
+    // Stable lambdas. The capture set is the bare minimum needed for the
+    // operation, which keeps Compose from invalidating these on every parent
+    // recomposition.
+    val onChipClicked: (String) -> Unit = remember(galleryViewModel, contentUiState,sectionUiState) {
         { keyword ->
-            sectionUiState.editableInputState.textState = keyword
-            contentUiState.baseUiState.keyboardController?.hide()
-            galleryViewModel.onQueryChanged(keyword)
-            galleryViewModel.commitSearch()
+            if (keyword.isNotEmpty() && keyword != contentUiState.galleryUiState.currentQuery) {
+                sectionUiState.editableInputState.textState = keyword
+                galleryViewModel.onQueryChanged(keyword)
+            }
         }
     }
 

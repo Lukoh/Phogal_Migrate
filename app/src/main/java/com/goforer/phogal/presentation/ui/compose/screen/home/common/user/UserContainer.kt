@@ -281,20 +281,29 @@ fun ShowPortfolioButton(
     onDismissedRequest: (Boolean) -> Unit,
     onOpenBottomSheet: (Boolean) -> Unit
 ) {
-    IconButton(
-        modifier = Modifier.padding(horizontal = 2.dp),
-        height = 32.dp,
-        onClick = {
+    // Note: SearchSection text input is now hoisted into rememberSearchSectionUiState
+    // alongside the screen, so the chip-tap path goes through the same channel as
+    // typed input. This collapses two state mutation paths into one.
+    val onClick = remember(bottomSheetState, scope, onOpenBottomSheet, onDismissedRequest) {
+        {
             scope.launch {
                 bottomSheetState.hide()
             }.invokeOnCompletion {
+                // 이 콜백은 메인 스레드에서 실행되지만,
+                // 가급적 상태 변경 로직은 launch 블록 내부 마지막에 두는 것이 더 명확합니다.
                 if (!bottomSheetState.isVisible) {
                     onOpenBottomSheet(false)
                 }
             }
 
             onDismissedRequest(true)
-        },
+        }
+    }
+
+    IconButton(
+        modifier = Modifier.padding(horizontal = 2.dp),
+        height = 32.dp,
+        onClick = onClick,
         icon = {
             Icon(
                 imageVector = Icons.Default.Star,

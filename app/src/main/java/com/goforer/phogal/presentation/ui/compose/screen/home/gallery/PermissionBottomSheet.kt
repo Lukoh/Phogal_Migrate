@@ -12,6 +12,7 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +59,17 @@ fun PermissionBottomSheet(
         },
         sheetState = sheetState,
     ) {
+        // Note: SearchSection text input is now hoisted into rememberSearchSectionUiState
+        // alongside the screen, so the chip-tap path goes through the same channel as
+        // typed input. This collapses two state mutation paths into one.
+        val onClick: () -> Unit = remember(sheetState, scope, onClicked) {
+            {
+                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                    if (!sheetState.isVisible) onClicked()
+                }
+            }
+        }
+
         Column(
             modifier = Modifier.wrapContentHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -93,11 +105,7 @@ fun PermissionBottomSheet(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = {
-                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-                        if (!sheetState.isVisible) onClicked()
-                    }
-                }
+                onClick = onClick
             ) {
                 Text(text = stringResource(id = R.string.permission_request))
             }
