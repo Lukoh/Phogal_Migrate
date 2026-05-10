@@ -103,7 +103,7 @@ fun PhotoItem(
             val imageUrl = state.photo.urls.raw
             val painter = loadImagePainter(
                 data = imageUrl,
-                size = Size(state.photo.width.div(8), state.photo.height.div(8))
+                size = Size(state.photo.width, state.photo.height)
             )
             val transition by animateFloatAsState(
                 targetValue = if (painter.state is AsyncImagePainter.State.Success) 1f else 0f

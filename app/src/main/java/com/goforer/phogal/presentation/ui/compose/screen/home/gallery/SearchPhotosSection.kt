@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -51,6 +52,8 @@ import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmar
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosSectionUiState
+import com.goforer.phogal.presentation.ui.compose.screen.home.common.EmptyState
+import com.goforer.phogal.presentation.ui.compose.screen.home.common.ErrorRow
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.error.ErrorContent
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.PhotoItem
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.ShowUpButton
@@ -122,8 +125,13 @@ fun SearchPhotosSection(
             )
         }
 
-        // PullToRefreshBox renders its own default Indicator (Material 3 spec-compliant).
-        // To customize, pass `indicator = { ... }` to PullToRefreshBox above.
+        if (sectionUiState.loadingDone) {
+            SideEffect {
+                val hasItems = photos.itemCount > 0
+                sectionUiState.setUpButtonVisibilityChanged(hasItems)
+                onLoadSuccess(hasItems)
+            }
+        }
 
         // Show up-button only when user has scrolled past the threshold and isn't
         // actively scrolling (prevents the button from flickering during drags).
@@ -167,26 +175,23 @@ private fun LazyListScope.renderLoadState(
     when (loadState.refresh) {
         is LoadState.Loading -> {
             item { LoadingRow() }
+            sectionUiState.setLoadingDone()
         }
-
-        is LoadState.NotLoading if photos.itemCount == 0 -> {
-            onLoadSuccess(false)
-            sectionUiState.setUpButtonVisibilityChanged(false)
-            item { EmptyState() }
-        }
-
         is LoadState.NotLoading -> {
-            onLoadSuccess(true)
-            photoItems(
-                photos = photos,
-                bookmarkViewModel = bookmarkViewModel,
-                onItemClicked = onItemClicked,
-                onViewPhotos = onViewPhotos,
-                onShowSnackBar = onShowSnackBar,
-                onOpenWebView = onOpenWebView
-            )
+            if (sectionUiState.loadingDone) {
+                if (photos.itemCount == 0)
+                    item { EmptyState() }
+                else
+                    photoItems(
+                        photos = photos,
+                        bookmarkViewModel = bookmarkViewModel,
+                        onItemClicked = onItemClicked,
+                        onViewPhotos = onViewPhotos,
+                        onShowSnackBar = onShowSnackBar,
+                        onOpenWebView = onOpenWebView
+                    )
+            }
         }
-
         is LoadState.Error -> {
             onLoadSuccess(false)
             val error = (loadState.refresh as LoadState.Error).error
@@ -224,7 +229,9 @@ private fun LazyListScope.photoItems(
 ) {
     items(
         count = photos.itemCount,
-        key = photos.itemKey { it.id },
+        key = photos.itemKey(
+            key = { photo -> photo.id }
+        ),
         contentType = photos.itemContentType()
     ) { index ->
         val photo = photos[index] ?: return@items
@@ -259,42 +266,6 @@ private fun LoadingRow(modifier: Modifier = Modifier) {
         count = 3,
         enableLoadIndicator = true
     )
-}
-
-@Composable
-private fun EmptyState(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxWidth()) {
-        Spacer(modifier = Modifier.height(320.dp))
-        Text(
-            text = stringResource(id = R.string.no_picture),
-            style = MaterialTheme.typography.titleMedium.copy(color = ColorSystemGray7),
-            modifier = Modifier.align(Alignment.Center),
-            fontFamily = FontFamily.SansSerif,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
-
-@Composable
-private fun ErrorRow(
-    throwable: Throwable,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    AnimatedVisibility(
-        visible = true,
-        modifier = modifier,
-        enter = scaleIn(transformOrigin = TransformOrigin(0f, 0f)) + fadeIn() +
-                expandIn(expandFrom = Alignment.TopStart),
-        exit = scaleOut(transformOrigin = TransformOrigin(0f, 0f)) + fadeOut() +
-                shrinkOut(shrinkTowards = Alignment.TopStart)
-    ) {
-        ErrorContent(
-            title = stringResource(id = R.string.error_dialog_title),
-            message = throwable.message ?: stringResource(id = R.string.error_dialog_content),
-            onRetry = onRetry
-        )
-    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
