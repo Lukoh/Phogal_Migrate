@@ -40,6 +40,7 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.common.EmptyState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.ErrorRow
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.PhotoItem
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.ShowUpButton
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import timber.log.Timber
 
@@ -66,7 +67,7 @@ fun SearchPhotosSection(
 
     // derivedStateOf: only triggers recomposition when the boolean actually flips,
     // not on every scroll tick.
-    val isScrolledPastThreshold by remember(lazyListState, sectionUiState.visibleUpButton) {
+    val isScrolledPastThreshold by remember(lazyListState) {
         derivedStateOf {
             !lazyListState.isScrollInProgress && lazyListState.firstVisibleItemIndex > UP_BUTTON_THRESHOLD ||
                     lazyListState.firstVisibleItemScrollOffset > SCROLL_OFFSET_SIGNAL
@@ -111,17 +112,9 @@ fun SearchPhotosSection(
         // actively scrolling (prevents the button from flickering during drags).
         ShowUpButton(
             modifier = Modifier.align(Alignment.BottomEnd),
-            visible = isScrolledPastThreshold && sectionUiState.visibleUpButton,
+            visible = isScrolledPastThreshold,
             onClick = { sectionUiState.setUpButtonClicked() }
         )
-    }
-
-    LaunchedEffect(sectionUiState.loadingDone) {
-        if (sectionUiState.loadingDone) {
-            val hasItems = photos.itemCount > 0
-
-            sectionUiState.setUpButtonVisibilityChanged(hasItems)
-        }
     }
 
     // Animate scroll-to-top when the up-button was tapped.
@@ -154,8 +147,8 @@ private fun LazyListScope.renderLoadState(
 
     when (loadState.refresh) {
         is LoadState.Loading -> {
-            sectionUiState.setLoadingDone()
             item {}
+            sectionUiState.setLoadingDone()
         }
         is LoadState.NotLoading -> {
             if (sectionUiState.loadingDone) {

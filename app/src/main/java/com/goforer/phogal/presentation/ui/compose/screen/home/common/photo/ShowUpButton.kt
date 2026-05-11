@@ -17,7 +17,7 @@ fun ShowUpButton(modifier: Modifier, visible: Boolean, onClick: () -> Unit) {
     ) {
         FloatingActionButton(
             modifier = modifier
-                .padding(bottom = 32.dp, end = 16.dp),
+                .padding(bottom = 36.dp, end = 16.dp),
             containerColor = GreenGray60,
             onClick = onClick
         ) {

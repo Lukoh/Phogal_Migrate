@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -35,7 +36,6 @@ import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rem
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.EmptyState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.ErrorRow
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.ShowUpButton
-import com.goforer.phogal.presentation.ui.compose.screen.home.gallery.LoadingPhotos
 import timber.log.Timber
 
 private const val PAGE_SIZE_HINT = 10
@@ -58,7 +58,7 @@ fun BookmarkedPhotosSection(
 
     // derivedStateOf: only triggers recomposition when the boolean actually flips,
     // not on every scroll tick.
-    val isScrolledPastThreshold by remember(lazyListState, sectionUiState.visibleUpButton) {
+    val isScrolledPastThreshold by remember(lazyListState) {
         derivedStateOf {
             !lazyListState.isScrollInProgress && lazyListState.firstVisibleItemIndex > UP_BUTTON_THRESHOLD ||
                     lazyListState.firstVisibleItemScrollOffset > SCROLL_OFFSET_SIGNAL
@@ -86,70 +86,19 @@ fun BookmarkedPhotosSection(
                     .fillMaxHeight(),
                 state = lazyListState,
             ) {
-                val loadState = photos.loadState
-
-                when(loadState.refresh) {
-                    is LoadState.Loading -> {
-                        item {}
-                    }
-                    is LoadState.NotLoading -> {
-                        if (photos.itemCount == 0 ) {
-                            item { EmptyState() }
-                        } else {
-                            items(count = photos.itemCount,
-                                key = photos.itemKey(
-                                    key = { photo -> photo.id }
-                                ),
-                                contentType = photos.itemContentType()
-                            ) { index ->
-                                PictureItem(
-                                    modifier = modifier.animateItem(
-                                        tween(durationMillis = 250)
-                                    ),
-                                    pictureItemUiState = rememberPictureItemUiState(
-                                        picture = rememberSaveable { mutableStateOf(photos[index]!!)}
-                                    ),
-                                    onItemClicked = onItemClicked,
-                                    onViewPhotos = onViewPhotos,
-                                    onShowSnackBar = {},
-                                    onOpenWebView = onOpenWebView
-                                )
-                                if (photos.itemCount < PAGE_SIZE_HINT && index == photos.itemCount - 1)
-                                    Spacer(modifier = Modifier.height(26.dp))
-                            }
-                        }
-                    }
-                    is LoadState.Error -> {
-                        val error = (loadState.refresh as LoadState.Error).error
-                        item { ErrorRow(throwable = error, onRetry = { photos.retry() }) }
-                    }
-                }
-
-                // Append (next-page) state is rendered independently from refresh state.
-                when (loadState.append) {
-                    is LoadState.Loading -> {
-                        Timber.d("Pagination Loading")
-                    }
-                    is LoadState.Error -> {
-                        Timber.d("Pagination broken Error")
-                        val error = (loadState.append as LoadState.Error).error
-                        item { ErrorRow(throwable = error, onRetry = { photos.retry() }) }
-                    }
-                    else -> Unit
-                }
+                renderLoadState(
+                    photos = photos,
+                    onItemClicked = onItemClicked,
+                    onViewPhotos = onViewPhotos,
+                    onOpenWebView = onOpenWebView,
+                )
             }
 
             ShowUpButton(
                 modifier = Modifier.align(Alignment.BottomEnd),
-                visible = isScrolledPastThreshold && sectionUiState.visibleUpButton,
+                visible = isScrolledPastThreshold,
                 onClick = { sectionUiState.setUpButtonClicked() }
             )
-        }
-
-        LaunchedEffect(sectionUiState) {
-            val hasItems = photos.itemCount > 0
-
-            sectionUiState.setUpButtonVisibilityChanged(hasItems)
         }
 
         LaunchedEffect(lazyListState, true, sectionUiState.clicked) {
@@ -160,5 +109,70 @@ fun BookmarkedPhotosSection(
 
             sectionUiState.setScrollConsumed()
         }
+    }
+}
+
+/**
+ * Dispatches the current [LoadState] of [photos] into the appropriate sub-renderer.
+ * Kept as a LazyListScope extension so each sub-renderer can emit `item {}` / `items {}`
+ * directly without re-wrapping.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+private fun LazyListScope.renderLoadState(
+    photos: LazyPagingItems<Picture>,
+    onItemClicked: (item: Picture, index: Int) -> Unit,
+    onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
+    onOpenWebView: (firstName: String, url: String) -> Unit
+) {
+    val loadState = photos.loadState
+
+    when(loadState.refresh) {
+        is LoadState.Loading -> {
+            item {}
+        }
+        is LoadState.NotLoading -> {
+            if (photos.itemCount == 0 ) {
+                item { EmptyState() }
+            } else {
+                items(count = photos.itemCount,
+                    key = photos.itemKey(
+                        key = { photo -> photo.id }
+                    ),
+                    contentType = photos.itemContentType()
+                ) { index ->
+                    PictureItem(
+                        modifier = Modifier.animateItem(
+                            tween(durationMillis = 250)
+                        ),
+                        pictureItemUiState = rememberPictureItemUiState(
+                            picture = rememberSaveable { mutableStateOf(photos[index]!!)}
+                        ),
+                        onItemClicked = onItemClicked,
+                        onViewPhotos = onViewPhotos,
+                        onShowSnackBar = {},
+                        onOpenWebView = onOpenWebView
+                    )
+                    if (photos.itemCount < PAGE_SIZE_HINT && index == photos.itemCount - 1)
+                        Spacer(modifier = Modifier.height(26.dp))
+                }
+            }
+        }
+        is LoadState.Error -> {
+            val error = (loadState.refresh as LoadState.Error).error
+            item { ErrorRow(throwable = error, onRetry = { photos.retry() }) }
+        }
+    }
+
+    // Append (next-page) state is rendered independently from refresh state.
+    when (loadState.append) {
+        is LoadState.Loading -> {
+            Timber.d("Pagination Loading")
+        }
+        is LoadState.Error -> {
+            Timber.d("Pagination broken Error")
+            val error = (loadState.append as LoadState.Error).error
+            item { ErrorRow(throwable = error, onRetry = { photos.retry() }) }
+        }
+        else -> Unit
     }
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.goforer.base.designsystem.component.state.rememberLazyListState
 import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
+import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.FollowingUserSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserItemUiState
@@ -58,7 +60,7 @@ fun FollowingUsersSection(
 
     // derivedStateOf: only triggers recomposition when the boolean actually flips,
     // not on every scroll tick.
-    val isScrolledPastThreshold by remember(lazyListState, sectionUiState.visibleUpButton) {
+    val isScrolledPastThreshold by remember(lazyListState) {
         derivedStateOf {
             !lazyListState.isScrollInProgress && lazyListState.firstVisibleItemIndex > UP_BUTTON_THRESHOLD ||
                     lazyListState.firstVisibleItemScrollOffset > SCROLL_OFFSET_SIGNAL
@@ -87,77 +89,20 @@ fun FollowingUsersSection(
                 contentPadding = PaddingValues(vertical = 0.1.dp),
                 state = lazyListState,
             ) {
-                val loadState = users.loadState
-
-                when(loadState.refresh) {
-                    is LoadState.Loading -> {
-                        item {}
-                    }
-
-                    is LoadState.NotLoading -> {
-                        if (users.itemCount == 0) {
-                            item { EmptyState() }
-                        } else {
-                            items(
-                                count = users.itemCount,
-                                key = users.itemKey(
-                                    key = { photo -> photo.id }
-                                ),
-                                contentType = users.itemContentType()
-                            ) { index ->
-                                FollowingUsersItem(
-                                    modifier = modifier.animateItem(
-                                        tween(durationMillis = 250)
-                                    ),
-                                    followingUserItemUiState = rememberFollowingUserItemUiState(
-                                        index = rememberSaveable { mutableIntStateOf(index) },
-                                        user = rememberSaveable { mutableStateOf(users[index]!!.toString()) },
-                                        visibleViewButton = rememberSaveable { mutableStateOf(true) },
-                                        followed = rememberSaveable { mutableStateOf(true) }
-                                    ),
-                                    onViewPhotos = onViewPhotos,
-                                    onOpenWebView = onOpenWebView,
-                                    onFollow = onFollow
-                                )
-
-                                if (index == users.itemCount - 1)
-                                    Spacer(modifier = Modifier.height(26.dp))
-                            }
-                        }
-                    }
-
-                    is LoadState.Error -> {
-                        val error = (loadState.refresh as LoadState.Error).error
-                        item { ErrorRow(throwable = error, onRetry = { users.retry() }) }
-                    }
-                }
-
-                // Append (next-page) state is rendered independently from refresh state.
-                when (loadState.append) {
-                    is LoadState.Loading -> {
-                        Timber.d("Pagination Loading")
-                    }
-                    is LoadState.Error -> {
-                        Timber.d("Pagination broken Error")
-                        val error = (loadState.append as LoadState.Error).error
-                        item { ErrorRow(throwable = error, onRetry = { users.retry() }) }
-                    }
-                    else -> Unit
-                }
+                renderLoadState(
+                    users = users,
+                    onViewPhotos = onViewPhotos,
+                    onOpenWebView = onOpenWebView,
+                    onFollow = onFollow
+                )
             }
         }
 
         ShowUpButton(
             modifier = Modifier.align(Alignment.BottomEnd),
-            visible = isScrolledPastThreshold && sectionUiState.visibleUpButton,
+            visible = isScrolledPastThreshold,
             onClick = { sectionUiState.setClicked(true) }
         )
-    }
-
-    LaunchedEffect(sectionUiState) {
-        val hasItems = users.itemCount > 0
-
-        sectionUiState.setVisibleUpButton(hasItems)
     }
 
     LaunchedEffect(lazyListState, true, sectionUiState.clicked) {
@@ -167,5 +112,76 @@ fun FollowingUsersSection(
         }
 
         sectionUiState.setClicked(false)
+    }
+}
+
+/**
+ * Dispatches the current [LoadState] of [users] into the appropriate sub-renderer.
+ * Kept as a LazyListScope extension so each sub-renderer can emit `item {}` / `items {}`
+ * directly without re-wrapping.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+private fun LazyListScope.renderLoadState(
+    users: LazyPagingItems<User>,
+    onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
+    onOpenWebView: (firstName: String, url: String?) -> Unit,
+    onFollow: (userUiState: User) -> Unit
+) {
+    val loadState = users.loadState
+
+    when(loadState.refresh) {
+        is LoadState.Loading -> {
+            item {}
+        }
+
+        is LoadState.NotLoading -> {
+            if (users.itemCount == 0) {
+                item { EmptyState() }
+            } else {
+                items(
+                    count = users.itemCount,
+                    key = users.itemKey(
+                        key = { photo -> photo.id }
+                    ),
+                    contentType = users.itemContentType()
+                ) { index ->
+                    FollowingUsersItem(
+                        modifier = Modifier.animateItem(
+                            tween(durationMillis = 250)
+                        ),
+                        followingUserItemUiState = rememberFollowingUserItemUiState(
+                            index = rememberSaveable { mutableIntStateOf(index) },
+                            user = rememberSaveable { mutableStateOf(users[index]!!.toString()) },
+                            visibleViewButton = rememberSaveable { mutableStateOf(true) },
+                            followed = rememberSaveable { mutableStateOf(true) }
+                        ),
+                        onViewPhotos = onViewPhotos,
+                        onOpenWebView = onOpenWebView,
+                        onFollow = onFollow
+                    )
+
+                    if (index == users.itemCount - 1)
+                        Spacer(modifier = Modifier.height(26.dp))
+                }
+            }
+        }
+
+        is LoadState.Error -> {
+            val error = (loadState.refresh as LoadState.Error).error
+            item { ErrorRow(throwable = error, onRetry = { users.retry() }) }
+        }
+    }
+
+    // Append (next-page) state is rendered independently from refresh state.
+    when (loadState.append) {
+        is LoadState.Loading -> {
+            Timber.d("Pagination Loading")
+        }
+        is LoadState.Error -> {
+            Timber.d("Pagination broken Error")
+            val error = (loadState.append as LoadState.Error).error
+            item { ErrorRow(throwable = error, onRetry = { users.retry() }) }
+        }
+        else -> Unit
     }
 }
