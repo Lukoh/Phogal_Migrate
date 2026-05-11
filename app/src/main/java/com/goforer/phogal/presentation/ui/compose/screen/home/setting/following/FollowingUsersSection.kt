@@ -66,13 +66,13 @@ fun FollowingUsersSection(
     }
 
     PullToRefreshBox(
-        modifier = modifier.clip(RoundedCornerShape(0.2.dp)),
+        modifier = modifier.clip(RoundedCornerShape(2.dp)),
         isRefreshing = isRefreshing,
         onRefresh = users::refresh
     ) {
         Box(
             modifier = modifier
-                .clip(RoundedCornerShape(2.dp))
+                .clip(RoundedCornerShape(0.2.dp))
                 .padding(
                     0.dp,
                     contentPadding.calculateTopPadding(),
@@ -91,47 +91,37 @@ fun FollowingUsersSection(
 
                 when(loadState.refresh) {
                     is LoadState.Loading -> {
-                        item {
-                            LoadingPhotos(
-                                modifier = Modifier.padding(4.dp, 4.dp),
-                                count = 3,
-                                enableLoadIndicator = true
-                            )
-                        }
-
-                        sectionUiState.setLoadingDone()
+                        item {}
                     }
 
                     is LoadState.NotLoading -> {
-                        if (sectionUiState.loadingDone) {
-                            if (users.itemCount == 0) {
-                                item { EmptyState() }
-                            } else {
-                                items(
-                                    count = users.itemCount,
-                                    key = users.itemKey(
-                                        key = { photo -> photo.id }
+                        if (users.itemCount == 0) {
+                            item { EmptyState() }
+                        } else {
+                            items(
+                                count = users.itemCount,
+                                key = users.itemKey(
+                                    key = { photo -> photo.id }
+                                ),
+                                contentType = users.itemContentType()
+                            ) { index ->
+                                FollowingUsersItem(
+                                    modifier = modifier.animateItem(
+                                        tween(durationMillis = 250)
                                     ),
-                                    contentType = users.itemContentType()
-                                ) { index ->
-                                    FollowingUsersItem(
-                                        modifier = modifier.animateItem(
-                                            tween(durationMillis = 250)
-                                        ),
-                                        followingUserItemUiState = rememberFollowingUserItemUiState(
-                                            index = rememberSaveable { mutableIntStateOf(index) },
-                                            user = rememberSaveable { mutableStateOf(users[index]!!.toString()) },
-                                            visibleViewButton = rememberSaveable { mutableStateOf(true) },
-                                            followed = rememberSaveable { mutableStateOf(true) }
-                                        ),
-                                        onViewPhotos = onViewPhotos,
-                                        onOpenWebView = onOpenWebView,
-                                        onFollow = onFollow
-                                    )
+                                    followingUserItemUiState = rememberFollowingUserItemUiState(
+                                        index = rememberSaveable { mutableIntStateOf(index) },
+                                        user = rememberSaveable { mutableStateOf(users[index]!!.toString()) },
+                                        visibleViewButton = rememberSaveable { mutableStateOf(true) },
+                                        followed = rememberSaveable { mutableStateOf(true) }
+                                    ),
+                                    onViewPhotos = onViewPhotos,
+                                    onOpenWebView = onOpenWebView,
+                                    onFollow = onFollow
+                                )
 
-                                    if (index == users.itemCount - 1)
-                                        Spacer(modifier = Modifier.height(26.dp))
-                                }
+                                if (index == users.itemCount - 1)
+                                    Spacer(modifier = Modifier.height(26.dp))
                             }
                         }
                     }
@@ -164,12 +154,10 @@ fun FollowingUsersSection(
         )
     }
 
-    LaunchedEffect(sectionUiState.loadingDone) {
-        if (sectionUiState.loadingDone) {
-            val hasItems = users.itemCount > 0
+    LaunchedEffect(sectionUiState) {
+        val hasItems = users.itemCount > 0
 
-            sectionUiState.setVisibleUpButton(hasItems)
-        }
+        sectionUiState.setVisibleUpButton(hasItems)
     }
 
     LaunchedEffect(lazyListState, true, sectionUiState.clicked) {

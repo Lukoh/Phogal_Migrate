@@ -121,7 +121,6 @@ fun SearchPhotosSection(
             val hasItems = photos.itemCount > 0
 
             sectionUiState.setUpButtonVisibilityChanged(hasItems)
-            onLoadSuccess(hasItems)
         }
     }
 
@@ -155,11 +154,12 @@ private fun LazyListScope.renderLoadState(
 
     when (loadState.refresh) {
         is LoadState.Loading -> {
-            item { LoadingRow() }
             sectionUiState.setLoadingDone()
+            item {}
         }
         is LoadState.NotLoading -> {
             if (sectionUiState.loadingDone) {
+                onLoadSuccess(true)
                 if (photos.itemCount == 0)
                     item { EmptyState() }
                 else
@@ -238,15 +238,6 @@ private fun LazyListScope.photoItems(
             Spacer(modifier = Modifier.height(26.dp))
         }
     }
-}
-
-@Composable
-private fun LoadingRow(modifier: Modifier = Modifier) {
-    LoadingPhotos(
-        modifier = modifier.padding(4.dp, 4.dp),
-        count = 3,
-        enableLoadIndicator = true
-    )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

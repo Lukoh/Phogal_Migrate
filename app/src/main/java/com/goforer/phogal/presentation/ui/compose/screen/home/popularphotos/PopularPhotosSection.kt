@@ -89,18 +89,13 @@ fun PopularPhotosSection(
 
             when(loadState.refresh) {
                 is LoadState.Loading -> {
-                    item {
-                        LoadingPhotos(
-                            modifier = Modifier.padding(4.dp, 4.dp),
-                            count = 3,
-                            enableLoadIndicator = true
-                        )
-                    }
+                    item {}
 
                     sectionUiState.setLoadingDone()
                 }
                 is LoadState.NotLoading -> {
                     if (sectionUiState.loadingDone) {
+                        onSuccess(true)
                         if (photos.itemCount == 0 ) {
                             item { EmptyState() }
                         } else {
@@ -185,7 +180,6 @@ fun PopularPhotosSection(
             val hasItems = photos.itemCount > 0
 
             sectionUiState.setUpButtonVisibilityChanged(hasItems)
-            onSuccess(hasItems)
         }
     }
 

@@ -90,42 +90,32 @@ fun BookmarkedPhotosSection(
 
                 when(loadState.refresh) {
                     is LoadState.Loading -> {
-                        item {
-                            LoadingPhotos(
-                                modifier = Modifier.padding(4.dp, 4.dp),
-                                count = 3,
-                                enableLoadIndicator = true
-                            )
-                        }
-
-                        sectionUiState.setLoadingDone()
+                        item {}
                     }
                     is LoadState.NotLoading -> {
-                        if (sectionUiState.loadingDone) {
-                            if (photos.itemCount == 0 ) {
-                                item { EmptyState() }
-                            } else {
-                                items(count = photos.itemCount,
-                                    key = photos.itemKey(
-                                        key = { photo -> photo.id }
+                        if (photos.itemCount == 0 ) {
+                            item { EmptyState() }
+                        } else {
+                            items(count = photos.itemCount,
+                                key = photos.itemKey(
+                                    key = { photo -> photo.id }
+                                ),
+                                contentType = photos.itemContentType()
+                            ) { index ->
+                                PictureItem(
+                                    modifier = modifier.animateItem(
+                                        tween(durationMillis = 250)
                                     ),
-                                    contentType = photos.itemContentType()
-                                ) { index ->
-                                    PictureItem(
-                                        modifier = modifier.animateItem(
-                                            tween(durationMillis = 250)
-                                        ),
-                                        pictureItemUiState = rememberPictureItemUiState(
-                                            picture = rememberSaveable { mutableStateOf(photos[index]!!)}
-                                        ),
-                                        onItemClicked = onItemClicked,
-                                        onViewPhotos = onViewPhotos,
-                                        onShowSnackBar = {},
-                                        onOpenWebView = onOpenWebView
-                                    )
-                                    if (photos.itemCount < PAGE_SIZE_HINT && index == photos.itemCount - 1)
-                                        Spacer(modifier = Modifier.height(26.dp))
-                                }
+                                    pictureItemUiState = rememberPictureItemUiState(
+                                        picture = rememberSaveable { mutableStateOf(photos[index]!!)}
+                                    ),
+                                    onItemClicked = onItemClicked,
+                                    onViewPhotos = onViewPhotos,
+                                    onShowSnackBar = {},
+                                    onOpenWebView = onOpenWebView
+                                )
+                                if (photos.itemCount < PAGE_SIZE_HINT && index == photos.itemCount - 1)
+                                    Spacer(modifier = Modifier.height(26.dp))
                             }
                         }
                     }
@@ -156,12 +146,10 @@ fun BookmarkedPhotosSection(
             )
         }
 
-        LaunchedEffect(sectionUiState.loadingDone) {
-            if (sectionUiState.loadingDone) {
-                val hasItems = photos.itemCount > 0
+        LaunchedEffect(sectionUiState) {
+            val hasItems = photos.itemCount > 0
 
-                sectionUiState.setUpButtonVisibilityChanged(hasItems)
-            }
+            sectionUiState.setUpButtonVisibilityChanged(hasItems)
         }
 
         LaunchedEffect(lazyListState, true, sectionUiState.clicked) {

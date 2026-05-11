@@ -7,7 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.goforer.phogal.presentation.ui.theme.Blue70
+import com.goforer.phogal.presentation.ui.theme.GreenGray60
 
 @Composable
 fun ShowUpButton(modifier: Modifier, visible: Boolean, onClick: () -> Unit) {
@@ -17,8 +17,8 @@ fun ShowUpButton(modifier: Modifier, visible: Boolean, onClick: () -> Unit) {
     ) {
         FloatingActionButton(
             modifier = modifier
-                .padding(bottom = 8.dp, end = 8.dp),
-            containerColor = Blue70,
+                .padding(bottom = 32.dp, end = 16.dp),
+            containerColor = GreenGray60,
             onClick = onClick
         ) {
             Text("Up!")
