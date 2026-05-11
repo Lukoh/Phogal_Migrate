@@ -101,7 +101,7 @@ fun BookmarkedPhotosSection(
             )
         }
 
-        LaunchedEffect(lazyListState, true, sectionUiState.clicked) {
+        LaunchedEffect(lazyListState, sectionUiState.clicked) {
             if (sectionUiState.clicked) {
                 lazyListState.animateScrollToItem (0)
                 sectionUiState.setUpButtonVisibilityChanged(false)

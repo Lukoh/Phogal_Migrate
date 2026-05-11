@@ -118,7 +118,7 @@ fun SearchPhotosSection(
     }
 
     // Animate scroll-to-top when the up-button was tapped.
-    LaunchedEffect(sectionUiState.clicked) {
+    LaunchedEffect(lazyListState, sectionUiState.clicked) {
         if (sectionUiState.clicked) {
             lazyListState.animateScrollToItem(0)
             sectionUiState.setUpButtonVisibilityChanged(false)
