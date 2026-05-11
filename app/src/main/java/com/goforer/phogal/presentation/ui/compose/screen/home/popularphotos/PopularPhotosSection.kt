@@ -15,7 +15,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -67,20 +66,18 @@ fun PopularPhotosSection(
 
     // derivedStateOf: only triggers recomposition when the boolean actually flips,
     // not on every scroll tick.
-    val isScrolledPastThreshold by remember(lazyListState) {
+    val isScrolledPastThreshold by remember(lazyListState, sectionUiState.visibleUpButton) {
         derivedStateOf {
-            lazyListState.firstVisibleItemIndex > UP_BUTTON_THRESHOLD ||
+            !lazyListState.isScrollInProgress && lazyListState.firstVisibleItemIndex > UP_BUTTON_THRESHOLD ||
                     lazyListState.firstVisibleItemScrollOffset > SCROLL_OFFSET_SIGNAL
         }
     }
 
     // Material 3 PullToRefreshBox — default indicator is rendered automatically.
     PullToRefreshBox(
-        modifier = modifier.clip(RoundedCornerShape(0.2.dp)),
+        modifier = modifier.clip(RoundedCornerShape(2.dp)),
         isRefreshing = isRefreshing,
-        onRefresh = {
-            photos.refresh()
-        }
+        onRefresh = photos::refresh
     ) {
         LazyColumn(
             modifier = Modifier
@@ -176,20 +173,19 @@ fun PopularPhotosSection(
             }
         }
 
-        if (sectionUiState.loadingDone) {
-            SideEffect {
-                val hasItems = photos.itemCount > 0
-                sectionUiState.setUpButtonVisibilityChanged(hasItems)
-                onSuccess(hasItems)
-            }
-        }
+        ShowUpButton(
+            modifier = Modifier.align(Alignment.BottomEnd),
+            visible = isScrolledPastThreshold && sectionUiState.visibleUpButton,
+            onClick = { sectionUiState.setUpButtonClicked() }
+        )
+    }
 
-        if (!lazyListState.isScrollInProgress) {
-            ShowUpButton(
-                modifier = Modifier.align(Alignment.BottomEnd),
-                visible = isScrolledPastThreshold && sectionUiState.visibleUpButton,
-                onClick = { sectionUiState.setUpButtonClicked() }
-            )
+    LaunchedEffect(sectionUiState.loadingDone) {
+        if (sectionUiState.loadingDone) {
+            val hasItems = photos.itemCount > 0
+
+            sectionUiState.setUpButtonVisibilityChanged(hasItems)
+            onSuccess(hasItems)
         }
     }
 
