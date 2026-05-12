@@ -48,7 +48,7 @@ private const val SCROLL_OFFSET_SIGNAL = 35
 @Composable
 fun FollowingUsersSection(
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues,
+    paddingValues: PaddingValues,
     sectionUiState: FollowingUserSectionUiState = rememberFollowingUserSectionUiState(),
     users: LazyPagingItems<User>,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
@@ -73,21 +73,14 @@ fun FollowingUsersSection(
         onRefresh = users::refresh
     ) {
         Box(
-            modifier = modifier
-                .clip(RoundedCornerShape(0.2.dp))
-                .padding(
-                    0.dp,
-                    contentPadding.calculateTopPadding(),
-                    0.dp,
-                    0.dp
-                )
+            modifier = modifier.clip(RoundedCornerShape(0.2.dp))
         ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(),
-                contentPadding = PaddingValues(vertical = 0.1.dp),
                 state = lazyListState,
+                contentPadding = paddingValues,
             ) {
                 renderLoadState(
                     users = users,

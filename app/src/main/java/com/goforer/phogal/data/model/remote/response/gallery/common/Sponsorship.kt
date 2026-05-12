@@ -2,11 +2,13 @@ package com.goforer.phogal.data.model.remote.response.gallery.common
 
 import kotlinx.serialization.Serializable
 import android.os.Parcelable
+import androidx.compose.runtime.Immutable
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 
 @Serializable
 @Parcelize
+@Immutable
 data class Sponsorship(
     @SerialName("impression_urls") val impressionUrls: List<String>?,
     val sponsor: Sponsor,

@@ -1,7 +1,9 @@
 package com.goforer.phogal.presentation.ui.compose.screen.home.gallery
 
+import android.R.attr.x
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
@@ -54,6 +57,7 @@ private const val SCROLL_OFFSET_SIGNAL = 35
 @Composable
 fun SearchPhotosSection(
     modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
     photos: LazyPagingItems<Photo>,
     sectionUiState: SearchPhotosSectionUiState = rememberSearchPhotosSectionUiState(rememberCoroutineScope(),rememberSaveable { mutableStateOf(true) }),
     bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
@@ -92,12 +96,20 @@ fun SearchPhotosSection(
         isRefreshing = isRefreshing,
         onRefresh = photos::refresh
     ) {
+        val layoutDirection = LocalLayoutDirection.current
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(),
-            state = lazyListState
-        ) {
+            state = lazyListState,
+            contentPadding = PaddingValues(
+                start = paddingValues.calculateLeftPadding(layoutDirection),
+                top = 0.dp,
+                end = paddingValues.calculateRightPadding(layoutDirection) ,
+                bottom = paddingValues.calculateBottomPadding() + 24.dp
+            )
+        ) {x
             renderLoadState(
                 photos = photos,
                 sectionUiState = sectionUiState,

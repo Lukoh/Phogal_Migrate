@@ -17,8 +17,8 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.common.InitScreen
 @Composable
 fun FollowingUsersContent(
     modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
     users: LazyPagingItems<User>,
-    contentPadding: PaddingValues = PaddingValues(4.dp),
     enabledLoadPhotos: Boolean,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String?) -> Unit,
@@ -27,7 +27,7 @@ fun FollowingUsersContent(
     if (users.itemCount > 0) {
         FollowingUsersSection(
             modifier = modifier,
-            contentPadding = contentPadding,
+            paddingValues = paddingValues,
             users = users,
             onViewPhotos = onViewPhotos,
             onOpenWebView = onOpenWebView,

@@ -14,7 +14,7 @@ plugins {
 android {
     namespace 'com.goforer.phogal'
     // AGP 8.7.3은 최대 API 35까지 지원합니다. API 36은 AGP 8.11+ 필요.
-    compileSdk = 36  // 기존 'compileSdk 36'에서 '=' 추가
+    compileSdk = 37  // 기존 'compileSdk 36'에서 '=' 추가
 
     defaultConfig {
         applicationId "com.goforer.phogal"
@@ -149,12 +149,12 @@ android {
     }
 }
 
-// Compose Compiler 플러그인 옵션 (선택사항)
-// 리포트/메트릭을 생성하고 싶다면 아래 주석을 해제하세요.
-//composeCompiler {
-//    reportsDestination = layout.buildDirectory.dir("compose_compiler")
-//    metricsDestination = layout.buildDirectory.dir("compose_compiler")
-//}
+composeCompiler {
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+    metricsDestination = layout.buildDirectory.dir("compose_compiler")
+
+    enableStrongSkippingMode = true
+}
 
 dependencies {
     // --- Core & lifecycle ---

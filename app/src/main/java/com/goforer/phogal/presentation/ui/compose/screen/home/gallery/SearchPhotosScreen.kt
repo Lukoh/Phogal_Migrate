@@ -115,10 +115,11 @@ fun SearchPhotosScreen(
             )
         },
         content = { paddingValues ->
-            ScaffoldContent(topInterval = 8.dp) {
+            ScaffoldContent(topInterval = paddingValues.calculateTopPadding()) {
                 SearchPhotosContent(
-                    modifier = modifier.padding(top = paddingValues.calculateTopPadding()),
+                    modifier = modifier,
                     contentUiState = contentUiState,
+                    paddingValues = paddingValues,
                     onSearch = onSearch,
                     onChipClicked = onChipClicked,
                     onItemClicked = onItemClicked,

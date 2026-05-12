@@ -46,7 +46,7 @@ private const val SCROLL_OFFSET_SIGNAL = 35
 @Composable
 fun BookmarkedPhotosSection(
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues,
+    paddingValues: PaddingValues,
     sectionUiState: BookmarkSectionUiState = rememberBookmarkSectionUiState(),
     photos: LazyPagingItems<Picture>,
     onItemClicked: (item: Picture, index: Int) -> Unit,
@@ -71,20 +71,14 @@ fun BookmarkedPhotosSection(
         onRefresh = photos::refresh
     ) {
         Box(
-            modifier = modifier
-                .clip(RoundedCornerShape(0.2.dp))
-                .padding(
-                    0.dp,
-                    contentPadding.calculateTopPadding(),
-                    0.dp,
-                    0.dp
-                )
+            modifier = modifier.clip(RoundedCornerShape(0.2.dp))
         ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(),
                 state = lazyListState,
+                contentPadding = paddingValues
             ) {
                 renderLoadState(
                     photos = photos,

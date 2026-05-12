@@ -143,8 +143,8 @@ fun BookmarkedPhotosScreen(
             ScaffoldContent(topInterval = 2.dp) {
                 BookmarkedPhotosContent(
                     modifier = modifier,
+                    paddingValues = paddingValues,
                     bookmarkedPictures = bookmarkContentUiState.bookmarkUiState.bookmarkedPictures,
-                    contentPadding = paddingValues,
                     enabledLoadPhotos = bookmarkContentUiState.enabledLoadPhotos,
                     onItemClicked = onItemClicked,
                     onViewPhotos = onViewPhotos,

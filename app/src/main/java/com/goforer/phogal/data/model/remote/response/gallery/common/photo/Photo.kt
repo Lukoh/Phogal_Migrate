@@ -1,6 +1,7 @@
 package com.goforer.phogal.data.model.remote.response.gallery.common.photo
 
 import android.os.Parcelable
+import androidx.compose.runtime.Immutable
 import com.goforer.phogal.data.model.remote.response.gallery.common.CurrentUserCollection
 import com.goforer.phogal.data.model.remote.response.gallery.common.Urls
 import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
@@ -10,6 +11,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
+@Immutable
 data class Photo(
     val id: String,
     @SerialName("created_at") val createdAt: String,

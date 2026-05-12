@@ -111,6 +111,7 @@ fun PopularPhotosScreen(
                 popularPhotosViewModel.updateOrderBy(POPULAR)
                 PopularPhotosContent(
                     modifier = modifier,
+                    paddingValues= paddingValues,
                     photos = contentUiState.popularPhotosUiState.photos,
                     onItemClicked = onItemClicked,
                     onViewPhotos = onViewPhotos,

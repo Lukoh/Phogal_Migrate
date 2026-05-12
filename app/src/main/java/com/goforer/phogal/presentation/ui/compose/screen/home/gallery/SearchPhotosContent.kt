@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,6 +53,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 fun SearchPhotosContent(
     modifier: Modifier = Modifier,
     contentUiState: SearchPhotosContentUiState,
+    paddingValues: PaddingValues,
     onSearch: (String) -> Unit,
     onChipClicked: (String) -> Unit,
     onItemClicked: (id: String) -> Unit,
@@ -82,6 +84,7 @@ fun SearchPhotosContent(
         )
 
         PhotosOrInitScreen(
+            paddingValues = paddingValues,
             query = contentUiState.galleryUiState.currentQuery,
             photos = contentUiState.galleryUiState.photos,
             onItemClicked = { photo, _ -> onItemClicked(photo.id) },
@@ -157,6 +160,7 @@ private fun RecentWordsChips(
  */
 @Composable
 private fun ColumnScope.PhotosOrInitScreen(
+    paddingValues: PaddingValues,
     query: String,
     photos: LazyPagingItems<Photo>,
     onItemClicked: (Photo, Int) -> Unit,
@@ -171,6 +175,7 @@ private fun ColumnScope.PhotosOrInitScreen(
             modifier = Modifier
                 .padding(top = 0.5.dp)
                 .weight(1f),
+            paddingValues = paddingValues,
             photos = photos,
             sectionUiState = rememberSearchPhotosSectionUiState(rememberCoroutineScope(), rememberSaveable { mutableStateOf(false) }),
             onItemClicked = onItemClicked,

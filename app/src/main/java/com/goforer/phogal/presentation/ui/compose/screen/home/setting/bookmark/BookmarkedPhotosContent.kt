@@ -17,8 +17,8 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.common.InitScreen
 @Composable
 fun BookmarkedPhotosContent(
     modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
     bookmarkedPictures: LazyPagingItems<Picture>,
-    contentPadding: PaddingValues = PaddingValues(4.dp),
     enabledLoadPhotos: Boolean,
     onItemClicked: (item: Picture, index: Int) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
@@ -27,7 +27,7 @@ fun BookmarkedPhotosContent(
     if (bookmarkedPictures.itemCount > 0) {
         BookmarkedPhotosSection(
             modifier = modifier,
-            contentPadding = contentPadding,
+            paddingValues = paddingValues,
             photos = bookmarkedPictures,
             onItemClicked = onItemClicked,
             onViewPhotos = onViewPhotos,

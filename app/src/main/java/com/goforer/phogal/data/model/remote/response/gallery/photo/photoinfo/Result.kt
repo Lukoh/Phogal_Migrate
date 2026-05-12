@@ -2,6 +2,7 @@ package com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo
 
 import kotlinx.serialization.Serializable
 import android.os.Parcelable
+import androidx.compose.runtime.Immutable
 import com.goforer.phogal.data.model.remote.response.gallery.common.CoverPhoto
 import com.goforer.phogal.data.model.remote.response.gallery.common.Links
 import com.goforer.phogal.data.model.remote.response.gallery.common.Tag
@@ -11,6 +12,7 @@ import kotlinx.serialization.SerialName
 
 @Serializable
 @Parcelize
+@Immutable
 data class Result(
     @SerialName("cover_photo") val coverPhoto: CoverPhoto?,
     val curated: Boolean,

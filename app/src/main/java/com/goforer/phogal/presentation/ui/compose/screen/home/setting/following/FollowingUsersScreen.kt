@@ -143,8 +143,8 @@ fun FollowingUsersScreen(
             ScaffoldContent(topInterval = 2.dp) {
                 FollowingUsersContent(
                     modifier = modifier,
+                    paddingValues = paddingValues,
                     users = followingUserContentUiState.followingUserUiState.users,
-                    contentPadding = paddingValues,
                     enabledLoadPhotos = followingUserContentUiState.enabledLoadPhotos,
                     onViewPhotos = onViewPhotos,
                     onOpenWebView = onOpenWebView,

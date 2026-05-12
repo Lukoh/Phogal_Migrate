@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -20,6 +21,7 @@ import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 @Composable
 fun PopularPhotosContent(
     modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
     photos: LazyPagingItems<Photo>,
     onItemClicked: (id: String) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
@@ -30,6 +32,7 @@ fun PopularPhotosContent(
 ) {
     PopularPhotosSection(
         modifier = modifier,
+        paddingValues = paddingValues,
         photos = photos,
         onItemClicked = { photo: Photo, index: Int -> onItemClicked(photo.id) },
         onViewPhotos = onViewPhotos,
