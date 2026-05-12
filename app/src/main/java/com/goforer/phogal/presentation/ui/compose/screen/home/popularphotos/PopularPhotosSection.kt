@@ -69,7 +69,7 @@ fun PopularPhotosSection(
     // not on every scroll tick.
     val isScrolledPastThreshold by remember(lazyListState) {
         derivedStateOf {
-            !lazyListState.isScrollInProgress && lazyListState.firstVisibleItemIndex > UP_BUTTON_THRESHOLD ||
+            !lazyListState.isScrollInProgress && lazyListState.firstVisibleItemIndex > UP_BUTTON_THRESHOLD &&
                     lazyListState.firstVisibleItemScrollOffset > SCROLL_OFFSET_SIGNAL
         }
     }
