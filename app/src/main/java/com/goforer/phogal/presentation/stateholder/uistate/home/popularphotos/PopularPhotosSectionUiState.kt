@@ -5,7 +5,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * UI-local state holder for the popular photos screen's scrollable section.
@@ -28,28 +30,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
  */
 @Stable
 class PopularPhotosSectionUiState internal constructor(
-    private val _clicked: MutableState<Boolean>,
-    private val _visibleUpButton: MutableState<Boolean>,
+    val scope: CoroutineScope,
     private val _loadingDone: MutableState<Boolean>
 ) {
-    val clicked: Boolean get() = _clicked.value
-    val visibleUpButton: Boolean get() = _visibleUpButton.value
     val loadingDone: Boolean get() = _loadingDone.value
-
-    fun setUpButtonClicked() { _clicked.value = true }
-    fun setScrollConsumed() { _clicked.value = false }
-    fun setUpButtonVisibilityChanged(visible: Boolean) { _visibleUpButton.value = visible }
-
     fun setLoadingDone() { _loadingDone.value = true }
 }
 
 @Composable
 fun rememberPopularPhotosSectionUiState(
-    clicked: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
-    visibleUpButton: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
+    scope: CoroutineScope = rememberCoroutineScope(),
     loadingDone: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
-): PopularPhotosSectionUiState = remember(clicked, visibleUpButton) {
+): PopularPhotosSectionUiState = remember(scope, loadingDone) {
     PopularPhotosSectionUiState(
-        _clicked = clicked, _visibleUpButton = visibleUpButton, _loadingDone = loadingDone
+        scope = scope, _loadingDone = loadingDone
     )
 }

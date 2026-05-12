@@ -41,6 +41,7 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.Photo
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.ShowUpButton
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.EmptyState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.ErrorRow
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 private const val PAGE_SIZE_HINT = 10
@@ -101,17 +102,12 @@ fun PopularPhotosSection(
         ShowUpButton(
             modifier = Modifier.align(Alignment.BottomEnd),
             visible = isScrolledPastThreshold,
-            onClick = { sectionUiState.setUpButtonClicked() }
+            onClick = {
+                sectionUiState.scope.launch {
+                    lazyListState.animateScrollToItem (0)
+                }
+            }
         )
-    }
-
-    LaunchedEffect(lazyListState, true, sectionUiState.clicked) {
-        if (sectionUiState.clicked) {
-            lazyListState.animateScrollToItem (0)
-            sectionUiState.setUpButtonVisibilityChanged(false)
-        }
-
-        sectionUiState.setScrollConsumed()
     }
 }
 
@@ -162,11 +158,7 @@ private fun LazyListScope.renderLoadState(
                             2.dp
                         else
                             0.5.dp
-                        // After recreation, LazyPagingItems first return 0 items, then the cached items.
-                        // This behavior/issue is resetting the LazyListState scroll position.
-                        // Below is a workaround. More info: https://issuetracker.google.com/issues/177245496.
-                        // If this bug will got fixed... then have to be removed below code
-                        sectionUiState.setUpButtonVisibilityChanged(visibleUpButton(index))
+
                         state.setIndex(index)
                         state.setPhoto(photos[index]!!)
                         state.setVisibleViewButton(true)
