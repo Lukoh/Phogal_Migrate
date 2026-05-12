@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +43,7 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.Photo
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.ShowUpButton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 private const val PAGE_SIZE_HINT = 10
@@ -53,7 +55,7 @@ private const val SCROLL_OFFSET_SIGNAL = 35
 fun SearchPhotosSection(
     modifier: Modifier = Modifier,
     photos: LazyPagingItems<Photo>,
-    sectionUiState: SearchPhotosSectionUiState = rememberSearchPhotosSectionUiState(rememberSaveable { mutableStateOf(true) }),
+    sectionUiState: SearchPhotosSectionUiState = rememberSearchPhotosSectionUiState(rememberCoroutineScope(),rememberSaveable { mutableStateOf(true) }),
     bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
     onItemClicked: (item: Photo, index: Int) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
@@ -113,17 +115,12 @@ fun SearchPhotosSection(
         ShowUpButton(
             modifier = Modifier.align(Alignment.BottomEnd),
             visible = isScrolledPastThreshold,
-            onClick = { sectionUiState.setUpButtonClicked() }
+            onClick = {
+                sectionUiState.scope.launch {
+                    lazyListState.animateScrollToItem(0)
+                }
+            }
         )
-    }
-
-    // Animate scroll-to-top when the up-button was tapped.
-    LaunchedEffect(lazyListState, sectionUiState.clicked) {
-        if (sectionUiState.clicked) {
-            lazyListState.animateScrollToItem(0)
-            sectionUiState.setUpButtonVisibilityChanged(false)
-            sectionUiState.setScrollConsumed()
-        }
     }
 }
 
