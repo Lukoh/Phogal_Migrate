@@ -33,7 +33,6 @@ import javax.inject.Inject
 @HiltViewModel
 class GalleryViewModel @Inject constructor(
     private val photosRepository: PhotosRepository,
-    private val localDataSource: LocalDataSource,
     @IoDispatcher
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
@@ -41,7 +40,7 @@ class GalleryViewModel @Inject constructor(
     val query: StateFlow<String> = _query.asStateFlow()
 
     private val _recentWords = MutableStateFlow<List<String>>(emptyList())
-    val recentWords: StateFlow<List<String>> = localDataSource.searchWordsFlow
+    val recentWords: StateFlow<List<String>> = photosRepository.getSearchWords()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000), // UI가 활성화될 때만 데이터 수집
@@ -94,7 +93,7 @@ class GalleryViewModel @Inject constructor(
                 if (currentKeywords.size >= MAX_HISTORY_SIZE) currentKeywords.removeAt(0)
                 currentKeywords += keyword
                 val snapshot = currentKeywords.toMutableList()
-                localDataSource.setSearchWords(snapshot)
+                photosRepository.setSearchWords(snapshot)
                 snapshot
             } ?: return@launch
 

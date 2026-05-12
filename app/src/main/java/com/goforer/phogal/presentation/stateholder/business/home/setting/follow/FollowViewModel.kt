@@ -25,15 +25,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FollowViewModel @Inject constructor(
-    private val localDataSource: LocalDataSource,
-    followUserRepository: FollowUserRepository,
+    private val followUserRepository: FollowUserRepository,
     @IoDispatcher
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
     private val _followedUsers = MutableStateFlow<List<User>>(emptyList())
 
-    val users: StateFlow<List<User>> = localDataSource.followingUsersFlow
+    val users: StateFlow<List<User>> = followUserRepository.getFollowingUsers()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -59,19 +58,19 @@ class FollowViewModel @Inject constructor(
     fun refresh() {
         viewModelScope.launch {
             _followedUsers.value = withContext(ioDispatcher) {
-                localDataSource.followingUsersFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList()).value.toMutableList().toList()
+                followUserRepository.getFollowingUsers().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList()).value.toMutableList().toList()
             }
         }
     }
 
-    fun setUserFollow(userUiState: User) {
+    fun setUserFollow(user: User) {
         viewModelScope.launch {
             withContext(ioDispatcher) {
-                localDataSource.toggleFollowingUser(userUiState)
+                followUserRepository.toggleFollowingUser(user)
             }
             refresh()
         }
     }
 
-    fun isUserFollowed(userUiState: User): Boolean = localDataSource.isUserFollowedFlow(userUiState).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false).value
+    fun isUserFollowed(user: User): Boolean = followUserRepository.isUserFollowedFlow(user).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false).value
 }

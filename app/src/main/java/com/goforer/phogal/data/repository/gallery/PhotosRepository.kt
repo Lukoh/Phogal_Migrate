@@ -12,10 +12,16 @@ import kotlinx.coroutines.flow.Flow
  * to the UI layer as a `StateFlow<PagingData<Photo>>`.
  */
 interface PhotosRepository {
+    fun getSearchWords(): Flow<List<String>>
 
     /**
      * @param query     user keyword (non-blank)
      * @param pageSize  page size for [androidx.paging.PagingConfig]; also used as initial load size
      */
     fun search(query: String, pageSize: Int): Flow<PagingData<Photo>>
+
+    /**
+     * @param words  th keyword list (non-blank)
+     */
+    suspend fun setSearchWords(words: List<String>)
 }

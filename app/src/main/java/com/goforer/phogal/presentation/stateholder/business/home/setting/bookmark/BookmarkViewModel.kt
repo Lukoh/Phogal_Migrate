@@ -23,14 +23,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class BookmarkViewModel @Inject constructor(
-    private val localDataSource: LocalDataSource,
-    bookmarkRepository: BookmarkRepository,
+    private val bookmarkRepository: BookmarkRepository,
     @IoDispatcher
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
     private val _bookmarkedPictures = MutableStateFlow<List<Picture>>(emptyList())
 
-    val photos: StateFlow<List<Picture>> = localDataSource.bookmarkedPhotosFlow
+    val photos: StateFlow<List<Picture>> = bookmarkRepository.getBookmarkList()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000), // UI가 활성화될 때만 데이터 수집
@@ -57,7 +56,7 @@ class BookmarkViewModel @Inject constructor(
     fun refresh() {
         viewModelScope.launch {
             _bookmarkedPictures.value = withContext(ioDispatcher) {
-                localDataSource.bookmarkedPhotosFlow
+                bookmarkRepository.getBookmarkList()
                     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList()).value.toMutableList().toList()
             }
         }
@@ -67,10 +66,10 @@ class BookmarkViewModel @Inject constructor(
      * Adds [pictureUiState] to bookmarks and refreshes the flow.
      * I/O is dispatched off the main thread.
      */
-    fun setBookmarkPicture(pictureUiState: Picture) {
+    fun setBookmarkPicture(picture: Picture) {
         viewModelScope.launch {
             withContext(ioDispatcher) {
-                localDataSource.toggleBookmarkPhoto(pictureUiState)
+                bookmarkRepository.toggleBookmarkPhoto(picture)
             }
 
             refresh()
@@ -81,10 +80,10 @@ class BookmarkViewModel @Inject constructor(
      * Synchronous existence check. Cheap in-memory lookup; OK on main thread.
      * If the backing storage ever becomes truly async, convert this to `suspend`.
      */
-    fun isPhotoBookmarked(pictureUiState: Picture): Boolean = localDataSource.isPhotoBookmarkedFlow(pictureUiState).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false).value
+    fun isPhotoBookmarked(picture: Picture): Boolean = bookmarkRepository.isPhotoBookmarkedFlow(picture).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false).value
 
     /** Synchronous existence check by id — same rationale as above. */
-    fun isPhotoBookmarked(id: String): Boolean = localDataSource.isPhotoBookmarkedFlow(id).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false).value
+    fun isPhotoBookmarked(id: String): Boolean = bookmarkRepository.isPhotoBookmarkedFlow(id).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false).value
 
     companion object {
         const val PAGE_SIZE = 10
