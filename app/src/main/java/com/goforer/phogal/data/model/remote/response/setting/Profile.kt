@@ -1,5 +1,6 @@
 package com.goforer.phogal.data.model.remote.response.setting
 
+import android.os.Parcel
 import kotlinx.serialization.Serializable
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
@@ -20,4 +21,22 @@ data class Profile(
     val birthday: String,
     val reputation: String,
     var deleted: Boolean
-) : Parcelable
+) : Parcelable {
+    companion object {
+        val EMPTY = Profile(
+            id = -1,
+            name = "",
+            sex = "",
+            favor = false,
+            followed = false,
+            email = "",
+            profileImage = "",
+            personality = "",
+            cellphone = "",
+            address = "",
+            birthday = "",
+            reputation = "",
+            deleted = false
+        )
+    }
+}

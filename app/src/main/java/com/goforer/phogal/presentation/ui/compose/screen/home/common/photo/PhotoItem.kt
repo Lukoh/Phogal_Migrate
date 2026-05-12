@@ -72,7 +72,6 @@ fun PhotoItem(
     onShowSnackBar: (text: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit
 ) {
-    state.photo.alreadySearched = true
     AnimatedVisibility(
         visible = true,
         modifier = modifier,

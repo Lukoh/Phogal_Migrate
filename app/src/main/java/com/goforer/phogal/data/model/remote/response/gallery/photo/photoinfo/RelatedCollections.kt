@@ -1,8 +1,10 @@
 package com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo
 
+import android.os.Parcel
 import kotlinx.serialization.Serializable
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.parcelize.Parcelize
 
 @Serializable
@@ -12,4 +14,12 @@ data class RelatedCollections(
     val result: List<Result>,
     val total: Long,
     val type: String
-) : Parcelable
+) : Parcelable {
+    companion object {
+        val EMPTY = RelatedCollections(
+            result = emptyList(),
+            total = 0L,
+            type = ""
+        )
+    }
+}

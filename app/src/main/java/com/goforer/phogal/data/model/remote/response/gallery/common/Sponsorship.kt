@@ -1,8 +1,11 @@
 package com.goforer.phogal.data.model.remote.response.gallery.common
 
+import android.os.Parcel
 import kotlinx.serialization.Serializable
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 
@@ -17,7 +20,7 @@ data class Sponsorship(
 ) : Parcelable {
     companion object {
         fun empty() = Sponsorship(
-            impressionUrls = null,
+            impressionUrls = emptyList(),
             sponsor = Sponsor.empty(), // 하위 객체도 empty() 호출
             tagline = "",
             taglineUrl = null

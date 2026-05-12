@@ -1,5 +1,6 @@
 package com.goforer.phogal.data.model.remote.response.gallery.common.user
 
+import android.os.Parcel
 import android.os.Parcelable
 import com.goforer.phogal.data.model.remote.response.gallery.common.ProfileImage
 import com.goforer.phogal.data.model.remote.response.gallery.common.Social
@@ -7,6 +8,7 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 
 @Serializable
 @Parcelize

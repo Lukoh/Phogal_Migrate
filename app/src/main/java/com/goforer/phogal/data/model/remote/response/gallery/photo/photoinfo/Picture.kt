@@ -1,5 +1,6 @@
 package com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo
 
+import android.os.Parcel
 import kotlinx.serialization.Serializable
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
@@ -8,6 +9,8 @@ import com.goforer.phogal.data.model.remote.response.gallery.common.Links
 import com.goforer.phogal.data.model.remote.response.gallery.common.Tag
 import com.goforer.phogal.data.model.remote.response.gallery.common.Urls
 import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 
@@ -50,7 +53,7 @@ data class Picture(
             exif = null,     // Nullable 필드는 null로 초기화
             location = null, // Nullable 필드는 null로 초기화
             tags = null,
-            currentUserCollections = null,
+            currentUserCollections = emptyList(),
             urls = Urls.empty(),
             links = Links.empty(),
             user = User.empty(),

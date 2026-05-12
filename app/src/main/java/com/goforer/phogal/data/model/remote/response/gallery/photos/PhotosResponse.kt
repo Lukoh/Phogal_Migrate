@@ -1,9 +1,12 @@
 package com.goforer.phogal.data.model.remote.response.gallery.photos
 
+import android.os.Parcel
 import kotlinx.serialization.Serializable
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 
@@ -11,13 +14,13 @@ import kotlinx.serialization.SerialName
 @Parcelize
 @Immutable
 data class PhotosResponse(
-    val results: MutableList<Photo>,
+    val results: List<Photo>,
     val total: Int,
     @SerialName("total_pages") val totalPages: Int
 ) : Parcelable {
     companion object {
         fun empty() = PhotosResponse(
-            results = mutableListOf(),
+            results = persistentListOf(),
             total = 0,
             totalPages = 0
         )

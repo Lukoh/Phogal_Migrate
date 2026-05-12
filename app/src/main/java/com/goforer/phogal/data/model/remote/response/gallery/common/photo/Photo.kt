@@ -1,17 +1,20 @@
 package com.goforer.phogal.data.model.remote.response.gallery.common.photo
 
+import android.os.Parcel
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import com.goforer.phogal.data.model.remote.response.gallery.common.CurrentUserCollection
 import com.goforer.phogal.data.model.remote.response.gallery.common.Urls
 import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable
-@Parcelize
+@Serializable // JSON 파싱을 위해 추가 (SerialName을 사용하므로 필수)
 @Immutable
+@Parcelize
 data class Photo(
     val id: String,
     @SerialName("created_at") val createdAt: String,
@@ -25,7 +28,6 @@ data class Photo(
     @SerialName("current_user_collections") val currentUserCollections: List<CurrentUserCollection>,
     val urls: Urls,
     val links: PhotoLinks,
-    var alreadySearched: Boolean = false
 ) : Parcelable {
     companion object {
         fun empty() = Photo(

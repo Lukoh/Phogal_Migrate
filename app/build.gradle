@@ -157,6 +157,8 @@ composeCompiler {
 }
 
 dependencies {
+    implementation libs.androidx.compose.runtime
+
     // --- Core & lifecycle ---
     implementation libs.androidx.core.ktx
     implementation libs.androidx.lifecycle.runtime.ktx
@@ -225,6 +227,8 @@ dependencies {
 
     // --- Kotlinx serialization ---
     implementation libs.kotlinx.serialization.json
+
+    implementation(libs.kotlinx.collections.immutable)
 
     // --- Accompanist ---
     implementation libs.accompanist.webview

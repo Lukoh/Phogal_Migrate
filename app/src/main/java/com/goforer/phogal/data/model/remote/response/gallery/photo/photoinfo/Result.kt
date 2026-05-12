@@ -5,8 +5,11 @@ import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import com.goforer.phogal.data.model.remote.response.gallery.common.CoverPhoto
 import com.goforer.phogal.data.model.remote.response.gallery.common.Links
+import com.goforer.phogal.data.model.remote.response.gallery.common.ProfileImage
+import com.goforer.phogal.data.model.remote.response.gallery.common.Social
 import com.goforer.phogal.data.model.remote.response.gallery.common.Tag
 import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
+import com.goforer.phogal.data.model.remote.response.gallery.common.user.UserLinks
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 
@@ -30,4 +33,50 @@ data class Result(
     @SerialName("total_photos") val totalPhotos: Long,
     @SerialName("updated_at")val updatedAt: String,
     val user: User
-) : Parcelable
+) : Parcelable {
+    companion object {
+        val EMPTY = Result(
+            coverPhoto = null,
+            curated = false,
+            description = "",
+            featured = false,
+            id = "",
+            lastCollectedAt = "",
+            links = Links(
+                self = "",
+                html = "",
+                download = "",
+                downloadLocation = ""
+            ), // Links 클래스에도 EMPTY 정의 권장
+            previewPhotos = emptyList(), // 또는 persistentListOf()
+            private = false,
+            publishedAt = "",
+            shareKey = "",
+            tags = emptyList(),
+            title = "",
+            totalPhotos = 0L,
+            updatedAt = "",
+            user = User(
+                acceptedTos = false,
+                bio = null,
+                firstName = "",
+                forHire = false,
+                id = "",
+                instagramUsername = null,
+                lastName = null,
+                links = UserLinks.empty(),
+                location = null,
+                name = "",
+                portfolioUrl = null,
+                profileImage = ProfileImage.empty(),
+                social = Social.empty(),
+                totalCollections = 0,
+                totalLikes = 0,
+                totalPhotos = 0,
+                twitterUsername = null,
+                updatedAt = "",
+                username = ""
+            )
+        )
+    }
+}
