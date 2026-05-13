@@ -80,27 +80,16 @@ fun UserPhotosSection(
     // Material 3 PullToRefreshBox (replaces deprecated material.pullrefresh.*).
     PullToRefreshBox(
         modifier = modifier
-            .clip(RoundedCornerShape(0.2.dp))
-            .padding(
-                0.dp,
-                paddingValues.calculateTopPadding(),
-                0.dp,
-                0.dp
-            ),
+            .clip(RoundedCornerShape(0.2.dp)),
         isRefreshing = isRefreshing,
-        onRefresh = { photos.refresh() }
+        onRefresh = photos::refresh
     ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(),
             state = lazyListState,
-            contentPadding = PaddingValues(
-                start = paddingValues.calculateLeftPadding(layoutDirection),
-                top = 0.dp,
-                end = paddingValues.calculateRightPadding(layoutDirection) ,
-                bottom = paddingValues.calculateBottomPadding() + 24.dp
-            )
+            contentPadding = paddingValues
         ) {
             renderLoadState(
                 photos = photos,
