@@ -28,12 +28,11 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.common.InitScreen
 import com.goforer.phogal.presentation.ui.compose.screen.home.gallery.SearchSection
 import com.goforer.phogal.presentation.ui.theme.ColorSystemGray7
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
-import kotlinx.coroutines.Job
 
 @Composable
 fun UserPhotosContent(
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(4.dp),
+    paddingValues: PaddingValues = PaddingValues(4.dp),
     contentUiState: UserPhotosContentUiState = rememberUserPhotosContentUiState(),
     photos: LazyPagingItems<Photo>,
     onItemClicked: (String) -> Unit,
@@ -43,7 +42,7 @@ fun UserPhotosContent(
     if (contentUiState.name.isNotBlank()) {
         UserPhotosSection(
             modifier = Modifier.padding(top = 0.5.dp),
-            contentPadding = contentPadding,
+            paddingValues = paddingValues,
             photos = photos,
             sectionUiState = rememberUserPhotosSectionUiState(),
             onItemClicked = { photo, _ -> onItemClicked(photo.id) },

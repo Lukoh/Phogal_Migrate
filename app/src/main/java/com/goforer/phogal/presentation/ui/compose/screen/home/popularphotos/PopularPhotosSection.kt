@@ -153,9 +153,10 @@ private fun LazyListScope.renderLoadState(
                     item { EmptyState() }
                 } else {
                     items(count = photos.itemCount,
-                        key = photos.itemKey(
-                            key = { photo -> photo.id }
-                        ),
+                        key = { index ->
+                            val photo = photos.peek(index)
+                            "${photo?.id ?: index}_$index"
+                        },
                         contentType = photos.itemContentType()
                     ) { index ->
                         val photo = photos[index] ?: return@items

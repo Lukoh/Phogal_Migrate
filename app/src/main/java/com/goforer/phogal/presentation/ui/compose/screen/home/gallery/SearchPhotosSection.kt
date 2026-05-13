@@ -109,7 +109,7 @@ fun SearchPhotosSection(
                 end = paddingValues.calculateRightPadding(layoutDirection) ,
                 bottom = paddingValues.calculateBottomPadding() + 24.dp
             )
-        ) {x
+        ) {
             renderLoadState(
                 photos = photos,
                 sectionUiState = sectionUiState,
@@ -212,12 +212,13 @@ private fun LazyListScope.photoItems(
 ) {
     items(
         count = photos.itemCount,
-        key = photos.itemKey(
-            key = { photo -> photo.id }
-        ),
+        key = { index ->
+            val photo = photos.peek(index)
+            "${photo?.id ?: index}_$index"
+        },
         contentType = photos.itemContentType()
     ) { index ->
-        val photo = photos[index] ?: return@items
+        val photo = photos.peek(index) ?: return@items
 
         PhotoItem(
             modifier = Modifier.animateItem(tween(durationMillis = 250)),

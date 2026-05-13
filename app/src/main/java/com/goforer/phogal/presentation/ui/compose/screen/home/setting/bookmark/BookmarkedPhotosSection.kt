@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -129,9 +128,10 @@ private fun LazyListScope.renderLoadState(
                 item { EmptyState() }
             } else {
                 items(count = photos.itemCount,
-                    key = photos.itemKey(
-                        key = { photo -> photo.id }
-                    ),
+                    key = { index ->
+                        val photo = photos.peek(index)
+                        "${photo?.id ?: index}_$index"
+                    },
                     contentType = photos.itemContentType()
                 ) { index ->
                     PictureItem(

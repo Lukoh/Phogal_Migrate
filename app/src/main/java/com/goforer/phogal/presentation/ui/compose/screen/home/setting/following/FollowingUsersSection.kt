@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -133,9 +132,10 @@ private fun LazyListScope.renderLoadState(
             } else {
                 items(
                     count = users.itemCount,
-                    key = users.itemKey(
-                        key = { photo -> photo.id }
-                    ),
+                    key = { index ->
+                        val user = users.peek(index)
+                        "${user?.id ?: index}_$index"
+                    },
                     contentType = users.itemContentType()
                 ) { index ->
                     FollowingUsersItem(

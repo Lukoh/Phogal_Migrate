@@ -2,68 +2,58 @@
 
 package com.goforer.phogal.presentation.ui.compose.screen.home.common.user.userphotos
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandIn
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
-import androidx.paging.compose.itemKey
 import com.goforer.base.designsystem.component.state.rememberLazyListState
-import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosSectionUiState
-import com.goforer.phogal.presentation.ui.compose.screen.home.common.error.ErrorContent
+import com.goforer.phogal.presentation.ui.compose.screen.home.common.EmptyState
+import com.goforer.phogal.presentation.ui.compose.screen.home.common.ErrorRow
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.PhotoItem
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.ShowUpButton
-import com.goforer.phogal.presentation.ui.compose.screen.home.gallery.LoadingPhotos
-import com.goforer.phogal.presentation.ui.theme.ColorSystemGray7
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 /** Matches `UserPhotosViewModel.PAGE_SIZE`. Kept local so the section stays decoupled. */
 private const val PAGE_SIZE_HINT = 10
+private const val UP_BUTTON_THRESHOLD = 4
+private const val SCROLL_OFFSET_SIGNAL = 35
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun UserPhotosSection(
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues,
+    paddingValues: PaddingValues,
     photos: LazyPagingItems<Photo>,
     sectionUiState: UserPhotosSectionUiState = rememberUserPhotosSectionUiState(),
     bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
@@ -75,18 +65,17 @@ fun UserPhotosSection(
 ) {
     val lazyListState = photos.rememberLazyListState()
     val isRefreshing = photos.loadState.refresh is LoadState.Loading
-    // After recreation, LazyPagingItems first return 0 items, then the cached items.
-    // This behavior/issue is resetting the LazyListState scroll position.
-    // Below is a workaround. More info: https://issuetracker.google.com/issues/177245496.
-    // If this bug will got fixed... then have to be unblocked below code
-    /*
-    val visibleUpButtonState by remember {
+
+    // derivedStateOf: only triggers recomposition when the boolean actually flips,
+    // not on every scroll tick.
+    val isScrolledPastThreshold by remember(lazyListState) {
         derivedStateOf {
-            lazyListState.firstVisibleItemIndex > 0
+            !lazyListState.isScrollInProgress && lazyListState.firstVisibleItemIndex > UP_BUTTON_THRESHOLD &&
+                    lazyListState.firstVisibleItemScrollOffset > SCROLL_OFFSET_SIGNAL
         }
     }
 
-     */
+    val layoutDirection = LocalLayoutDirection.current
 
     // Material 3 PullToRefreshBox (replaces deprecated material.pullrefresh.*).
     PullToRefreshBox(
@@ -94,7 +83,7 @@ fun UserPhotosSection(
             .clip(RoundedCornerShape(0.2.dp))
             .padding(
                 0.dp,
-                contentPadding.calculateTopPadding(),
+                paddingValues.calculateTopPadding(),
                 0.dp,
                 0.dp
             ),
@@ -106,155 +95,121 @@ fun UserPhotosSection(
                 .fillMaxWidth()
                 .fillMaxHeight(),
             state = lazyListState,
+            contentPadding = PaddingValues(
+                start = paddingValues.calculateLeftPadding(layoutDirection),
+                top = 0.dp,
+                end = paddingValues.calculateRightPadding(layoutDirection) ,
+                bottom = paddingValues.calculateBottomPadding() + 24.dp
+            )
         ) {
-            photos.loadState.apply {
-                when {
-                    refresh is LoadState.Loading -> {
-                        item {
-                            LoadingPhotos(
-                                modifier = Modifier.padding(4.dp, 4.dp),
-                                count = 3,
-                                enableLoadIndicator = true
-                            )
-                        }
-                    }
-                    refresh is LoadState.NotLoading -> {
-                        if (photos.itemCount == 0 ) {
-                            sectionUiState.setUpButtonVisibilityChanged(false)
-                            onSuccess(false)
-                            item {
-                                Spacer(modifier = Modifier.height(320.dp))
-                                Text(
-                                    text = stringResource(id = R.string.no_picture),
-                                    style = MaterialTheme.typography.titleMedium.copy(color = ColorSystemGray7),
-                                    modifier = Modifier.align(Alignment.Center),
-                                    fontFamily = FontFamily.SansSerif,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        } else {
-                            onSuccess(true)
-                            items(count = photos.itemCount,
-                                key = photos.itemKey(
-                                    key = { photo -> photo.id }
-                                ),
-                                contentType = photos.itemContentType()
-                            ) { index ->
-                                val photo = photos[index] ?: return@items
-
-                                // After recreation, LazyPagingItems first return 0 items, then the cached items.
-                                // This behavior/issue is resetting the LazyListState scroll position.
-                                // Below is a workaround. More info: https://issuetracker.google.com/issues/177245496.
-                                // If this bug will got fixed... then have to be removed below code
-                                sectionUiState.setUpButtonVisibilityChanged(visibleUpButton(index))
-                                PhotoItem(
-                                    modifier.animateItem(
-                                        placementSpec = tween(durationMillis = 250)
-                                    ),
-                                    state = rememberPhotoItemUiState(
-                                        index = rememberSaveable { mutableIntStateOf(index) },
-                                        photo = rememberSaveable { mutableStateOf(photo) },
-                                        visibleViewButton = rememberSaveable { mutableStateOf(true) },
-                                        bookmarked = rememberSaveable {
-                                            mutableStateOf(bookmarkViewModel.isPhotoBookmarked(photo.id))
-                                        }
-                                    ),
-                                    onItemClicked = onItemClicked,
-                                    onViewPhotos = onViewPhotos,
-                                    onShowSnackBar = onShowSnackBar,
-                                    onOpenWebView = onOpenWebView
-                                )
-                                if (photos.itemCount < PAGE_SIZE_HINT && index == photos.itemCount - 1)
-                                    Spacer(modifier = Modifier.height(26.dp))
-                            }
-                        }
-                    }
-                    refresh is LoadState.Error -> {
-                        onSuccess(false)
-                        item {
-                            val throwable = (refresh as LoadState.Error).error
-
-                            AnimatedVisibility(
-                                visible = true,
-                                modifier = Modifier,
-                                enter = scaleIn(transformOrigin = TransformOrigin(0f, 0f)) +
-                                        fadeIn() + expandIn(expandFrom = Alignment.TopStart),
-                                exit = scaleOut(transformOrigin = TransformOrigin(0f, 0f)) +
-                                        fadeOut() + shrinkOut(shrinkTowards = Alignment.TopStart)
-                            ) {
-                                ErrorContent(
-                                    modifier = modifier,
-                                    title = stringResource(id = R.string.error_dialog_title),
-                                    message = throwable.message
-                                        ?: stringResource(id = R.string.error_dialog_content),
-                                    onRetry = {
-                                        photos.retry()
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    append is LoadState.Loading -> {
-                        Timber.d("Pagination Loading")
-                    }
-                    append is LoadState.Error -> {
-                        Timber.d("Pagination broken Error")
-                        onSuccess(false)
-                        item {
-                            val throwable = (append as LoadState.Error).error
-
-                            AnimatedVisibility(
-                                visible = true,
-                                modifier = Modifier,
-                                enter = scaleIn(transformOrigin = TransformOrigin(0f, 0f)) +
-                                        fadeIn() + expandIn(expandFrom = Alignment.TopStart),
-                                exit = scaleOut(transformOrigin = TransformOrigin(0f, 0f)) +
-                                        fadeOut() + shrinkOut(shrinkTowards = Alignment.TopStart)
-                            ) {
-                                ErrorContent(
-                                    title = stringResource(id = R.string.error_dialog_title),
-                                    message = throwable.message
-                                        ?: stringResource(id = R.string.error_dialog_content),
-                                    onRetry = {
-                                        photos.retry()
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // PullToRefreshBox renders its own default Indicator.
-        if (!lazyListState.isScrollInProgress) {
-            ShowUpButton(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .navigationBarsPadding(),
-                visible = sectionUiState.visibleUpButton,
-                onClick = {
-                    sectionUiState.setUpButtonClicked(true)
-                }
+            renderLoadState(
+                photos = photos,
+                sectionUiState = sectionUiState,
+                bookmarkViewModel = bookmarkViewModel,
+                onItemClicked = onItemClicked,
+                onViewPhotos = onViewPhotos,
+                onShowSnackBar = onShowSnackBar,
+                onOpenWebView = onOpenWebView,
+                onSuccess = onSuccess
             )
         }
 
-        LaunchedEffect(lazyListState, true, sectionUiState.clicked) {
-            if (sectionUiState.clicked) {
-                lazyListState.animateScrollToItem (0)
-                sectionUiState.setUpButtonVisibilityChanged(false)
+        ShowUpButton(
+            modifier = Modifier.align(Alignment.BottomEnd),
+            visible = isScrolledPastThreshold,
+            onClick = {
+                sectionUiState.scope.launch {
+                    lazyListState.animateScrollToItem (0)
+                }
             }
-
-            sectionUiState.setScrollConsumed(false)
-        }
+        )
     }
 }
 
-private fun visibleUpButton(index: Int): Boolean {
-    return when {
-        index > 4 -> true
-        index < 4-> false
-        else -> true
+/**
+* Dispatches the current [LoadState] of [photos] into the appropriate sub-renderer.
+* Kept as a LazyListScope extension so each sub-renderer can emit `item {}` / `items {}`
+* directly without re-wrapping.
+*/
+@OptIn(ExperimentalFoundationApi::class)
+private fun LazyListScope.renderLoadState(
+    photos: LazyPagingItems<Photo>,
+    sectionUiState: UserPhotosSectionUiState,
+    bookmarkViewModel: BookmarkViewModel,
+    onItemClicked: (item: Photo, index: Int) -> Unit,
+    onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
+    onShowSnackBar: (text: String) -> Unit,
+    onOpenWebView: (firstName: String, url: String) -> Unit,
+    onSuccess: (Boolean) -> Unit
+) {
+    val loadState = photos.loadState
+
+    when(loadState.refresh) {
+        is LoadState.Loading -> {
+            item {}
+            sectionUiState.setLoadingDone()
+        }
+        is LoadState.NotLoading -> {
+            if (sectionUiState.loadingDone) {
+                if (photos.itemCount == 0 ) {
+                    onSuccess(false)
+                    item { EmptyState() }
+                } else {
+                    onSuccess(true)
+                    items(
+                        count = photos.itemCount,
+                        key = { index ->
+                            val photo = photos.peek(index)
+                            "${photo?.id ?: index}_$index"
+                        },
+                        contentType = photos.itemContentType()
+                    ) { index ->
+                        val photo = photos[index] ?: return@items
+
+                        PhotoItem(
+                            Modifier.animateItem(
+                                placementSpec = tween(durationMillis = 250)
+                            ),
+                            state = rememberPhotoItemUiState(
+                                index = rememberSaveable { mutableIntStateOf(index) },
+                                photo = rememberSaveable { mutableStateOf(photo) },
+                                visibleViewButton = rememberSaveable { mutableStateOf(true) },
+                                bookmarked = rememberSaveable {
+                                    mutableStateOf(bookmarkViewModel.isPhotoBookmarked(photo.id))
+                                }
+                            ),
+                            onItemClicked = onItemClicked,
+                            onViewPhotos = onViewPhotos,
+                            onShowSnackBar = onShowSnackBar,
+                            onOpenWebView = onOpenWebView
+                        )
+                        if (photos.itemCount < PAGE_SIZE_HINT && index == photos.itemCount - 1)
+                            Spacer(modifier = Modifier.height(26.dp))
+                    }
+                }
+            }
+        }
+        is LoadState.Error -> {
+            onSuccess(false)
+            val error = (loadState.refresh as LoadState.Error).error
+            item { ErrorRow(throwable = error, onRetry = { photos.retry() }) }
+        }
+    }
+
+    // Append (next-page) state is rendered independently from refresh state.
+    when (loadState.append) {
+        is LoadState.Loading -> {
+            Timber.d("Pagination Loading")
+        }
+
+        is LoadState.Error -> {
+            Timber.d("Pagination broken Error")
+            onSuccess(false)
+            val error = (loadState.append as LoadState.Error).error
+            item { ErrorRow(throwable = error, onRetry = { photos.retry() }) }
+        }
+
+        else -> Unit
     }
 }
 

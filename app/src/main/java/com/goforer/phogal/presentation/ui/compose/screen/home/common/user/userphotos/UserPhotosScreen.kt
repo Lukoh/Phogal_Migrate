@@ -40,7 +40,6 @@ import com.goforer.base.designsystem.component.CardSnackBar
 import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.phogal.R
-import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.presentation.stateholder.business.home.common.user.UserPhotosViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosContentUiState
@@ -157,7 +156,7 @@ fun UserPhotosScreen(
             ScaffoldContent(topInterval = 2.dp) {
                 UserPhotosContent(
                     modifier = modifier,
-                    contentPadding = paddingValues,
+                    paddingValues = paddingValues,
                     contentUiState = contentUiState,
                     photos = photos,
                     onItemClicked = onItemClicked,
