@@ -1,13 +1,14 @@
 package com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo
 
-import android.os.Parcel
 import kotlinx.serialization.Serializable
 import android.os.Parcelable
+import androidx.compose.runtime.Immutable
 import com.goforer.phogal.data.model.remote.response.gallery.common.Urls
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 
 @Serializable
+@Immutable
 @Parcelize
 data class PreviewPhoto(
     @SerialName("blur_hash") val blurHash: String,

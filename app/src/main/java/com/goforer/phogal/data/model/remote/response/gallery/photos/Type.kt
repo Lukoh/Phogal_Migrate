@@ -1,6 +1,5 @@
 package com.goforer.phogal.data.model.remote.response.gallery.photos
 
-import android.os.Parcel
 import kotlinx.serialization.Serializable
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

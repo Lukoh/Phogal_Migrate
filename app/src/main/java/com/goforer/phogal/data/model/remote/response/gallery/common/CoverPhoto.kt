@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 
 @Serializable
-@Immutable // Compose 리컴포지션 최적화를 위해 추가
+@Immutable
 @Parcelize
 data class CoverPhoto(
     val id: String,

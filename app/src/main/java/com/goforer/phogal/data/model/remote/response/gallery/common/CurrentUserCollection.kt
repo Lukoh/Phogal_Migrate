@@ -1,13 +1,14 @@
 package com.goforer.phogal.data.model.remote.response.gallery.common
 
-import android.os.Parcel
 import android.os.Parcelable
+import androidx.compose.runtime.Immutable
 import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Immutable
 @Parcelize
 data class CurrentUserCollection(
     val id: Int,
