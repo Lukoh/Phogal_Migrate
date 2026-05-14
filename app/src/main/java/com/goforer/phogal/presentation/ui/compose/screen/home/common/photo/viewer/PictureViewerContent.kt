@@ -27,8 +27,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.DrawerDefaults.backgroundColor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -150,7 +152,9 @@ fun HandlePictureResponse(
             val picture = pictureUiState.data
             LaunchedEffect(picture.id) { onShownPhoto(picture) }
             Box(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.LightGray.copy(alpha = 0.3f)),
             ) {
                 Column(
                     modifier = Modifier
@@ -158,7 +162,24 @@ fun HandlePictureResponse(
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (photoDownloadState.isDownloading) {
+                    BodyContent(
+                        modifier = modifier,
+                        picture = picture,
+                        visibleViewPhotosButton = state.visibleViewButton,
+                        onViewPhotos = onViewPhotos,
+                        onShowSnackBar = onShowSnackBar,
+                        onShownPhoto = onShownPhoto,
+                        onOpenWebView = onOpenWebView,
+                        onClick = photoDownloadViewModel::startDownload
+                    )
+                    Spacer(modifier = Modifier.height(30.dp))
+                }
+
+                if (photoDownloadState.isDownloading) {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Box(contentAlignment = Alignment.Center) {
                             CircularProgressIndicator(
                                 progress = { animatedProgress },
@@ -175,24 +196,23 @@ fun HandlePictureResponse(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        OutlinedButton(onClick = {
-                            photoDownloadViewModel.cancelDownload(state.baseUiState.context.getString(R.string.error_download_canceled))
-                        }) {
-                            Text(state.baseUiState.context.getString(R.string.cancel), color = Color.Red)
+                        OutlinedButton(
+                            onClick = {
+                                photoDownloadViewModel.cancelDownload(
+                                    state.baseUiState.context.getString(R.string.error_download_canceled)
+                                )
+                            },
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                containerColor = Color.LightGray, // 버튼 내부 배경색을 회색으로 설정
+                                contentColor = Color.Red          // 내부 텍스트나 아이콘의 기본 색상
+                            )
+                        ) {
+                            Text(
+                                text = state.baseUiState.context.getString(R.string.cancel),
+                                color = Color.Red
+                            )
                         }
                     }
-
-                    BodyContent(
-                        modifier = modifier,
-                        picture = picture,
-                        visibleViewPhotosButton = state.visibleViewButton,
-                        onViewPhotos = onViewPhotos,
-                        onShowSnackBar = onShowSnackBar,
-                        onShownPhoto = onShownPhoto,
-                        onOpenWebView = onOpenWebView,
-                        onClick = photoDownloadViewModel::startDownload
-                    )
-                    Spacer(modifier = Modifier.height(30.dp))
                 }
             }
         }
