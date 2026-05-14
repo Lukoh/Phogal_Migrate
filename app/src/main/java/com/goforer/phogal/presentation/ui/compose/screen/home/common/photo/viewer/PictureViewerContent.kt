@@ -1,4 +1,4 @@
-package com.goforer.phogal.presentation.ui.compose.screen.home.common.photo
+package com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.viewer
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
@@ -32,8 +32,10 @@ import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,6 +54,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -67,6 +70,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImagePainter
 import coil.size.Size
 import com.goforer.base.designsystem.animation.GenericCubicAnimationShape
@@ -76,6 +80,7 @@ import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Exif
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.presentation.stateholder.business.home.common.photo.info.PictureViewModel
+import com.goforer.phogal.presentation.stateholder.business.home.download.PhotoDownloadViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.UiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.PhotoContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoContentUiState
@@ -89,12 +94,13 @@ import com.goforer.phogal.presentation.ui.theme.ColorSnowWhite
 import com.goforer.phogal.presentation.ui.theme.ColorSystemGray1
 import com.goforer.phogal.presentation.ui.theme.ColorSystemGray5
 import com.goforer.phogal.presentation.ui.compose.base.designsystem.component.shimmer
+import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.LoadingPicture
 import com.goforer.phogal.presentation.ui.theme.ColorSystemGray7
 import com.goforer.phogal.presentation.ui.theme.ColorText4
 import com.goforer.phogal.presentation.ui.theme.DarkGreen60
 
 @Composable
-fun PictureContent(
+fun PictureViewerContent(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
     state: PhotoContentUiState = rememberPhotoContentUiState(),
@@ -123,6 +129,7 @@ fun HandlePictureResponse(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
     pictureViewModel: PictureViewModel = hiltViewModel(),
+    photoDownloadViewModel: PhotoDownloadViewModel = hiltViewModel(),
     state: PhotoContentUiState = rememberPhotoContentUiState(),
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
@@ -130,12 +137,17 @@ fun HandlePictureResponse(
     onOpenWebView: (firstName: String, url: String) -> Unit,
     onSuccess: (isSuccessful: Boolean) -> Unit
 ) {
-    val pictureUiState = pictureViewModel.pictureUiState.collectAsStateWithLifecycle()
+    val pictureState by pictureViewModel.picture.collectAsStateWithLifecycle()
+    val photoDownloadState by photoDownloadViewModel.downloadPhoto.collectAsStateWithLifecycle()
+    val animatedProgress by animateFloatAsState(
+        targetValue = photoDownloadState.progress,
+        label = "progress_rate"
+    )
 
-    when (val state1 = pictureUiState.value) {
+    when (val pictureUiState = pictureState) {
         is UiState.Success -> {
             onSuccess(true)
-            val picture = state1.data
+            val picture = pictureUiState.data
             LaunchedEffect(picture.id) { onShownPhoto(picture) }
             Box(
                 modifier = Modifier.fillMaxSize()
@@ -146,14 +158,39 @@ fun HandlePictureResponse(
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    if (photoDownloadState.isDownloading) {
+                        Box(contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(
+                                progress = { animatedProgress },
+                                modifier = Modifier.size(120.dp),
+                                strokeWidth = 8.dp,
+                                strokeCap = StrokeCap.Round
+                            )
+                            Text(
+                                text = "${(photoDownloadState.progress * 100).toInt()}%",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        OutlinedButton(onClick = {
+                            photoDownloadViewModel.cancelDownload(state.baseUiState.context.getString(R.string.error_download_canceled))
+                        }) {
+                            Text(state.baseUiState.context.getString(R.string.cancel), color = Color.Red)
+                        }
+                    }
+
                     BodyContent(
                         modifier = modifier,
-                        pictureUiState = picture,
+                        picture = picture,
                         visibleViewPhotosButton = state.visibleViewButton,
                         onViewPhotos = onViewPhotos,
                         onShowSnackBar = onShowSnackBar,
                         onShownPhoto = onShownPhoto,
-                        onOpenWebView = onOpenWebView
+                        onOpenWebView = onOpenWebView,
+                        onClick = photoDownloadViewModel::startDownload
                     )
                     Spacer(modifier = Modifier.height(30.dp))
                 }
@@ -186,11 +223,11 @@ fun HandlePictureResponse(
             ) {
                 ErrorContent(
                     modifier = Modifier,
-                    title = if (state1.code !in 200..299)
+                    title = if (pictureUiState.code !in 200..299)
                         stringResource(id = R.string.error_dialog_network_title)
                     else
                         stringResource(id = R.string.error_dialog_title),
-                    message = "${stringResource(id = R.string.error_get_picture)}${"\n\n"}${state1.message}",
+                    message = "${stringResource(id = R.string.error_get_picture)}${"\n\n"}${pictureUiState.message}",
                     onRetry = {
                         pictureViewModel.loadPicture(state.id)
                     }
@@ -203,14 +240,15 @@ fun HandlePictureResponse(
 @Composable
 fun BodyContent(
     modifier: Modifier = Modifier,
-    pictureUiState: Picture,
+    picture: Picture,
     visibleViewPhotosButton: Boolean,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
-    onShownPhoto: (pictureUiState: Picture) -> Unit,
-    onOpenWebView: (firstName: String, url: String) -> Unit
+    onShownPhoto: (picture: Picture) -> Unit,
+    onOpenWebView: (firstName: String, url: String) -> Unit,
+    onClick: (url: String, fileName: String) -> Unit
 ) {
-    var visiebleCameraInfo by remember { mutableStateOf(false) }
+    var visibleCameraInfo by remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier.padding(0.dp, 2.dp),
@@ -227,10 +265,10 @@ fun BodyContent(
         ),
         shape = RectangleShape
     ) {
-        val imageUrl = pictureUiState.urls.raw
+        val imageUrl = picture.urls.raw
         val painter = loadImagePainter(
             data = imageUrl,
-            size = Size(pictureUiState.width.div(8), pictureUiState.height.div(8))
+            size = Size(picture.width.div(8), picture.height.div(8))
         )
 
         if (painter.state is AsyncImagePainter.State.Loading) {
@@ -255,7 +293,7 @@ fun BodyContent(
             UserContainer(
                 modifier = Modifier,
                 state = rememberUserContainerUiState(
-                    user = rememberSaveable { mutableStateOf(pictureUiState.user.toString()) },
+                    user = rememberSaveable { mutableStateOf(picture.user.toString()) },
                     profileSize = rememberSaveable { mutableDoubleStateOf(48.0) },
                     colors = remember { mutableStateOf(listOf(ColorSystemGray1, ColorSystemGray1, ColorSnowWhite, ColorSystemGray5, Blue75, DarkGreen60)) },
                     visibleViewButton = rememberSaveable { mutableStateOf(visibleViewPhotosButton) },
@@ -274,14 +312,14 @@ fun BodyContent(
                 exit = scaleOut(transformOrigin = TransformOrigin(0f, 0f)) +
                         fadeOut() + shrinkOut(shrinkTowards = Alignment.TopStart)
             ) {
-                ImageContent(painter = painter)
+                ImageContent(painter = painter, onClick = { onClick(picture.urls.full, picture.id) })
             }
 
             Spacer(modifier = Modifier.height(12.dp))
             BehaviorItem(700, 700, 700)
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = pictureUiState.description ?: "None",
+                text = picture.description ?: "None",
                 modifier = Modifier.padding(8.dp, 4.dp),
                 color = ColorText4,
                 fontFamily = FontFamily.SansSerif,
@@ -291,16 +329,16 @@ fun BodyContent(
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(10.dp))
-            pictureUiState.location?.let {
+            picture.location?.let {
                 LocationItem(it.name)
                 Spacer(modifier = Modifier.height(2.dp))
             }
 
-            DateItem(pictureUiState.createdAt)
+            DateItem(picture.createdAt)
             Spacer(modifier = Modifier.height(2.dp))
-            pictureUiState.exif?.let { exif ->
+            picture.exif?.let { exif ->
                 GenericCubicAnimationShape(
-                    visible = visiebleCameraInfo,
+                    visible = visibleCameraInfo,
                     duration = 550
                 ) { animatedShape, _ ->
                     ExifItem(
@@ -322,7 +360,7 @@ fun BodyContent(
                     contentColor = Color.White
                 ),
                 onClick = {
-                    visiebleCameraInfo = !visiebleCameraInfo
+                    visibleCameraInfo = !visibleCameraInfo
                 },
                 icon = {
                     Icon(
@@ -332,7 +370,7 @@ fun BodyContent(
                 },
                 text = {
                     Text(
-                        text = if (visiebleCameraInfo)
+                        text = if (visibleCameraInfo)
                             stringResource(id = R.string.picture_close_camera_info)
                         else
                             stringResource(id = R.string.picture_view_camera_info),
@@ -344,7 +382,7 @@ fun BodyContent(
             )
 
             Spacer(modifier = Modifier.height(70.dp))
-            onShownPhoto(pictureUiState)
+            onShownPhoto(picture)
         }
     }
 }
@@ -352,7 +390,8 @@ fun BodyContent(
 @Composable
 fun ImageContent(
     modifier: Modifier = Modifier,
-    painter: AsyncImagePainter
+    painter: AsyncImagePainter,
+    onClick: () -> Unit
 ) {
     val transition by animateFloatAsState(
         targetValue = if (painter.state is AsyncImagePainter.State.Success) 1f else 0f
@@ -372,6 +411,7 @@ fun ImageContent(
             )
             .clip(RectangleShape)
             .clickable {
+                onClick()
             }
             .scale(.8f + (.2f * transition))
             .graphicsLayer { rotationX = (1f - transition) * 5f }

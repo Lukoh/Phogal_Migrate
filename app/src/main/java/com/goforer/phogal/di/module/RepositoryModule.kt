@@ -8,6 +8,8 @@ import com.goforer.phogal.data.repository.common.photo.like.PictureLikeRepositor
 import com.goforer.phogal.data.repository.common.photo.like.PictureLikeRepositoryImpl
 import com.goforer.phogal.data.repository.common.user.photos.UserPhotosRepository
 import com.goforer.phogal.data.repository.common.user.photos.UserPhotosRepositoryImpl
+import com.goforer.phogal.data.repository.download.PhotoDownloadRepository
+import com.goforer.phogal.data.repository.download.PhotoDownloadRepositoryImpl
 import com.goforer.phogal.data.repository.follow.FollowUserRepository
 import com.goforer.phogal.data.repository.follow.FollowUserRepositoryImpl
 import com.goforer.phogal.data.repository.gallery.PhotosRepository
@@ -51,4 +53,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindFollowUserRepository(impl: FollowUserRepositoryImpl): FollowUserRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPhotoDownloadRepository(impl: PhotoDownloadRepositoryImpl): PhotoDownloadRepository
 }

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Phogal</string>
     <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
     <string name="bottom_navigation_photo">Photo</string>
     <string name="bottom_navigation_gallery">Gallery</string>
     <string name="bottom_navigation_popular_photos">Popular</string>
@@ -17,6 +18,8 @@
     <string name="error_dialog_content">Failed to get the photo list.</string>
     <string name="no_picture">No pictures were found.</string>
     <string name="error_get_picture">Failed to get the picture</string>
+    <string name="error_unknown">An unknown error occurred.</string>
+    <string name="error_download_canceled">The download was canceled.</string>
 
     <string name="search_photos">Search your pictures</string>
     <string name="search_word">Search word chips : </string>

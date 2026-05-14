@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import coil.size.Size
 import com.goforer.base.designsystem.component.loadImagePainter
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
-import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.ImageContent
+import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.viewer.ImageContent
 import kotlin.math.absoluteValue
 
 @Composable
@@ -72,7 +72,7 @@ fun BookmarkedPhotoScreen(
                     size = Size(photos[page].width.div(8), photos[page].height.div(8))
                 )
 
-                ImageContent(painter = painter)
+                ImageContent(painter = painter, onClick = { })
             }
 
             CircularProgressIndicator()

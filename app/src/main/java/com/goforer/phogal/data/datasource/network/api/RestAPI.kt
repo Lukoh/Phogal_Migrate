@@ -5,12 +5,15 @@ import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
 import com.goforer.phogal.data.model.remote.response.gallery.photo.like.LikeResponse
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.data.model.remote.response.gallery.photos.PhotosResponse
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Streaming
+import retrofit2.http.Url
 
 /**
  * Retrofit definition of the Unsplash API surface used by Phogal.
@@ -68,4 +71,8 @@ interface RestAPI {
         @Query("per_page") perPage: Int?,
         @Query("order_by") orderBy: String,
     ): Response<List<Photo>>
+
+    @Streaming
+    @GET
+    suspend fun downloadPhoto(@Url fileUrl: String): Response<ResponseBody>
 }

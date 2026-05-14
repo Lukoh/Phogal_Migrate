@@ -9,7 +9,6 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,7 +20,6 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
 import com.goforer.base.customtab.openCustomTab
 import com.goforer.phogal.R
-import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.presentation.stateholder.business.home.common.photo.info.PictureViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.common.user.UserPhotosViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.gallery.GalleryViewModel
@@ -29,7 +27,7 @@ import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rem
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
-import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.PictureScreen
+import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.viewer.PictureViewerScreen
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.user.userphotos.UserPhotosScreen
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.webview.WebViewScreen
 import com.goforer.phogal.presentation.ui.compose.screen.home.gallery.SearchPhotosScreen
@@ -91,7 +89,7 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
         metadata = ListDetailSceneStrategy.detailPane()
     ) { key ->
         val pictureViewModel: PictureViewModel = hiltViewModel()
-        PictureScreen(
+        PictureViewerScreen(
             pictureViewModel = pictureViewModel,
             state = rememberPhotoContentUiState(
                 id = rememberSaveable { mutableStateOf(key.id) },

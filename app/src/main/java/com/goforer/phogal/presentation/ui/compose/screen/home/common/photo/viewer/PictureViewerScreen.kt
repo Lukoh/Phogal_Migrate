@@ -1,4 +1,4 @@
-package com.goforer.phogal.presentation.ui.compose.screen.home.common.photo
+package com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.viewer
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -60,7 +60,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PictureScreen(
+fun PictureViewerScreen(
     modifier: Modifier = Modifier,
     pictureViewModel: PictureViewModel,
     bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
@@ -97,7 +97,7 @@ fun PictureScreen(
     }
 
     // Top-bar icons read from the authoritative pictureUiState.
-    val pictureUiState by pictureViewModel.pictureUiState.collectAsStateWithLifecycle()
+    val pictureUiState by pictureViewModel.picture.collectAsStateWithLifecycle()
     val currentPicture = (pictureUiState as? UiState.Success)?.data
     val isLikedByUser = currentPicture?.likedByUser == true
 
@@ -227,7 +227,7 @@ fun PictureScreen(
                     }
                 }
 
-                PictureContent(
+                PictureViewerContent(
                     modifier = modifier,
                     contentPadding = paddingValues,
                     pictureViewModel = pictureViewModel,
@@ -246,7 +246,7 @@ fun PictureScreen(
 }
 
 /**
- * Observes the transient [com.goforer.phogal.presentation.stateholder.business.home.common.photo.info.PictureViewModel.likeActionState]
+ * Observes the transient [PictureViewModel.likeActionState]
  * and shows an error dialog on failure. Replaces the legacy `LikeResponseHandle` +
  * `UnlikeResponseHandle` pair — one handler is enough because the VM now exposes a
  * single state for both the POST and the DELETE path.
