@@ -148,11 +148,7 @@ fun PictureViewerContent(
         )
 
         if (state.showPopup) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.7f))
-            )
+            LoadingIndicator()
         }
 
         DownloadPhoto(
@@ -302,7 +298,9 @@ fun DownloadPhoto(
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
-                        ) {},
+                        ) {
+                            onDismissPopup()
+                        },
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
                 ) {
@@ -395,6 +393,38 @@ fun ShowDialog(
 }
 
 @Composable
+fun LoadingIndicator() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.7f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(100.dp),
+                    strokeWidth = 8.dp,
+                    color = Color.Magenta,
+                    trackColor = Color.LightGray,
+                    strokeCap = StrokeCap.Round
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = stringResource(id = R.string.picture_download_indicator),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
+        }
+    }
+}
+
+/*
+@Composable
 fun DownloadLoadingIndicatorBox(context: Context, progress: Float) {
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
@@ -438,6 +468,8 @@ fun DownloadLoadingIndicatorBox(context: Context, progress: Float) {
         )
     }
 }
+
+ */
 
 @Composable
 fun BodyContent(

@@ -66,6 +66,7 @@
     <string name="picture_download_complete">Download complete.</string>
     <string name="picture_name_exist">A file with the same name already exists.</string>
     <string name="picture_download_notification">Download Notification</string>
+    <string name="picture_download_indicator">On downloading the photo…</string>
 
     <string name="user_info_no_sex_info">No information</string>
     <string name="user_info_no_location_info">No user"'"s location information</string>
