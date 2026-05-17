@@ -200,6 +200,7 @@ dependencies {
     implementation libs.androidx.compose.animation
     implementation libs.androidx.compose.material.core
     implementation libs.androidx.runner
+    implementation libs.volley
 
     // --- Compose (BOM-managed) ---
     def composeBom = platform(libs.androidx.compose.bom)
@@ -257,6 +258,7 @@ dependencies {
     implementation libs.timber
 
     // --- Images / Animation ---
+    implementation libs.coil
     implementation libs.coil.compose
     implementation libs.coil.svg
     implementation libs.lottie.compose

@@ -80,6 +80,7 @@ espressoCore = "3.7.0"
 runner = "1.7.0"
 ui = "1.11.1"
 runtime = "1.11.1"
+volley = "1.2.1"
 
 
 [libraries]
@@ -160,6 +161,7 @@ okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
 # --- Utilities ---
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 coil-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
 lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottieCompose" }
@@ -176,6 +178,7 @@ androidx-compose-material-core = { group = "androidx.wear.compose", name = "comp
 androidx-runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
+volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
 
 [plugins]
 # --- Android ---

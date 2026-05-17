@@ -1,14 +1,8 @@
 package com.goforer.phogal.data.repository.download
 
-import kotlinx.coroutines.flow.Flow
-import java.io.File
-
-sealed class DownloadStatus {
-    data class Progress(val percentage: Float) : DownloadStatus()
-    data class Success(val file: File) : DownloadStatus()
-    data class Error(val message: String) : DownloadStatus()
-}
+import com.goforer.phogal.data.datasource.network.NetworkResult
+import com.goforer.phogal.data.model.remote.response.gallery.photo.download.TrackDownload
 
 interface PhotoDownloadRepository {
-    fun downloadPhoto(url: String, fileName: String): Flow<DownloadStatus>
+    suspend fun getFinalDownloadUrl(id: String): NetworkResult<TrackDownload>
 }

@@ -90,7 +90,7 @@ fun PictureViewerScreen(
         onDispose { state.baseUiState.lifecycle.removeObserver(observer) }
     }
 
-    // Kick off the load whenever the id changes (canonical replacement for the
+    // Kick off the load whenever the id changes
     // legacy `enabledLoadState` one-shot gate).
     LaunchedEffect(state.id) {
         pictureViewModel.loadPicture(state.id)

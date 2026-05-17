@@ -27,13 +27,13 @@ import com.goforer.phogal.presentation.ui.theme.ColorSystemGray7
 @Composable
 fun ErrorContent(
     modifier: Modifier = Modifier,
+    isFullMaxSize: Boolean = true,
     title: String,
     message: String,
     onRetry: () -> Unit
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize(),
+        modifier = if (isFullMaxSize) modifier.fillMaxSize() else modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

@@ -2,10 +2,10 @@ package com.goforer.phogal.data.datasource.network.api
 
 import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
+import com.goforer.phogal.data.model.remote.response.gallery.photo.download.TrackDownload
 import com.goforer.phogal.data.model.remote.response.gallery.photo.like.LikeResponse
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import com.goforer.phogal.data.model.remote.response.gallery.photos.PhotosResponse
-import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -72,7 +72,9 @@ interface RestAPI {
         @Query("order_by") orderBy: String,
     ): Response<List<Photo>>
 
-    @Streaming
-    @GET
-    suspend fun downloadPhoto(@Url fileUrl: String): Response<ResponseBody>
+    @GET("photos/{id}/download")
+    suspend fun trackDownload(
+        @Path("id") id: String,
+        @Query("client_id") clientId: String,
+    ): Response<TrackDownload>
 }
