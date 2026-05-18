@@ -40,6 +40,14 @@ object AppModule {
     private const val timeout_connect = 60L
     private const val timeout_write = 60L
 
+    @Singleton
+    @Provides
+    fun appContext(application: Application): Context = application.applicationContext
+
+    @Singleton
+    @Provides
+    fun provideConnectivityManagerNetworkMonitor(context: Context) = ConnectivityManagerNetworkMonitor(context)
+
     /**
      * Configures and provides a [Json] instance for the `retrofit2-kotlinx-serialization-converter`.
      *
@@ -53,19 +61,6 @@ object AppModule {
      * This configuration is declared as a singleton object to maintain a consistent parsing policy
      * across the entire application.
      */
-    val networkJson = Json {
-        ignoreUnknownKeys = true
-        coerceInputValues = true
-    }
-
-    @Singleton
-    @Provides
-    fun appContext(application: Application): Context = application.applicationContext
-
-    @Singleton
-    @Provides
-    fun provideConnectivityManagerNetworkMonitor(context: Context) = ConnectivityManagerNetworkMonitor(context)
-
     @Singleton
     @Provides
     fun provideJson(): Json = Json {
@@ -242,7 +237,6 @@ object AppModule {
         val retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.apiServer)
             .addConverterFactory(NullOnEmptyConverterFactory())
-            .addConverterFactory(networkJson.asConverterFactory(contentType))
             .addConverterFactory(json.asConverterFactory(contentType))
             .client(okHttpClient)
             .build()
