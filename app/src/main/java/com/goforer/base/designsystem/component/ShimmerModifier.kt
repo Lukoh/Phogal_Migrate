@@ -1,4 +1,4 @@
-package com.goforer.phogal.presentation.ui.compose.base.designsystem.component
+package com.goforer.base.designsystem.component
 
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat

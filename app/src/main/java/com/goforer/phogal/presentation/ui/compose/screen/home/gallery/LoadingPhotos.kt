@@ -19,7 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.goforer.base.designsystem.component.LoadingIndicator
-import com.goforer.phogal.presentation.ui.compose.base.designsystem.component.shimmer
+import com.goforer.base.designsystem.component.shimmer
 import com.goforer.phogal.presentation.ui.theme.ColorSystemGray7
 import com.goforer.phogal.presentation.ui.theme.DarkGreen10
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
