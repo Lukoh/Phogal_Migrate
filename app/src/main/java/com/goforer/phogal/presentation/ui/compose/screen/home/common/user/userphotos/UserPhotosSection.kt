@@ -4,6 +4,7 @@ package com.goforer.phogal.presentation.ui.compose.screen.home.common.user.userp
 
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -75,43 +76,52 @@ fun UserPhotosSection(
         }
     }
 
-    val layoutDirection = LocalLayoutDirection.current
-
     // Material 3 PullToRefreshBox (replaces deprecated material.pullrefresh.*).
     PullToRefreshBox(
         modifier = modifier
-            .clip(RoundedCornerShape(0.2.dp)),
+            .clip(RoundedCornerShape(2.dp)),
         isRefreshing = isRefreshing,
         onRefresh = photos::refresh
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(),
-            state = lazyListState,
-            contentPadding = paddingValues
+        val layoutDirection = LocalLayoutDirection.current
+
+        Box(
+            modifier = modifier.clip(RoundedCornerShape(0.2.dp))
         ) {
-            renderLoadState(
-                photos = photos,
-                sectionUiState = sectionUiState,
-                bookmarkViewModel = bookmarkViewModel,
-                onItemClicked = onItemClicked,
-                onViewPhotos = onViewPhotos,
-                onShowSnackBar = onShowSnackBar,
-                onOpenWebView = onOpenWebView,
-                onSuccess = onSuccess
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                state = lazyListState,
+                contentPadding = PaddingValues(
+                    start = paddingValues.calculateLeftPadding(layoutDirection),
+                    top = 0.dp,
+                    end = paddingValues.calculateRightPadding(layoutDirection) ,
+                    bottom = paddingValues.calculateBottomPadding() + 24.dp
+                )
+            ) {
+                renderLoadState(
+                    photos = photos,
+                    sectionUiState = sectionUiState,
+                    bookmarkViewModel = bookmarkViewModel,
+                    onItemClicked = onItemClicked,
+                    onViewPhotos = onViewPhotos,
+                    onShowSnackBar = onShowSnackBar,
+                    onOpenWebView = onOpenWebView,
+                    onSuccess = onSuccess
+                )
+            }
+
+            ShowUpButton(
+                modifier = Modifier.align(Alignment.BottomEnd),
+                visible = isScrolledPastThreshold,
+                onClick = {
+                    sectionUiState.scope.launch {
+                        lazyListState.animateScrollToItem (0)
+                    }
+                }
             )
         }
-
-        ShowUpButton(
-            modifier = Modifier.align(Alignment.BottomEnd),
-            visible = isScrolledPastThreshold,
-            onClick = {
-                sectionUiState.scope.launch {
-                    lazyListState.animateScrollToItem (0)
-                }
-            }
-        )
     }
 }
 

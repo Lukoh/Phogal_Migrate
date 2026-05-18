@@ -41,7 +41,7 @@ fun UserPhotosContent(
 ) {
     if (contentUiState.name.isNotBlank()) {
         UserPhotosSection(
-            modifier = Modifier.padding(top = 0.5.dp),
+            modifier = modifier,
             paddingValues = paddingValues,
             photos = photos,
             sectionUiState = rememberUserPhotosSectionUiState(),
