@@ -40,6 +40,24 @@ object AppModule {
     private const val timeout_connect = 60L
     private const val timeout_write = 60L
 
+    /**
+     * Configures and provides a [Json] instance for the `retrofit2-kotlinx-serialization-converter`.
+     *
+     * - By default, Kotlinx Serialization throws an [UnknownKeyException] if the JSON contains
+     *   keys not defined in the DTO. Setting `ignoreUnknownKeys = true` ensures the app gracefully
+     *   ignores undefined fields and prevents crashes when the backend updates.
+     * - Enabling `coerceInputValues = true` is highly recommended in production. It coerces invalid
+     *   or null inputs into their declared default values if the types don't match, preventing
+     *   deserialization failures.
+     *
+     * This configuration is declared as a singleton object to maintain a consistent parsing policy
+     * across the entire application.
+     */
+    val networkJson = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
+
     @Singleton
     @Provides
     fun appContext(application: Application): Context = application.applicationContext
@@ -224,6 +242,7 @@ object AppModule {
         val retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.apiServer)
             .addConverterFactory(NullOnEmptyConverterFactory())
+            .addConverterFactory(networkJson.asConverterFactory(contentType))
             .addConverterFactory(json.asConverterFactory(contentType))
             .client(okHttpClient)
             .build()
