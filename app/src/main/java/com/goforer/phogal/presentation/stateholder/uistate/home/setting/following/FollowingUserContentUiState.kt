@@ -14,6 +14,15 @@ import com.goforer.phogal.presentation.stateholder.uistate.BaseUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 
 @Stable
+interface FollowingUserUiState {
+    val users: LazyPagingItems<User>
+}
+
+private class FollowingUserUiStateImpl(
+    override val users: LazyPagingItems<User>
+) : FollowingUserUiState
+
+@Stable
 class FollowingUserContentUiState internal constructor(
     val baseUiState: BaseUiState,
     val followingUserUiState: FollowingUserUiState,
@@ -27,37 +36,22 @@ class FollowingUserContentUiState internal constructor(
     }
 }
 
-@Stable
-class FollowingUserUiState(
-    val users: LazyPagingItems<User>,
-)
-
 @Composable
 fun rememberFollowingUserContentUiState(
     followViewModel: FollowViewModel,
     baseUiState: BaseUiState = rememberBaseUiState(),
     enabledLoadPhotos: MutableState<Boolean> = rememberSaveable { mutableStateOf(true) }
 ): FollowingUserContentUiState {
-    val followingUserUiState = rememberFollowingUserUiState(followViewModel)
+    val users = followViewModel.followedUsers.collectAsLazyPagingItems()
+    val followingUserUiState = remember(followViewModel, users) {
+        FollowingUserUiStateImpl(users = users)
+    }
 
-    return remember(baseUiState, followViewModel) {
+    return remember(baseUiState, followViewModel, enabledLoadPhotos, followingUserUiState) {
         FollowingUserContentUiState(
             baseUiState = baseUiState,
             followingUserUiState = followingUserUiState,
             _enabledLoadPhotos = enabledLoadPhotos
-        )
-    }
-}
-
-@Composable
-fun rememberFollowingUserUiState(
-    followViewModel: FollowViewModel
-): FollowingUserUiState {
-    val users = followViewModel.followedUsers.collectAsLazyPagingItems()
-
-    return remember(users) {
-        FollowingUserUiState(
-            users = users,
         )
     }
 }

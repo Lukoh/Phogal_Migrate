@@ -17,6 +17,16 @@ import com.goforer.phogal.presentation.stateholder.uistate.BaseUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 
 @Stable
+class GalleryUiState internal constructor(
+    val photos: LazyPagingItems<Photo>,
+    private val currentQueryProvider: () -> String,
+    private val recentWordsProvider: () -> List<String>
+) {
+    val currentQuery: String get() = currentQueryProvider()
+    val recentWords: List<String> get() = recentWordsProvider()
+}
+
+@Stable
 class SearchPhotosContentUiState internal constructor(
     val baseUiState: BaseUiState,
     val galleryUiState: GalleryUiState,
@@ -36,59 +46,30 @@ class SearchPhotosContentUiState internal constructor(
     val visibleActions: Boolean get() = _visibleActions.value
 
     fun setPermissionGranted() {
-        _enabled.value = true
+        _enabled.value = true;
         _permissionVisible.value = false
     }
-
     fun setPermissionDenied(rationale: String) {
-        _rationaleText.value = rationale
-        _enabled.value = false
+        _rationaleText.value = rationale;
+        _enabled.value = false;
         _permissionVisible.value = true
     }
-
     fun setPermissionDialogDismissed() {
-        _enabled.value = false
+        _enabled.value = false;
         _permissionVisible.value = false
     }
-
-    fun setPermissionDialogConfirmed() {
-        _permissionVisible.value = false
-    }
-
-    fun setTriggerConsumed() {
-        _triggered.value = false
-    }
-
-    fun setSearchTriggered() {
-        _triggered.value = true
-    }
-
-    fun setScrollingChanged(scrolling: Boolean) {
-        _scrolling.value = scrolling
-    }
-
-    fun setActionsVisibilityChanged(visible: Boolean) {
-        _visibleActions.value = visible
-    }
-
-    fun setEnabled(enabled: Boolean) {
-        _enabled.value = enabled
-    }
+    fun setPermissionDialogConfirmed() { _permissionVisible.value = false }
+    fun setTriggerConsumed() { _triggered.value = false }
+    fun setSearchTriggered() { _triggered.value = true }
+    fun setScrollingChanged(scrolling: Boolean) { _scrolling.value = scrolling }
+    fun setActionsVisibilityChanged(visible: Boolean) { _visibleActions.value = visible }
+    fun setEnabled(enabled: Boolean) { _enabled.value = enabled }
 
     val permissions = listOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.CAMERA
     )
-}
-
-@Stable
-class GalleryUiState internal constructor(
-    val photos: LazyPagingItems<Photo>,
-    val currentQuery: String,
-    val recentWords: List<String>
-) {
-
 }
 
 @Composable
@@ -102,9 +83,27 @@ fun rememberSearchPhotosContentUiState(
     scrolling: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
     visibleActions: MutableState<Boolean> = rememberSaveable { mutableStateOf(true) }
 ): SearchPhotosContentUiState {
-    val galleryUiState = rememberGalleryUiState(galleryViewModel)
+    val photos = galleryViewModel.photos.collectAsLazyPagingItems()
+    val currentQuery by galleryViewModel.query.collectAsStateWithLifecycle()
+    val recentWords by galleryViewModel.recentWords.collectAsStateWithLifecycle()
+    val galleryUiState = remember(galleryViewModel, photos) {
+        GalleryUiState(
+            photos = photos,
+            currentQueryProvider = { currentQuery },
+            recentWordsProvider = { recentWords }
+        )
+    }
 
-    return remember(baseUiState, galleryUiState) {
+    return remember(
+        baseUiState,
+        galleryViewModel,
+        enabled,
+        triggered,
+        permissionVisible,
+        rationaleText,
+        scrolling,
+        visibleActions
+    ) {
         SearchPhotosContentUiState(
             baseUiState = baseUiState,
             galleryUiState = galleryUiState,
@@ -114,23 +113,6 @@ fun rememberSearchPhotosContentUiState(
             _rationaleText = rationaleText,
             _scrolling = scrolling,
             _visibleActions = visibleActions
-        )
-    }
-}
-
-@Composable
-fun rememberGalleryUiState(
-    galleryViewModel: GalleryViewModel
-): GalleryUiState {
-    val photos = galleryViewModel.photos.collectAsLazyPagingItems()
-    val currentQuery by galleryViewModel.query.collectAsStateWithLifecycle()
-    val recentWords by galleryViewModel.recentWords.collectAsStateWithLifecycle()
-
-    return remember(photos, currentQuery, recentWords) {
-        GalleryUiState(
-            photos = photos,
-            currentQuery = currentQuery,
-            recentWords = recentWords
         )
     }
 }

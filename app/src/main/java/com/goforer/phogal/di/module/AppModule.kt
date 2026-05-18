@@ -2,7 +2,6 @@ package com.goforer.phogal.di.module
 
 import android.app.Application
 import android.content.Context
-import android.os.Build
 import com.orhanobut.logger.Logger
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache

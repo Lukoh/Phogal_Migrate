@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ImageSearch
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,6 +21,7 @@ import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -30,20 +33,30 @@ import androidx.compose.ui.unit.sp
 import com.goforer.phogal.presentation.ui.theme.Black
 import com.goforer.phogal.presentation.ui.theme.Blue40
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
+import com.google.common.collect.Multimaps.index
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Chips(
-    modifier: Modifier = Modifier, // 외부에서 넘어오는 padding, graphicsLayer 등
+    modifier: Modifier = Modifier,
     items: List<String>,
     textColor: Color,
     leadingIconTint: Color,
     onClicked: (String) -> Unit
 ) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(items.size) {
+        if (items.isNotEmpty()) {
+            listState.animateScrollToItem(0)
+        }
+    }
+
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
         LazyRow(
+            state = listState,
             contentPadding = PaddingValues(horizontal = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp), // Spacer 대신 간격 설정
             modifier = Modifier
@@ -52,7 +65,7 @@ fun Chips(
         ) {
             items(
                 items = items,
-                key = { it } // 고유 키를 설정하여 리컴포지션 성능 최적화
+                key = { item -> item }
             ) { item ->
                 InputChip(
                     selected = true,

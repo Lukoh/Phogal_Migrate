@@ -14,6 +14,15 @@ import com.goforer.phogal.presentation.stateholder.uistate.BaseUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 
 @Stable
+interface BookmarkUiState {
+    val bookmarkedPictures: LazyPagingItems<Picture>
+}
+
+private class BookmarkUiStateImpl(
+    override val bookmarkedPictures: LazyPagingItems<Picture>
+) : BookmarkUiState
+
+@Stable
 class BookmarkContentUiState internal constructor(
     val baseUiState: BaseUiState,
     val bookmarkUiState: BookmarkUiState,
@@ -27,37 +36,22 @@ class BookmarkContentUiState internal constructor(
     }
 }
 
-@Stable
-class BookmarkUiState(
-    val bookmarkedPictures: LazyPagingItems<Picture>,
-)
-
 @Composable
 fun rememberBookmarkContentUiState(
     bookmarkViewModel: BookmarkViewModel,
     baseUiState: BaseUiState = rememberBaseUiState(),
     enabledLoadPhotos: MutableState<Boolean> = rememberSaveable { mutableStateOf(true) }
 ): BookmarkContentUiState {
-    val bookmarkUiState = rememberBookmarkUiState(bookmarkViewModel)
+    val bookmarkedPictures = bookmarkViewModel.bookmarkedPictures.collectAsLazyPagingItems()
+    val bookmarkUiState = remember(bookmarkViewModel, bookmarkedPictures) {
+        BookmarkUiStateImpl(bookmarkedPictures = bookmarkedPictures)
+    }
 
     return remember(baseUiState, bookmarkViewModel, enabledLoadPhotos) {
         BookmarkContentUiState(
             baseUiState = baseUiState,
             bookmarkUiState = bookmarkUiState,
             _enabledLoadPhotos = enabledLoadPhotos
-        )
-    }
-}
-
-@Composable
-fun rememberBookmarkUiState(
-    bookmarkViewModel: BookmarkViewModel
-): BookmarkUiState {
-    val bookmarkedPictures = bookmarkViewModel.bookmarkedPictures.collectAsLazyPagingItems()
-
-    return remember(bookmarkedPictures) {
-        BookmarkUiState(
-            bookmarkedPictures = bookmarkedPictures,
         )
     }
 }

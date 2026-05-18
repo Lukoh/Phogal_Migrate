@@ -112,7 +112,7 @@ fun PopularPhotosScreen(
                 PopularPhotosContent(
                     modifier = modifier,
                     paddingValues= paddingValues,
-                    photos = contentUiState.popularPhotosUiState.photos,
+                    photos = contentUiState.photos,
                     onItemClicked = onItemClicked,
                     onViewPhotos = onViewPhotos,
                     onShowSnackBar = {

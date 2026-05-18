@@ -52,7 +52,7 @@ import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 fun SearchSection(
     modifier: Modifier = Modifier,
     sectionUiState: SearchSectionUiState = rememberSearchSectionUiState(),
-    onSearched: (word: String) -> Unit
+    onSearched: (word: String) -> Unit,
 ) {
     val isFocused by sectionUiState.interactionSource.collectIsFocusedAsState()
     val indicatorColor = if (isFocused) Color.Black else Color.Gray

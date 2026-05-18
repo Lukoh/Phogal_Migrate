@@ -180,7 +180,6 @@ private object DefaultTransitions {
     private const val PREDICTIVE_DURATION_MS = 250
 
     /** Push (forward) */
-    // .() -> 를 .(Int) -> 로 수정하고, 람다 블록에 { _ -> 를 추가합니다.
     val push: AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
         val enter = slideIntoContainer(
             towards = AnimatedContentTransitionScope.SlideDirection.Start,

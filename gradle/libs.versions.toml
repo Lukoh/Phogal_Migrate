@@ -81,6 +81,7 @@ runner = "1.7.0"
 ui = "1.11.1"
 runtime = "1.11.1"
 volley = "1.2.1"
+foundation = "1.11.1"
 
 
 [libraries]
@@ -179,6 +180,7 @@ androidx-runner = { group = "androidx.test", name = "runner", version.ref = "run
 androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
+androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 # --- Android ---

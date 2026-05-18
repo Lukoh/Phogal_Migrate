@@ -15,7 +15,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -82,7 +81,6 @@ fun SearchPhotosContent(
             onTriggeredConsumed = contentUiState::setTriggerConsumed,
             onChipClicked = onChipClicked
         )
-
         PhotosOrInitScreen(
             paddingValues = paddingValues,
             query = contentUiState.galleryUiState.currentQuery,
@@ -121,6 +119,7 @@ private fun RecentWordsChips(
     onTriggeredConsumed: () -> Unit,
     onChipClicked: (String) -> Unit
 ) {
+
     GenericCubicAnimationShape(
         visible = !isScrolling,
         duration = 100

@@ -62,7 +62,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun PictureViewerScreen(
     modifier: Modifier = Modifier,
-    pictureViewModel: PictureViewModel,
+    pictureViewModel: PictureViewModel = hiltViewModel(),
     bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
     state: PhotoContentUiState = rememberPhotoContentUiState(),
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
