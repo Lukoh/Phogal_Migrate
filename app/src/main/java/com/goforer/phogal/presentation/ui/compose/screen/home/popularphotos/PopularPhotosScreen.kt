@@ -21,20 +21,14 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.goforer.base.designsystem.component.CardSnackBar
 import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.phogal.R
-import com.goforer.phogal.presentation.stateholder.business.home.popularphotos.PopularPhotosViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.popularphotos.PopularPhotosViewModel.Companion.POPULAR
 import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.PopularPhotosContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.PopularPhotosSectionUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.rememberPopularPhotosContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.rememberPopularPhotosSectionUiState
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import kotlinx.coroutines.launch
 
@@ -42,8 +36,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun PopularPhotosScreen(
     modifier: Modifier = Modifier,
-    popularPhotosViewModel: PopularPhotosViewModel = hiltViewModel(),
-    contentUiState: PopularPhotosContentUiState = rememberPopularPhotosContentUiState(popularPhotosViewModel),
+    contentUiState: PopularPhotosContentUiState,
     onItemClicked: (id: String) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
@@ -108,7 +101,7 @@ fun PopularPhotosScreen(
             )
         }, content = { paddingValues ->
             ScaffoldContent(topInterval = paddingValues.calculateTopPadding()) {
-                popularPhotosViewModel.updateOrderBy(POPULAR)
+                contentUiState.popularPhotosViewModel.updateOrderBy(POPULAR)
                 PopularPhotosContent(
                     modifier = modifier,
                     paddingValues= paddingValues,

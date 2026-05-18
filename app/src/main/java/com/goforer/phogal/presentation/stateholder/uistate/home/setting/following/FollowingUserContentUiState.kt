@@ -14,18 +14,10 @@ import com.goforer.phogal.presentation.stateholder.uistate.BaseUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 
 @Stable
-interface FollowingUserUiState {
-    val users: LazyPagingItems<User>
-}
-
-private class FollowingUserUiStateImpl(
-    override val users: LazyPagingItems<User>
-) : FollowingUserUiState
-
-@Stable
 class FollowingUserContentUiState internal constructor(
+    val followViewModel: FollowViewModel,
     val baseUiState: BaseUiState,
-    val followingUserUiState: FollowingUserUiState,
+    val users: LazyPagingItems<User>,
 
     private val _enabledLoadPhotos: MutableState<Boolean>
 ) {
@@ -43,14 +35,12 @@ fun rememberFollowingUserContentUiState(
     enabledLoadPhotos: MutableState<Boolean> = rememberSaveable { mutableStateOf(true) }
 ): FollowingUserContentUiState {
     val users = followViewModel.followedUsers.collectAsLazyPagingItems()
-    val followingUserUiState = remember(followViewModel, users) {
-        FollowingUserUiStateImpl(users = users)
-    }
 
-    return remember(baseUiState, followViewModel, enabledLoadPhotos, followingUserUiState) {
+    return remember(baseUiState, followViewModel, enabledLoadPhotos, users) {
         FollowingUserContentUiState(
+            followViewModel = followViewModel,
             baseUiState = baseUiState,
-            followingUserUiState = followingUserUiState,
+            users = users,
             _enabledLoadPhotos = enabledLoadPhotos
         )
     }

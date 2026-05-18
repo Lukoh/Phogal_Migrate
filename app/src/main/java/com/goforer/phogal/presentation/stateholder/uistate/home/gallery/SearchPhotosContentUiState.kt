@@ -19,6 +19,7 @@ import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 @Stable
 class GalleryUiState internal constructor(
     val photos: LazyPagingItems<Photo>,
+
     private val currentQueryProvider: () -> String,
     private val recentWordsProvider: () -> List<String>
 ) {
@@ -30,6 +31,7 @@ class GalleryUiState internal constructor(
 class SearchPhotosContentUiState internal constructor(
     val baseUiState: BaseUiState,
     val galleryUiState: GalleryUiState,
+    val galleryViewModel: GalleryViewModel,
 
     private val _enabled: MutableState<Boolean>,
     private val _triggered: MutableState<Boolean>,
@@ -95,8 +97,8 @@ fun rememberSearchPhotosContentUiState(
     }
 
     return remember(
-        baseUiState,
         galleryViewModel,
+        baseUiState,
         enabled,
         triggered,
         permissionVisible,
@@ -105,6 +107,7 @@ fun rememberSearchPhotosContentUiState(
         visibleActions
     ) {
         SearchPhotosContentUiState(
+            galleryViewModel = galleryViewModel,
             baseUiState = baseUiState,
             galleryUiState = galleryUiState,
             _enabled = enabled,

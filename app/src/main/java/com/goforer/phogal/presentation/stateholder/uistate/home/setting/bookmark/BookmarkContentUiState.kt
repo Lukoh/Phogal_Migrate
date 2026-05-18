@@ -14,18 +14,9 @@ import com.goforer.phogal.presentation.stateholder.uistate.BaseUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 
 @Stable
-interface BookmarkUiState {
-    val bookmarkedPictures: LazyPagingItems<Picture>
-}
-
-private class BookmarkUiStateImpl(
-    override val bookmarkedPictures: LazyPagingItems<Picture>
-) : BookmarkUiState
-
-@Stable
 class BookmarkContentUiState internal constructor(
     val baseUiState: BaseUiState,
-    val bookmarkUiState: BookmarkUiState,
+    val bookmarkedPictures: LazyPagingItems<Picture>,
 
     private val _enabledLoadPhotos: MutableState<Boolean>
 ) {
@@ -43,14 +34,11 @@ fun rememberBookmarkContentUiState(
     enabledLoadPhotos: MutableState<Boolean> = rememberSaveable { mutableStateOf(true) }
 ): BookmarkContentUiState {
     val bookmarkedPictures = bookmarkViewModel.bookmarkedPictures.collectAsLazyPagingItems()
-    val bookmarkUiState = remember(bookmarkViewModel, bookmarkedPictures) {
-        BookmarkUiStateImpl(bookmarkedPictures = bookmarkedPictures)
-    }
 
-    return remember(baseUiState, bookmarkViewModel, enabledLoadPhotos) {
+    return remember(baseUiState, bookmarkViewModel, enabledLoadPhotos, bookmarkedPictures) {
         BookmarkContentUiState(
             baseUiState = baseUiState,
-            bookmarkUiState = bookmarkUiState,
+            bookmarkedPictures = bookmarkedPictures,
             _enabledLoadPhotos = enabledLoadPhotos
         )
     }

@@ -33,7 +33,7 @@ import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 fun UserPhotosContent(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(4.dp),
-    contentUiState: UserPhotosContentUiState = rememberUserPhotosContentUiState(),
+    contentUiState: UserPhotosContentUiState,
     photos: LazyPagingItems<Photo>,
     onItemClicked: (String) -> Unit,
     onShowSnackBar: (String) -> Unit,

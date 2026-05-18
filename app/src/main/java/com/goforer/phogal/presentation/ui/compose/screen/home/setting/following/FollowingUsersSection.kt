@@ -23,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -71,12 +72,19 @@ fun FollowingUsersSection(
         Box(
             modifier = modifier.clip(RoundedCornerShape(0.2.dp))
         ) {
+            val layoutDirection = LocalLayoutDirection.current
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(),
                 state = lazyListState,
-                contentPadding = paddingValues,
+                contentPadding = PaddingValues(
+                    start = paddingValues.calculateLeftPadding(layoutDirection),
+                    top = 0.dp,
+                    end = paddingValues.calculateRightPadding(layoutDirection) ,
+                    bottom = paddingValues.calculateBottomPadding() + 24.dp
+                )
             ) {
                 renderLoadState(
                     users = users,

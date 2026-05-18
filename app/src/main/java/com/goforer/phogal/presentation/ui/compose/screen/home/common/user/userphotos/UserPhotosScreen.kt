@@ -52,8 +52,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun UserPhotosScreen(
     modifier: Modifier = Modifier,
-    userPhotosViewModel: UserPhotosViewModel = hiltViewModel(),
-    contentUiState: UserPhotosContentUiState = rememberUserPhotosContentUiState(),
+    userPhotosViewModel: UserPhotosViewModel,
+    contentUiState: UserPhotosContentUiState,
     onItemClicked: (id: String) -> Unit,
     onBackPressed: () -> Unit,
     onStart: () -> Unit = {

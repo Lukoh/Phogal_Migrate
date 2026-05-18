@@ -23,9 +23,20 @@ import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.business.home.common.photo.info.PictureViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.common.user.UserPhotosViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.gallery.GalleryViewModel
+import com.goforer.phogal.presentation.stateholder.business.home.popularphotos.PopularPhotosViewModel
+import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel
+import com.goforer.phogal.presentation.stateholder.business.home.setting.follow.FollowViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.PopularPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.rememberPopularPhotosContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.setting.bookmark.BookmarkContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.setting.bookmark.rememberBookmarkContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.FollowingUserContentUiState
+import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.viewer.PictureViewerScreen
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.user.userphotos.UserPhotosScreen
@@ -60,11 +71,10 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
         )
     ) {
         val galleryViewModel: GalleryViewModel = hiltViewModel()
+        val contentUiState: SearchPhotosContentUiState = rememberSearchPhotosContentUiState(galleryViewModel)
+
         SearchPhotosScreen(
-            galleryViewModel = galleryViewModel,
-            contentUiState = rememberSearchPhotosContentUiState(
-                baseUiState = rememberBaseUiState(), galleryViewModel = galleryViewModel
-            ),
+            contentUiState = contentUiState,
             onItemClicked = { id ->
                 navigationState.push(Routes.PictureRoute(id = id, showViewPhotosButton = true))
             },
@@ -89,6 +99,7 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
         metadata = ListDetailSceneStrategy.detailPane()
     ) { key ->
         val pictureViewModel: PictureViewModel = hiltViewModel()
+
         PictureViewerScreen(
             pictureViewModel = pictureViewModel,
             state = rememberPhotoContentUiState(
@@ -116,13 +127,15 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
 
     entry<Routes.UserPhotosRoute> { key ->
         val userPhotosViewModel: UserPhotosViewModel = hiltViewModel()
+        val contentUiState: UserPhotosContentUiState = rememberUserPhotosContentUiState(
+            baseUiState = rememberBaseUiState(),
+            name = rememberSaveable { mutableStateOf(key.name) },
+            firstName = rememberSaveable { mutableStateOf(key.firstName) }
+        )
+
         UserPhotosScreen(
             userPhotosViewModel = userPhotosViewModel,
-            contentUiState = rememberUserPhotosContentUiState(
-                baseUiState = rememberBaseUiState(),
-                name = rememberSaveable { mutableStateOf(key.name) },
-                firstName = rememberSaveable { mutableStateOf(key.firstName) }
-            ),
+            contentUiState = contentUiState,
             onItemClicked = { id ->
                 navigationState.push(Routes.PictureRoute(id = id, showViewPhotosButton = false))
             },
@@ -163,7 +176,11 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
 
 private fun EntryProviderScope<NavKey>.popularTabEntries(navState: NavigationState) {
     entry<Routes.PopularPhotosRoute> {
+        val popularPhotosViewModel: PopularPhotosViewModel = hiltViewModel()
+        val contentUiState: PopularPhotosContentUiState = rememberPopularPhotosContentUiState(popularPhotosViewModel)
+
         PopularPhotosScreen(
+            contentUiState = contentUiState,
             onItemClicked = { id ->
                 navState.push(Routes.PictureRoute(id = id, showViewPhotosButton = true))
             },
@@ -222,7 +239,13 @@ private fun EntryProviderScope<NavKey>.settingTabEntries(navState: NavigationSta
     }
 
     entry<Routes.BookmarkedPhotosRoute> {
+        val bookmarkViewModel: BookmarkViewModel = hiltViewModel()
+        val contentUiState: BookmarkContentUiState  = rememberBookmarkContentUiState(
+            bookmarkViewModel = bookmarkViewModel, enabledLoadPhotos = rememberSaveable { mutableStateOf(true) }
+        )
+
         BookmarkedPhotosScreen(
+            contentUiState = contentUiState,
             onItemClicked = { picture, _ ->
                 navState.push(
                     Routes.PictureRoute(id = picture.id, showViewPhotosButton = false)
@@ -246,7 +269,13 @@ private fun EntryProviderScope<NavKey>.settingTabEntries(navState: NavigationSta
     }
 
     entry<Routes.FollowingUsersRoute> {
+        val followViewModel: FollowViewModel = hiltViewModel()
+        val contentUiState: FollowingUserContentUiState = rememberFollowingUserContentUiState(
+            followViewModel = followViewModel, enabledLoadPhotos = rememberSaveable { mutableStateOf(true) }
+        )
+
         FollowingUsersScreen(
+            contentUiState = contentUiState,
             onBackPressed = { navState.pop() },
             onViewPhotos = { name, firstName, lastName, username ->
                 navState.push(

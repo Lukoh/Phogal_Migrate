@@ -31,6 +31,7 @@ import kotlinx.coroutines.CoroutineScope
 @Stable
 class PopularPhotosSectionUiState internal constructor(
     val scope: CoroutineScope,
+
     private val _loadingDone: MutableState<Boolean>
 ) {
     val loadingDone: Boolean get() = _loadingDone.value

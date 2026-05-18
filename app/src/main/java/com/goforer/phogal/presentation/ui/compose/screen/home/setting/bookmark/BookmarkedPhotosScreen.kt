@@ -21,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,7 +32,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.goforer.base.designsystem.component.CardSnackBar
@@ -41,9 +39,7 @@ import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
-import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.bookmark.BookmarkContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.setting.bookmark.rememberBookmarkContentUiState
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 
@@ -51,10 +47,7 @@ import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 @Composable
 fun BookmarkedPhotosScreen(
     modifier: Modifier = Modifier,
-    bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
-    bookmarkContentUiState: BookmarkContentUiState  = rememberBookmarkContentUiState(
-        bookmarkViewModel = bookmarkViewModel, enabledLoadPhotos = rememberSaveable { mutableStateOf(true) }
-    ),
+    contentUiState: BookmarkContentUiState,
     onItemClicked: (item: Picture, index: Int) -> Unit,
     onBackPressed: () -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
@@ -75,7 +68,7 @@ fun BookmarkedPhotosScreen(
         onBackPressed()
     }
 
-    DisposableEffect(bookmarkContentUiState.baseUiState.lifecycle) {
+    DisposableEffect(contentUiState.baseUiState.lifecycle) {
         // Create an observer that triggers our remembered callbacks
         // for doing anything
         val observer = LifecycleEventObserver { _, event ->
@@ -87,11 +80,11 @@ fun BookmarkedPhotosScreen(
         }
 
         // Add the observer to the lifecycle
-        bookmarkContentUiState.baseUiState.lifecycle.addObserver(observer)
+        contentUiState.baseUiState.lifecycle.addObserver(observer)
 
         // When the effect leaves the Composition, remove the observer
         onDispose {
-            bookmarkContentUiState.baseUiState.lifecycle.removeObserver(observer)
+            contentUiState.baseUiState.lifecycle.removeObserver(observer)
         }
     }
 
@@ -128,7 +121,7 @@ fun BookmarkedPhotosScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            bookmarkContentUiState.setEnabledLoadPhotos(false)
+                            contentUiState.setEnabledLoadPhotos(false)
                             onBackPressed()
                         }
                     ) {
@@ -144,8 +137,8 @@ fun BookmarkedPhotosScreen(
                 BookmarkedPhotosContent(
                     modifier = modifier,
                     paddingValues = paddingValues,
-                    bookmarkedPictures = bookmarkContentUiState.bookmarkUiState.bookmarkedPictures,
-                    enabledLoadPhotos = bookmarkContentUiState.enabledLoadPhotos,
+                    bookmarkedPictures = contentUiState.bookmarkedPictures,
+                    enabledLoadPhotos = contentUiState.enabledLoadPhotos,
                     onItemClicked = onItemClicked,
                     onViewPhotos = onViewPhotos,
                     onOpenWebView = onOpenWebView

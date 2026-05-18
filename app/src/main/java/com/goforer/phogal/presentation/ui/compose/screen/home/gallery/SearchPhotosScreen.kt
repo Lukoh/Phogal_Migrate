@@ -30,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -39,9 +38,7 @@ import com.goforer.base.designsystem.component.CardSnackBar
 import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.phogal.R
-import com.goforer.phogal.presentation.stateholder.business.home.gallery.GalleryViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchSectionUiState
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
@@ -51,8 +48,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SearchPhotosScreen(
     modifier: Modifier = Modifier,
-    galleryViewModel: GalleryViewModel = hiltViewModel(),
-    contentUiState: SearchPhotosContentUiState = rememberSearchPhotosContentUiState(galleryViewModel),
+    contentUiState: SearchPhotosContentUiState,
     onItemClicked: (id: String) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
@@ -64,12 +60,12 @@ fun SearchPhotosScreen(
     // Stable lambdas. The capture set is the bare minimum needed for the
     // operation, which keeps Compose from invalidating these on every parent
     // recomposition.
-    val onSearch: (String) -> Unit = remember(galleryViewModel, contentUiState) {
+    val onSearch: (String) -> Unit = remember(contentUiState.galleryViewModel, contentUiState) {
         { keyword ->
             if (keyword.isNotEmpty() && keyword != contentUiState.galleryUiState.currentQuery) {
                 contentUiState.baseUiState.keyboardController?.hide()
-                galleryViewModel.onQueryChanged(keyword)
-                galleryViewModel.commitSearch()
+                contentUiState.galleryViewModel.onQueryChanged(keyword)
+                contentUiState.galleryViewModel.commitSearch()
                 contentUiState.setSearchTriggered()
             }
         }
@@ -83,11 +79,11 @@ fun SearchPhotosScreen(
     // Stable lambdas. The capture set is the bare minimum needed for the
     // operation, which keeps Compose from invalidating these on every parent
     // recomposition.
-    val onChipClicked: (String) -> Unit = remember(galleryViewModel, contentUiState,sectionUiState) {
+    val onChipClicked: (String) -> Unit = remember(contentUiState.galleryViewModel, contentUiState,sectionUiState) {
         { keyword ->
             if (keyword.isNotEmpty() && keyword != contentUiState.galleryUiState.currentQuery) {
                 sectionUiState.editableInputState.textState = keyword
-                galleryViewModel.onQueryChanged(keyword)
+                contentUiState.galleryViewModel.onQueryChanged(keyword)
             }
         }
     }
