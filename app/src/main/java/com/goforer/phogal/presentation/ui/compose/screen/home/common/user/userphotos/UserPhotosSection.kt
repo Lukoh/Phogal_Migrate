@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -113,7 +114,12 @@ fun UserPhotosSection(
             }
 
             ShowUpButton(
-                modifier = Modifier.align(Alignment.BottomEnd),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(
+                        end = 4.dp,
+                        bottom = paddingValues.calculateBottomPadding() + 18.dp
+                    ),
                 visible = isScrolledPastThreshold,
                 onClick = {
                     sectionUiState.scope.launch {
@@ -121,6 +127,15 @@ fun UserPhotosSection(
                     }
                 }
             )
+        }
+
+        LaunchedEffect(lazyListState, sectionUiState.clicked) {
+            if (sectionUiState.clicked) {
+                lazyListState.animateScrollToItem (0)
+                sectionUiState.setUpButtonVisibilityChanged(false)
+            }
+
+            sectionUiState.setScrollConsumed()
         }
     }
 }

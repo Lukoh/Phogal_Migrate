@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -96,7 +97,12 @@ fun FollowingUsersSection(
         }
 
         ShowUpButton(
-            modifier = Modifier.align(Alignment.BottomEnd),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(
+                    end = 4.dp,
+                    bottom = paddingValues.calculateBottomPadding() + 18.dp
+                ),
             visible = isScrolledPastThreshold,
             onClick = { sectionUiState.setClicked(true) }
         )

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -121,7 +122,12 @@ fun SearchPhotosSection(
         // Show up-button only when user has scrolled past the threshold and isn't
         // actively scrolling (prevents the button from flickering during drags).
         ShowUpButton(
-            modifier = Modifier.align(Alignment.BottomEnd),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(
+                    end = 4.dp,
+                    bottom = paddingValues.calculateBottomPadding() - 18.dp
+                ),
             visible = isScrolledPastThreshold,
             onClick = {
                 sectionUiState.scope.launch {

@@ -56,6 +56,22 @@ fun FollowingUsersScreen(
     val currentOnStop by rememberUpdatedState(onStop)
     val snackbarHostState = remember { SnackbarHostState() }
     val backHandlingEnabled by remember { mutableStateOf(true) }
+    val text = stringResource(id = R.string.user_info_has_no_portfolio)
+
+    // Stable lambdas. The capture set is the bare minimum needed for the
+    // operation, which keeps Compose from invalidating these on every parent
+    // recomposition.
+    val onOpenWebView = remember {
+        { firstName: String, url: String? ->
+            url.isNull({
+                contentUiState.baseUiState.scope.launch {
+                    snackbarHostState.showSnackbar("${firstName}${" "}${text}")
+                }
+            }, {
+                onOpenWebView(firstName, it)
+            })
+        }
+    }
 
     BackHandler(backHandlingEnabled) {
         onBackPressed()
@@ -116,24 +132,7 @@ fun FollowingUsersScreen(
                 }
             )
         }, content = { paddingValues ->
-            val text = stringResource(id = R.string.user_info_has_no_portfolio)
-
-            // Stable lambdas. The capture set is the bare minimum needed for the
-            // operation, which keeps Compose from invalidating these on every parent
-            // recomposition.
-            val onOpenWebView = remember {
-                { firstName: String, url: String? ->
-                    url.isNull({
-                        contentUiState.baseUiState.scope.launch {
-                            snackbarHostState.showSnackbar("${firstName}${" "}${text}")
-                        }
-                    }, {
-                        onOpenWebView(firstName, it)
-                    })
-                }
-            }
-
-            ScaffoldContent(topInterval = 2.dp) {
+            ScaffoldContent(topInterval = paddingValues.calculateTopPadding()) {
                 FollowingUsersContent(
                     modifier = modifier,
                     paddingValues = paddingValues,

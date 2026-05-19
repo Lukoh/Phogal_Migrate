@@ -109,7 +109,12 @@ fun PopularPhotosSection(
         }
 
         ShowUpButton(
-            modifier = Modifier.align(Alignment.BottomEnd),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(
+                    end = 4.dp,
+                    bottom = paddingValues.calculateBottomPadding() - 18.dp
+                ),
             visible = isScrolledPastThreshold,
             onClick = {
                 sectionUiState.scope.launch {

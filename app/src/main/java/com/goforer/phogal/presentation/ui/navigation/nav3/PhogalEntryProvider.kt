@@ -129,12 +129,12 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
         val userPhotosViewModel: UserPhotosViewModel = hiltViewModel()
         val contentUiState: UserPhotosContentUiState = rememberUserPhotosContentUiState(
             baseUiState = rememberBaseUiState(),
+            userPhotosViewModel = userPhotosViewModel,
             name = rememberSaveable { mutableStateOf(key.name) },
             firstName = rememberSaveable { mutableStateOf(key.firstName) }
         )
 
         UserPhotosScreen(
-            userPhotosViewModel = userPhotosViewModel,
             contentUiState = contentUiState,
             onItemClicked = { id ->
                 navigationState.push(Routes.PictureRoute(id = id, showViewPhotosButton = false))

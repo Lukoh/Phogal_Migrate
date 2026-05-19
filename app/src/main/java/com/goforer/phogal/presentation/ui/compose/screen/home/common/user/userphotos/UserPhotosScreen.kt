@@ -52,7 +52,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun UserPhotosScreen(
     modifier: Modifier = Modifier,
-    userPhotosViewModel: UserPhotosViewModel,
     contentUiState: UserPhotosContentUiState,
     onItemClicked: (id: String) -> Unit,
     onBackPressed: () -> Unit,
@@ -67,6 +66,37 @@ fun UserPhotosScreen(
     val currentOnStop by rememberUpdatedState(onStop)
     val snackbarHostState = remember { SnackbarHostState() }
     val backHandlingEnabled by remember { mutableStateOf(true) }
+    // Stable lambdas. The capture set is the bare minimum needed for the
+    // operation, which keeps Compose from invalidating these on every parent
+    // recomposition.
+    val snackbarHost = remember(snackbarHostState) {
+        @Composable {
+            SnackbarHost(
+                snackbarHostState,
+                snackbar = { snackbarData: SnackbarData ->
+                    CardSnackBar(modifier = Modifier, snackbarData)
+                }
+            )
+        }
+    }
+
+    // Stable lambdas. The capture set is the bare minimum needed for the
+    // operation, which keeps Compose from invalidating these on every parent
+    // recomposition.
+    val onShowSnackBar: (String) -> Unit = remember(snackbarHostState, contentUiState) {
+        { text: String ->
+            contentUiState.baseUiState.scope.launch {
+                snackbarHostState.showSnackbar(text)
+            }
+        }
+    }
+
+    // Kick off the Paging stream whenever the target user changes.
+    LaunchedEffect(contentUiState.name) {
+        if (contentUiState.name.isNotBlank()) {
+            contentUiState.userPhotosViewModel.loadFor(contentUiState.name)
+        }
+    }
 
     BackHandler(backHandlingEnabled) {
         onBackPressed()
@@ -94,12 +124,8 @@ fun UserPhotosScreen(
 
     Scaffold(
         contentColor = ColorBgSecondary,
-        snackbarHost = { SnackbarHost(
-            snackbarHostState, snackbar = { snackbarData: SnackbarData ->
-                CardSnackBar(modifier = Modifier, snackbarData)
-            }
-        )
-        }, topBar = {
+        snackbarHost = snackbarHost,
+        topBar = {
             CustomCenterAlignedTopAppBar(
                 title = {
                     Text(
@@ -134,32 +160,12 @@ fun UserPhotosScreen(
                 }
             )
         }, content = { paddingValues ->
-            // Kick off the Paging stream whenever the target user changes.
-            LaunchedEffect(contentUiState.name) {
-                if (contentUiState.name.isNotBlank()) {
-                    userPhotosViewModel.loadFor(contentUiState.name)
-                }
-            }
-
-            val photos = userPhotosViewModel.photos.collectAsLazyPagingItems()
-
-            // Stable lambdas. The capture set is the bare minimum needed for the
-            // operation, which keeps Compose from invalidating these on every parent
-            // recomposition.
-            val onShowSnackBar: (String) -> Unit = remember(snackbarHostState, contentUiState) {
-                { text: String ->
-                    contentUiState.baseUiState.scope.launch {
-                        snackbarHostState.showSnackbar(text)
-                    }
-                }
-            }
-
-            ScaffoldContent(topInterval = 2.dp) {
+            ScaffoldContent(paddingValues.calculateTopPadding()) {
                 UserPhotosContent(
                     modifier = modifier,
                     paddingValues = paddingValues,
                     contentUiState = contentUiState,
-                    photos = photos,
+                    photos = contentUiState.photos,
                     onItemClicked = onItemClicked,
                     onShowSnackBar = onShowSnackBar,
                     onSuccess = { isSuccessful: Boolean ->
