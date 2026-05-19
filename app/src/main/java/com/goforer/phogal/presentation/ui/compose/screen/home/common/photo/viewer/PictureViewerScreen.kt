@@ -40,7 +40,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -50,11 +49,9 @@ import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.base.designsystem.component.dialog.ErrorDialog
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
-import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.common.photo.info.PictureViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.UiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.PhotoContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoContentUiState
 import com.goforer.phogal.presentation.ui.theme.Red60
 import kotlinx.coroutines.launch
 
@@ -62,9 +59,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun PictureViewerScreen(
     modifier: Modifier = Modifier,
-    pictureViewModel: PictureViewModel = hiltViewModel(),
-    bookmarkViewModel: BookmarkViewModel = hiltViewModel(),
-    state: PhotoContentUiState = rememberPhotoContentUiState(),
+    contentUiState: PhotoContentUiState,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onBackPressed: () -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
@@ -78,7 +73,7 @@ fun PictureViewerScreen(
 
     BackHandler(backHandlingEnabled) { onBackPressed() }
 
-    DisposableEffect(state.baseUiState.lifecycle) {
+    DisposableEffect(contentUiState.baseUiState.lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_START -> currentOnStart()
@@ -86,20 +81,41 @@ fun PictureViewerScreen(
                 else -> Unit
             }
         }
-        state.baseUiState.lifecycle.addObserver(observer)
-        onDispose { state.baseUiState.lifecycle.removeObserver(observer) }
+        contentUiState.baseUiState.lifecycle.addObserver(observer)
+        onDispose { contentUiState.baseUiState.lifecycle.removeObserver(observer) }
     }
 
     // Kick off the load whenever the id changes
     // legacy `enabledLoadState` one-shot gate).
-    LaunchedEffect(state.id) {
-        pictureViewModel.loadPicture(state.id)
+    LaunchedEffect(contentUiState.id) {
+        contentUiState.pictureViewModel.loadPicture(contentUiState.id)
     }
 
     // Top-bar icons read from the authoritative pictureUiState.
-    val pictureUiState by pictureViewModel.picture.collectAsStateWithLifecycle()
-    val currentPicture = (pictureUiState as? UiState.Success)?.data
+    val currentPicture = (contentUiState.pictureState as? UiState.Success)?.data
     val isLikedByUser = currentPicture?.likedByUser == true
+    // Stable lambdas. The capture set is the bare minimum needed for the
+    // operation, which keeps Compose from invalidating these on every parent
+    // recomposition.
+    val onShowSnackBar: (String) -> Unit = remember(contentUiState, snackbarHostState) {
+        { text: String ->
+            contentUiState.baseUiState.scope.launch {
+                snackbarHostState.showSnackbar(text)
+            }
+        }
+    }
+
+    // Stable lambdas. The capture set is the bare minimum needed for the
+    // operation, which keeps Compose from invalidating these on every parent
+    // recomposition.
+    val onShownPhoto: (Picture) -> Unit = remember(contentUiState.bookmarkViewModel, contentUiState) {
+        { picture: Picture ->
+            contentUiState.setVisibleActions(true)
+            contentUiState.baseUiState.scope.launch {
+                contentUiState.setEnabledBookmark(contentUiState.bookmarkViewModel.isPhotoBookmarked(picture))
+            }
+        }
+    }
 
     // Stable lambdas. The capture set is the bare minimum needed for the
     // operation, which keeps Compose from invalidating these on every parent
@@ -116,7 +132,7 @@ fun PictureViewerScreen(
     }
 
     // Observe like/unlike transient result so we can surface an error dialog.
-    LikeActionHandle(pictureViewModel = pictureViewModel)
+    LikeActionHandle(pictureViewModel = contentUiState.pictureViewModel)
 
     Scaffold(
         contentColor = Color.White,
@@ -143,13 +159,13 @@ fun PictureViewerScreen(
                     }
                 },
                 actions = {
-                    if (state.visibleActions && currentPicture != null) {
+                    if (contentUiState.visibleActions && currentPicture != null) {
                         // Stable lambdas. The capture set is the bare minimum needed for the
                         // operation, which keeps Compose from invalidating these on every parent
                         // recomposition.
-                        val onLikedClick = remember(pictureViewModel) {
+                        val onLikedClick = remember(contentUiState.pictureViewModel) {
                             {
-                                pictureViewModel.toggleLike()
+                                contentUiState.pictureViewModel.toggleLike()
                             }
                         }
 
@@ -172,16 +188,16 @@ fun PictureViewerScreen(
                         // Stable lambdas. The capture set is the bare minimum needed for the
                         // operation, which keeps Compose from invalidating these on every parent
                         // recomposition.
-                        val onEnabledClick = remember(bookmarkViewModel, state) {
+                        val onEnabledClick = remember(contentUiState.bookmarkViewModel, contentUiState) {
                             {
-                                bookmarkViewModel.setBookmarkPicture(currentPicture)
-                                state.setEnabledBookmark(!state.enabledBookmark)
+                                contentUiState.bookmarkViewModel.setBookmarkPicture(currentPicture)
+                                contentUiState.setEnabledBookmark(!contentUiState.enabledBookmark)
                             }
                         }
 
                         IconButton(
                             colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = if (state.enabledBookmark) {
+                                contentColor = if (contentUiState.enabledBookmark) {
                                     Red60
                                 } else {
                                     Color.Black
@@ -190,7 +206,7 @@ fun PictureViewerScreen(
                             onClick = onEnabledClick
                         ) {
                             Icon(
-                                imageVector = if (state.enabledBookmark) {
+                                imageVector = if (contentUiState.enabledBookmark) {
                                     ImageVector.vectorResource(id = R.drawable.ic_bookmark_on)
                                 } else {
                                     ImageVector.vectorResource(id = R.drawable.ic_bookmark_off)
@@ -203,41 +219,17 @@ fun PictureViewerScreen(
             )
         },
         content = { paddingValues ->
-            ScaffoldContent(topInterval = 0.dp) {
-                // Stable lambdas. The capture set is the bare minimum needed for the
-                // operation, which keeps Compose from invalidating these on every parent
-                // recomposition.
-                val onShowSnackBar: (String) -> Unit = remember(state, snackbarHostState) {
-                    { text: String ->
-                        state.baseUiState.scope.launch {
-                            snackbarHostState.showSnackbar(text)
-                        }
-                    }
-                }
-
-                // Stable lambdas. The capture set is the bare minimum needed for the
-                // operation, which keeps Compose from invalidating these on every parent
-                // recomposition.
-                val onShownPhoto: (Picture) -> Unit = remember(bookmarkViewModel, state) {
-                    { picture: Picture ->
-                        state.setVisibleActions(true)
-                        state.baseUiState.scope.launch {
-                            state.setEnabledBookmark(bookmarkViewModel.isPhotoBookmarked(picture))
-                        }
-                    }
-                }
-
+            ScaffoldContent(0.dp) {
                 PictureViewerContent(
                     modifier = modifier,
                     contentPadding = paddingValues,
-                    pictureViewModel = pictureViewModel,
-                    state = state,
+                    contentUiState = contentUiState,
                     onViewPhotos = onViewPhotos,
                     onShowSnackBar = onShowSnackBar,
                     onShownPhoto = onShownPhoto,
                     onOpenWebView = onOpenWebView,
                     onSuccess = { isSuccessful: Boolean ->
-                        if (!isSuccessful) state.setVisibleActions(false)
+                        if (!isSuccessful) contentUiState.setVisibleActions(false)
                     }
                 )
             }

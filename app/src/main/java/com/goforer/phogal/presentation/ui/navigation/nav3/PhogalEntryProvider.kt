@@ -23,10 +23,12 @@ import com.goforer.base.utils.connect.ConnectionUtils
 import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.business.home.common.photo.info.PictureViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.common.user.UserPhotosViewModel
+import com.goforer.phogal.presentation.stateholder.business.home.download.PhotoDownloadViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.gallery.GalleryViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.popularphotos.PopularPhotosViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.setting.follow.FollowViewModel
+import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.PhotoContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosContentUiState
@@ -101,15 +103,20 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
         metadata = ListDetailSceneStrategy.detailPane()
     ) { key ->
         val pictureViewModel: PictureViewModel = hiltViewModel()
+        val bookmarkViewModel: BookmarkViewModel = hiltViewModel()
+        val photoDownloadViewModel: PhotoDownloadViewModel = hiltViewModel()
+        val contentUiState: PhotoContentUiState = rememberPhotoContentUiState(
+            pictureViewModel = pictureViewModel,
+            bookmarkViewModel = bookmarkViewModel,
+            photoDownloadViewModel = photoDownloadViewModel,
+            id = rememberSaveable { mutableStateOf(key.id) },
+            visibleViewButton = rememberSaveable {
+                mutableStateOf(key.showViewPhotosButton)
+            }
+        )
 
         PictureViewerScreen(
-            pictureViewModel = pictureViewModel,
-            state = rememberPhotoContentUiState(
-                id = rememberSaveable { mutableStateOf(key.id) },
-                visibleViewButton = rememberSaveable {
-                    mutableStateOf(key.showViewPhotosButton)
-                }
-            ),
+            contentUiState = contentUiState,
             onViewPhotos = { name, firstName, lastName, username ->
                 navigationState.push(
                     Routes.UserPhotosRoute(

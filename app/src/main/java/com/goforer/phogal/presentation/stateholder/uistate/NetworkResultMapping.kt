@@ -12,7 +12,7 @@ import com.goforer.phogal.data.datasource.network.NetworkResult
  */
 fun <T> NetworkResult<T>.toUiState(): UiState<T?> = when (this) {
     is NetworkResult.Success -> UiState.Success(data)
-    NetworkResult.Empty      -> UiState.Success(null)
+    is NetworkResult.Empty      -> UiState.Success(null)
     is NetworkResult.Error   -> UiState.Error(code = code, message = message)
     is NetworkResult.Exception -> UiState.Error(
         code = 0,
@@ -26,7 +26,7 @@ fun <T> NetworkResult<T>.toUiState(): UiState<T?> = when (this) {
  */
 fun <T : Any> NetworkResult<T>.toUiStateStrict(): UiState<T> = when (this) {
     is NetworkResult.Success -> UiState.Success(data)
-    NetworkResult.Empty      -> UiState.Error(code = 204, message = "Empty response body")
+    is NetworkResult.Empty      -> UiState.Error(code = 204, message = "Empty response body")
     is NetworkResult.Error   -> UiState.Error(code = code, message = message)
     is NetworkResult.Exception -> UiState.Error(
         code = 0,

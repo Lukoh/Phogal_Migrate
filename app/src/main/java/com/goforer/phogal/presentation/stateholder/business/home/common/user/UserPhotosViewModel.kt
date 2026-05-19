@@ -21,7 +21,6 @@ import javax.inject.Inject
 class UserPhotosViewModel @Inject constructor(
     private val userPhotosRepository: UserPhotosRepository
 ) : ViewModel() {
-
     private val _username = MutableStateFlow("")
 
     val photos: StateFlow<PagingData<Photo>> = _username

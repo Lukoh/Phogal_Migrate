@@ -43,10 +43,6 @@ class PopularPhotosViewModel @Inject constructor(
             initialValue = PagingData.empty()
         )
 
-    fun updateOrderBy(newOrderBy: String) {
-        _orderBy.value = newOrderBy
-    }
-
     companion object {
         const val POPULAR = "popular"
         const val LATEST = "latest"

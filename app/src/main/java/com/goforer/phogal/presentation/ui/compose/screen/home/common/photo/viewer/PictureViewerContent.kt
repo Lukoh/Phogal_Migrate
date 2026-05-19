@@ -114,64 +114,61 @@ sealed interface DownloadDialogState {
 fun PictureViewerContent(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
-    state: PhotoContentUiState = rememberPhotoContentUiState(),
-    pictureViewModel: PictureViewModel = hiltViewModel(),
-    photoDownloadViewModel: PhotoDownloadViewModel = hiltViewModel(),
+    contentUiState: PhotoContentUiState,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
     onShownPhoto: (pictureUiState: Picture) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
     onSuccess: (isSuccessful: Boolean) -> Unit
 ) {
-    val pictureState by pictureViewModel.picture.collectAsStateWithLifecycle()
-    val trackDownloadState by photoDownloadViewModel.trackDownload.collectAsStateWithLifecycle()
-
     Box(
         modifier = modifier.fillMaxSize()
     ) {
         PictureBody(
             modifier = Modifier.fillMaxSize(),
             contentPadding = contentPadding,
-            pictureState = pictureState,
-            visibleViewButton = state.visibleViewButton,
+            pictureState = contentUiState.pictureState,
+            visibleViewButton = contentUiState.visibleViewButton,
             onViewPhotos = onViewPhotos,
             onShowSnackBar = onShowSnackBar,
             onShownPhoto = onShownPhoto,
             onOpenWebView = onOpenWebView,
             onSuccess = onSuccess,
             onClick = { url ->
-                photoDownloadViewModel.getDownloadPhotoUrl(url)
-                state.setShowPopup(true)
+                contentUiState.baseUiState.scope.launch {
+                    contentUiState.photoDownloadViewModel.getDownloadPhotoUrl(url)
+                    contentUiState.setShowPopup(true)
+                }
             }
         )
 
-        if (state.showPopup) {
+        if (contentUiState.showPopup) {
             LoadingIndicator()
         }
 
         DownloadPhoto(
-            trackDownloadState = trackDownloadState,
-            showPopup = state.showPopup,
-            onRetry = { pictureViewModel.loadPicture(state.id) },
-            onDismissPopup = { state.setShowPopup(false)},
+            trackDownloadState = contentUiState.trackDownloadState,
+            showPopup = contentUiState.showPopup,
+            onRetry = { contentUiState.pictureViewModel.loadPicture(contentUiState.id) },
+            onDismissPopup = { contentUiState.setShowPopup(false)},
             onDownload = { url ->
-                state.baseUiState.scope.launch {
-                    photoDownloadViewModel.downloadPhoto(url, state.id)
+                contentUiState.baseUiState.scope.launch {
+                    contentUiState.photoDownloadViewModel.downloadPhoto(url, contentUiState.id)
                         .onSuccess {
-                            state.setDialogState(DownloadDialogState.Success)
-                            state.setShowPopup(false)
+                            contentUiState.setDialogState(DownloadDialogState.Success)
+                            contentUiState.setShowPopup(false)
                         }
                         .onFailure { error ->
-                            state.setDialogState(
+                            contentUiState.setDialogState(
                                 if (error is PhotoAlreadyExistsException) {
                                     DownloadDialogState.Duplicate
                                 } else {
                                     DownloadDialogState.Error(
-                                        error.message ?: state.baseUiState.context.getString(R.string.error_unknown)
+                                        error.message ?: contentUiState.baseUiState.context.getString(R.string.error_unknown)
                                     )
                                 }
                             )
-                            state.setShowPopup(false)
+                            contentUiState.setShowPopup(false)
                         }
                 }
             }
@@ -179,14 +176,14 @@ fun PictureViewerContent(
     }
 
     ShowDialog(
-        dialogState = state.dialogState,
+        dialogState = contentUiState.dialogState,
         onDismiss = {
-            state.setDialogState(DownloadDialogState.Idle)
-            state.setShowPopup(false)
+            contentUiState.setDialogState(DownloadDialogState.Idle)
+            contentUiState.setShowPopup(false)
         },
         onDismissRequest = {
-            state.setDialogState(DownloadDialogState.Idle)
-            state.setShowPopup(false)
+            contentUiState.setDialogState(DownloadDialogState.Idle)
+            contentUiState.setShowPopup(false)
         },
     )
 }

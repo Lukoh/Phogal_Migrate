@@ -74,7 +74,6 @@ fun PopularPhotosScreen(
             (contentUiState.baseUiState.context as Activity).finish()
         }
 
-        contentUiState.popularPhotosViewModel.updateOrderBy(POPULAR)
         DisposableEffect(contentUiState.baseUiState.lifecycle) {
             // Create an observer that triggers our remembered callbacks
             // for doing anything

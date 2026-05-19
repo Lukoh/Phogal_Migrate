@@ -16,7 +16,6 @@ import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
 @Stable
 class PopularPhotosContentUiState internal constructor(
     val baseUiState: BaseUiState,
-    val popularPhotosViewModel: PopularPhotosViewModel,
     val photos: LazyPagingItems<Photo>,
 
     private val _visibleActions: MutableState<Boolean>,
@@ -43,9 +42,8 @@ fun rememberPopularPhotosContentUiState(
 ): PopularPhotosContentUiState {
     val photos = popularPhotosViewModel.photos.collectAsLazyPagingItems()
 
-    return remember(popularPhotosViewModel, baseUiState, visibleActions, loadedPhotos, photos) {
+    return remember(popularPhotosViewModel, baseUiState, visibleActions, loadedPhotos) {
         PopularPhotosContentUiState(
-            popularPhotosViewModel = popularPhotosViewModel,
             baseUiState = baseUiState,
             photos = photos,
             _visibleActions = visibleActions,

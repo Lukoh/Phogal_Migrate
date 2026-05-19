@@ -88,7 +88,7 @@ fun rememberSearchPhotosContentUiState(
     val photos = galleryViewModel.photos.collectAsLazyPagingItems()
     val currentQuery by galleryViewModel.query.collectAsStateWithLifecycle()
     val recentWords by galleryViewModel.recentWords.collectAsStateWithLifecycle()
-    val galleryUiState = remember(galleryViewModel, photos) {
+    val galleryUiState = remember(galleryViewModel, currentQuery, recentWords) {
         GalleryUiState(
             photos = photos,
             currentQueryProvider = { currentQuery },
