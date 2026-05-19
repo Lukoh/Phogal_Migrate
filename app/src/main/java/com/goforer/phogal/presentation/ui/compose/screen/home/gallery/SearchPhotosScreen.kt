@@ -37,9 +37,11 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.goforer.base.designsystem.component.CardSnackBar
 import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
+import com.goforer.base.utils.connect.ConnectionUtils
 import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchSectionUiState
+import com.goforer.phogal.presentation.ui.compose.screen.home.OfflineScreen
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 import kotlinx.coroutines.launch
@@ -55,80 +57,97 @@ fun SearchPhotosScreen(
     onStart: () -> Unit = {},
     onStop: () -> Unit = {}
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    // Stable lambdas. The capture set is the bare minimum needed for the
-    // operation, which keeps Compose from invalidating these on every parent
-    // recomposition.
-    val onSearch: (String) -> Unit = remember(contentUiState.galleryViewModel, contentUiState) {
-        { keyword ->
-            if (keyword.isNotEmpty() && keyword != contentUiState.galleryUiState.currentQuery) {
-                contentUiState.baseUiState.keyboardController?.hide()
-                contentUiState.galleryViewModel.onQueryChanged(keyword)
-                contentUiState.galleryViewModel.commitSearch()
-                contentUiState.setSearchTriggered()
-            }
-        }
-    }
-
-    // Note: SearchSection text input is now hoisted into rememberSearchSectionUiState
-    // alongside the screen, so the chip-tap path goes through the same channel as
-    // typed input. This collapses two state mutation paths into one.
-    val sectionUiState = rememberSearchSectionUiState(enabled = remember { mutableStateOf(false) })
-
-    // Stable lambdas. The capture set is the bare minimum needed for the
-    // operation, which keeps Compose from invalidating these on every parent
-    // recomposition.
-    val onChipClicked: (String) -> Unit = remember(contentUiState.galleryViewModel, contentUiState,sectionUiState) {
-        { keyword ->
-            if (keyword.isNotEmpty() && keyword != contentUiState.galleryUiState.currentQuery) {
-                sectionUiState.editableInputState.textState = keyword
-                contentUiState.galleryViewModel.onQueryChanged(keyword)
-            }
-        }
-    }
-
-    ObserveLifecycle(
-        lifecycleOwner = LocalLifecycleOwner.current,
-        onStart = onStart,
-        onStop = onStop
-    )
-
-    BackHandler(enabled = true) {
-        (contentUiState.baseUiState.context as Activity).finish()
-    }
-
-    Scaffold(
-        contentColor = ColorBgSecondary,
-        snackbarHost = { SearchSnackbarHost(snackbarHostState) },
-        topBar = {
-            SearchTopBar(
-                showFavoriteAction = contentUiState.visibleActions,
-                onMenuClick = { /* TODO */ },
-                onFavoriteClick = { /* TODO */ }
-            )
-        },
-        content = { paddingValues ->
-            ScaffoldContent(topInterval = paddingValues.calculateTopPadding()) {
-                SearchPhotosContent(
-                    modifier = modifier,
-                    contentUiState = contentUiState,
-                    paddingValues = paddingValues,
-                    onSearch = onSearch,
-                    onChipClicked = onChipClicked,
-                    onItemClicked = onItemClicked,
-                    onViewPhotos = onViewPhotos,
-                    onShowSnackBar = { message ->
-                        contentUiState.baseUiState.scope.launch {
-                            snackbarHostState.showSnackbar(message)
-                        }
-                    },
-                    onOpenWebView = onOpenWebView,
-                    onLoadSuccess = contentUiState::setActionsVisibilityChanged
+    if (!ConnectionUtils.isNetworkAvailable(contentUiState.baseUiState.context)) {
+        OfflineScreen(modifier = Modifier)
+    } else {
+        val snackbarHostState = remember { SnackbarHostState() }
+        // Stable lambdas. The capture set is the bare minimum needed for the
+        // operation, which keeps Compose from invalidating these on every parent
+        // recomposition.
+        val snackbarHost = remember(snackbarHostState) {
+            @Composable {
+                SnackbarHost(
+                    snackbarHostState,
+                    snackbar = { snackbarData: SnackbarData ->
+                        CardSnackBar(modifier = Modifier, snackbarData)
+                    }
                 )
             }
         }
-    )
+
+        // Stable lambdas. The capture set is the bare minimum needed for the
+        // operation, which keeps Compose from invalidating these on every parent
+        // recomposition.
+        val onSearch: (String) -> Unit = remember(contentUiState.galleryViewModel, contentUiState) {
+            { keyword ->
+                if (keyword.isNotEmpty() && keyword != contentUiState.galleryUiState.currentQuery) {
+                    contentUiState.baseUiState.keyboardController?.hide()
+                    contentUiState.galleryViewModel.onQueryChanged(keyword)
+                    contentUiState.galleryViewModel.commitSearch()
+                    contentUiState.setSearchTriggered()
+                }
+            }
+        }
+
+        // Note: SearchSection text input is now hoisted into rememberSearchSectionUiState
+        // alongside the screen, so the chip-tap path goes through the same channel as
+        // typed input. This collapses two state mutation paths into one.
+        val sectionUiState = rememberSearchSectionUiState(enabled = remember { mutableStateOf(false) })
+
+        // Stable lambdas. The capture set is the bare minimum needed for the
+        // operation, which keeps Compose from invalidating these on every parent
+        // recomposition.
+        val onChipClicked: (String) -> Unit = remember(contentUiState.galleryViewModel, contentUiState,sectionUiState) {
+            { keyword ->
+                if (keyword.isNotEmpty() && keyword != contentUiState.galleryUiState.currentQuery) {
+                    sectionUiState.editableInputState.textState = keyword
+                    contentUiState.galleryViewModel.onQueryChanged(keyword)
+                }
+            }
+        }
+
+        ObserveLifecycle(
+            lifecycleOwner = LocalLifecycleOwner.current,
+            onStart = onStart,
+            onStop = onStop
+        )
+
+        BackHandler(enabled = true) {
+            (contentUiState.baseUiState.context as Activity).finish()
+        }
+
+        Scaffold(
+            contentColor = ColorBgSecondary,
+            snackbarHost = snackbarHost,
+            topBar = {
+                SearchTopBar(
+                    showFavoriteAction = contentUiState.visibleActions,
+                    onMenuClick = { /* TODO */ },
+                    onFavoriteClick = { /* TODO */ }
+                )
+            },
+            content = { paddingValues ->
+                ScaffoldContent(topInterval = paddingValues.calculateTopPadding()) {
+                    SearchPhotosContent(
+                        modifier = modifier,
+                        contentUiState = contentUiState,
+                        paddingValues = paddingValues,
+                        onSearch = onSearch,
+                        onChipClicked = onChipClicked,
+                        onItemClicked = onItemClicked,
+                        onViewPhotos = onViewPhotos,
+                        onShowSnackBar = { message ->
+                            contentUiState.baseUiState.scope.launch {
+                                snackbarHostState.showSnackbar(message)
+                            }
+                        },
+                        onOpenWebView = onOpenWebView,
+                        onLoadSuccess = contentUiState::setActionsVisibilityChanged
+                    )
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -164,16 +183,6 @@ private fun SearchTopBar(
                     )
                 }
             }
-        }
-    )
-}
-
-@Composable
-private fun SearchSnackbarHost(hostState: SnackbarHostState) {
-    SnackbarHost(
-        hostState = hostState,
-        snackbar = { snackbarData: SnackbarData ->
-            CardSnackBar(modifier = Modifier, snackbarData)
         }
     )
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -40,15 +41,15 @@ import com.goforer.phogal.presentation.ui.theme.ColorSystemGray10
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun OfflineScreen(modifier: Modifier = Modifier) {
-    Surface(modifier = modifier.fillMaxWidth()) {
+    Surface(modifier = modifier) {
         BoxWithConstraints(
-            modifier = modifier,
+            modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             val painter = rememberAsyncImagePainter(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(painterResource(id = R.drawable.ic_network_error))
-                    .size(Size.ORIGINAL) // Set the target size to load the image at.
+                    .data(R.drawable.ic_network_error)
+                    .size(Size.ORIGINAL)
                     .build()
             )
             val imageModifier = Modifier

@@ -12,27 +12,21 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.goforer.base.utils.connect.ConnectivityManagerNetworkMonitor
 import com.goforer.phogal.presentation.ui.compose.screen.MainScreen
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @Inject
-    lateinit var connectivityManagerNetworkMonitor: ConnectivityManagerNetworkMonitor
-
     companion object {
         internal const val SPLASH_WAIT_TIME = 2000L
     }
@@ -75,10 +69,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize().statusBarsPadding(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        MainScreen(
-                            networkMonitor = connectivityManagerNetworkMonitor,
-                            windowSizeClass = calculateWindowSizeClass(this)
-                        )
+                        MainScreen(windowSizeClass = calculateWindowSizeClass(this))
                     }
                 }
             }

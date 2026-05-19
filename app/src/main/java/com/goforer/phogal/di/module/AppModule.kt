@@ -7,7 +7,6 @@ import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import com.goforer.base.extension.isNull
-import com.goforer.base.utils.connect.ConnectivityManagerNetworkMonitor
 import com.goforer.phogal.BuildConfig
 import com.goforer.phogal.data.datasource.network.NetworkError
 import com.goforer.phogal.data.datasource.network.NetworkErrorHandler
@@ -42,10 +41,6 @@ object AppModule {
     @Singleton
     @Provides
     fun appContext(application: Application): Context = application.applicationContext
-
-    @Singleton
-    @Provides
-    fun provideConnectivityManagerNetworkMonitor(context: Context) = ConnectivityManagerNetworkMonitor(context)
 
     /**
      * Configures and provides a [Json] instance for the `retrofit2-kotlinx-serialization-converter`.

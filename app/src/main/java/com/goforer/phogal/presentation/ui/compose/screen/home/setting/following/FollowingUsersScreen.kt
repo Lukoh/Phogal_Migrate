@@ -57,6 +57,19 @@ fun FollowingUsersScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val backHandlingEnabled by remember { mutableStateOf(true) }
     val text = stringResource(id = R.string.user_info_has_no_portfolio)
+    // Stable lambdas. The capture set is the bare minimum needed for the
+    // operation, which keeps Compose from invalidating these on every parent
+    // recomposition.
+    val snackbarHost = remember(snackbarHostState) {
+        @Composable {
+            SnackbarHost(
+                snackbarHostState,
+                snackbar = { snackbarData: SnackbarData ->
+                    CardSnackBar(modifier = Modifier, snackbarData)
+                }
+            )
+        }
+    }
 
     // Stable lambdas. The capture set is the bare minimum needed for the
     // operation, which keeps Compose from invalidating these on every parent
@@ -99,12 +112,8 @@ fun FollowingUsersScreen(
 
     Scaffold(
         contentColor = ColorBgSecondary,
-        snackbarHost = { SnackbarHost(
-            snackbarHostState, snackbar = { snackbarData: SnackbarData ->
-                CardSnackBar(modifier = Modifier, snackbarData)
-            }
-        )
-        }, topBar = {
+        snackbarHost = snackbarHost,
+        topBar = {
             CustomCenterAlignedTopAppBar(
                 title = {
                     Text(

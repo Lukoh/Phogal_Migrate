@@ -26,9 +26,11 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.goforer.base.designsystem.component.CardSnackBar
 import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
+import com.goforer.base.utils.connect.ConnectionUtils
 import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.business.home.popularphotos.PopularPhotosViewModel.Companion.POPULAR
 import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.PopularPhotosContentUiState
+import com.goforer.phogal.presentation.ui.compose.screen.home.OfflineScreen
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import kotlinx.coroutines.launch
 
@@ -47,81 +49,94 @@ fun PopularPhotosScreen(
         //To Do:: Implement the code what you want to do....
     }
 ) {
-    val currentOnStart by rememberUpdatedState(onStart)
-    val currentOnStop by rememberUpdatedState(onStop)
-    val snackbarHostState = remember { SnackbarHostState() }
-    val backHandlingEnabled by remember { mutableStateOf(true) }
-
-    BackHandler(backHandlingEnabled) {
-        (contentUiState.baseUiState.context as Activity).finish()
-    }
-
-    contentUiState.popularPhotosViewModel.updateOrderBy(POPULAR)
-    DisposableEffect(contentUiState.baseUiState.lifecycle) {
-        // Create an observer that triggers our remembered callbacks
-        // for doing anything
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_START) {
-                currentOnStart()
-            } else if (event == Lifecycle.Event.ON_STOP) {
-                currentOnStop()
-            }
-        }
-
-        // Add the observer to the lifecycle
-        contentUiState.baseUiState.lifecycle.addObserver(observer)
-
-        // When the effect leaves the Composition, remove the observer
-        onDispose {
-            contentUiState.baseUiState.lifecycle.removeObserver(observer)
-        }
-    }
-
-    Scaffold(
-        contentColor = ColorBgSecondary,
-        snackbarHost = { SnackbarHost(
-            snackbarHostState, snackbar = { snackbarData: SnackbarData ->
-                CardSnackBar(modifier = Modifier, snackbarData)
-            }
-        )
-        }, topBar = {
-            CustomCenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        stringResource(id = R.string.bottom_navigation_popular_photos),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        fontFamily = FontFamily.SansSerif,
-                        fontSize = 20.sp,
-                        fontStyle = FontStyle.Normal,
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                navigationIcon = {},
-                actions = {}
-            )
-        }, content = { paddingValues ->
-            ScaffoldContent(topInterval = paddingValues.calculateTopPadding()) {
-                PopularPhotosContent(
-                    modifier = modifier,
-                    paddingValues= paddingValues,
-                    photos = contentUiState.photos,
-                    onItemClicked = onItemClicked,
-                    onViewPhotos = onViewPhotos,
-                    onShowSnackBar = {
-                        contentUiState.baseUiState.scope.launch {
-                            snackbarHostState.showSnackbar(it)
-                        }
-                    },
-                    onOpenWebView = onOpenWebView,
-                    onSuccess = {
-                        contentUiState.setVisibleActions(it)
-                    },
-                    onLoadedPhotos = {
-                        contentUiState.setLoadedPhotos(it)
+    if (!ConnectionUtils.isNetworkAvailable(contentUiState.baseUiState.context)) {
+        OfflineScreen(modifier = Modifier)
+    } else {
+        val currentOnStart by rememberUpdatedState(onStart)
+        val currentOnStop by rememberUpdatedState(onStop)
+        val snackbarHostState = remember { SnackbarHostState() }
+        val backHandlingEnabled by remember { mutableStateOf(true) }
+        // Stable lambdas. The capture set is the bare minimum needed for the
+        // operation, which keeps Compose from invalidating these on every parent
+        // recomposition.
+        val snackbarHost = remember(snackbarHostState) {
+            @Composable {
+                SnackbarHost(
+                    snackbarHostState,
+                    snackbar = { snackbarData: SnackbarData ->
+                        CardSnackBar(modifier = Modifier, snackbarData)
                     }
                 )
             }
         }
-    )
+
+        BackHandler(backHandlingEnabled) {
+            (contentUiState.baseUiState.context as Activity).finish()
+        }
+
+        contentUiState.popularPhotosViewModel.updateOrderBy(POPULAR)
+        DisposableEffect(contentUiState.baseUiState.lifecycle) {
+            // Create an observer that triggers our remembered callbacks
+            // for doing anything
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_START) {
+                    currentOnStart()
+                } else if (event == Lifecycle.Event.ON_STOP) {
+                    currentOnStop()
+                }
+            }
+
+            // Add the observer to the lifecycle
+            contentUiState.baseUiState.lifecycle.addObserver(observer)
+
+            // When the effect leaves the Composition, remove the observer
+            onDispose {
+                contentUiState.baseUiState.lifecycle.removeObserver(observer)
+            }
+        }
+
+        Scaffold(
+            contentColor = ColorBgSecondary,
+            snackbarHost = snackbarHost,
+            topBar = {
+                CustomCenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            stringResource(id = R.string.bottom_navigation_popular_photos),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            fontFamily = FontFamily.SansSerif,
+                            fontSize = 20.sp,
+                            fontStyle = FontStyle.Normal,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    },
+                    navigationIcon = {},
+                    actions = {}
+                )
+            }, content = { paddingValues ->
+                ScaffoldContent(topInterval = paddingValues.calculateTopPadding()) {
+                    PopularPhotosContent(
+                        modifier = modifier,
+                        paddingValues= paddingValues,
+                        photos = contentUiState.photos,
+                        onItemClicked = onItemClicked,
+                        onViewPhotos = onViewPhotos,
+                        onShowSnackBar = {
+                            contentUiState.baseUiState.scope.launch {
+                                snackbarHostState.showSnackbar(it)
+                            }
+                        },
+                        onOpenWebView = onOpenWebView,
+                        onSuccess = {
+                            contentUiState.setVisibleActions(it)
+                        },
+                        onLoadedPhotos = {
+                            contentUiState.setLoadedPhotos(it)
+                        }
+                    )
+                }
+            }
+        )
+    }
 }

@@ -34,7 +34,7 @@ class NetworkStatusChecker(context: Context) {
     private val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    val networkStatus = callbackFlow<NetworkStatus> {
+    val networkStatus = callbackFlow {
         val networkStatusCallback = object: ConnectivityManager.NetworkCallback() {
             override fun onUnavailable() {
                 trySend(NetworkStatus.Unavailable)
