@@ -77,107 +77,98 @@ fun FollowingUsersItem(
     else
         4.dp
 
-    AnimatedVisibility(
-        visible = true,
-        modifier = modifier,
-        enter = scaleIn(transformOrigin = TransformOrigin(0f, 0f)) +
-                fadeIn() + expandIn(expandFrom = Alignment.TopStart),
-        exit = scaleOut(transformOrigin = TransformOrigin(0f, 0f)) +
-                fadeOut() + shrinkOut(shrinkTowards = Alignment.TopStart)
+    Card(
+        modifier = modifier.padding(vertical = verticalPadding),
+        colors = CardDefaults.cardColors(
+            contentColor = Blue70,
+            containerColor =  if (followingUserItemUiState.clicked)
+                Blue75
+            else
+                Blue70,
+            disabledContentColor = Blue70,
+            disabledContainerColor = Blue70
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp,
+            pressedElevation = 2.dp,
+            focusedElevation = 4.dp
+        )
     ) {
-        Card(
-            modifier = modifier.padding(vertical = verticalPadding),
-            colors = CardDefaults.cardColors(
-                contentColor = Blue70,
-                containerColor =  if (followingUserItemUiState.clicked)
-                    Blue75
-                else
-                    Blue70,
-                disabledContentColor = Blue70,
-                disabledContainerColor = Blue70
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 8.dp,
-                pressedElevation = 2.dp,
-                focusedElevation = 4.dp
-            )
+        Column(
+            modifier = Modifier.wrapContentHeight(),
+            horizontalAlignment = Alignment.Start,
         ) {
-            Column(
-                modifier = Modifier.wrapContentHeight(),
-                horizontalAlignment = Alignment.Start,
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .background(Color.Transparent)
+                    .fillMaxWidth()
             ) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .background(Color.Transparent)
-                        .fillMaxWidth()
-                ) {
-                    ProfileItem(
-                        image = user.profileImage.medium,
-                        name = user.name,
-                        nameColor = Color.White,
-                        position = 9,
-                        onClicked = {
-                            user.username?.let {
-                                onViewPhotos(
-                                    it,
-                                    user.firstName,
-                                    user.lastName ?: "",
-                                    user.username
-                                )
-                            }
+                ProfileItem(
+                    image = user.profileImage.medium,
+                    name = user.name,
+                    nameColor = Color.White,
+                    position = 9,
+                    onClicked = {
+                        user.username?.let {
+                            onViewPhotos(
+                                it,
+                                user.firstName,
+                                user.lastName ?: "",
+                                user.username
+                            )
                         }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    ShowFollowButton(
-                        modifier = modifier,
-                        followColor = Blue50,
-                        isUserFollowed = followingUserItemUiState.followed
-                    ) {
-                       onFollow(user)
                     }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                getProfileInfoItems(user).forEachIndexed { _, item ->
-                    UserInfoItem(
-                        text = item.text,
-                        textColor = Color.White,
-                        iconResId = item.iconResId,
-                        position = item.position
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                ShowFollowButton(
+                    modifier = modifier,
+                    followColor = Blue50,
+                    isUserFollowed = followingUserItemUiState.followed
                 ) {
-                    val animationIconScale = animateIconScale(inputScale = 0.6F, position = 1, delay = 150L)
-
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_portfolio),
-                        contentDescription = "Following",
-                        modifier = Modifier
-                            .size(22.dp)
-                            .padding(horizontal = 4.dp)
-                            .graphicsLayer {
-                                scaleX = animationIconScale
-                                scaleY = animationIconScale
-                            }
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    ShowPortfolioButton(
-                        firstName = user.firstName,
-                        onOpenWebView = {
-                            onOpenWebView(user.firstName, user.portfolioUrl)
-                        }
-                    )
+                    onFollow(user)
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
             }
+            Spacer(modifier = Modifier.height(8.dp))
+            getProfileInfoItems(user).forEachIndexed { _, item ->
+                UserInfoItem(
+                    text = item.text,
+                    textColor = Color.White,
+                    iconResId = item.iconResId,
+                    position = item.position
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val animationIconScale = animateIconScale(inputScale = 0.6F, position = 1, delay = 150L)
+
+                Image(
+                    painter = painterResource(id = R.drawable.ic_portfolio),
+                    contentDescription = "Following",
+                    modifier = Modifier
+                        .size(22.dp)
+                        .padding(horizontal = 4.dp)
+                        .graphicsLayer {
+                            scaleX = animationIconScale
+                            scaleY = animationIconScale
+                        }
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                ShowPortfolioButton(
+                    firstName = user.firstName,
+                    onOpenWebView = {
+                        onOpenWebView(user.firstName, user.portfolioUrl)
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }

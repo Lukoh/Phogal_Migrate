@@ -284,7 +284,7 @@ private fun EntryProviderScope<NavKey>.settingTabEntries(navState: NavigationSta
         metadata = ListDetailSceneStrategy.listPane(
             detailPlaceholder = { DetailPlaceholder() }
         )
-    ) { 
+    ) {
         val followViewModel: FollowViewModel = hiltViewModel()
         val contentUiState: FollowingUserContentUiState = rememberFollowingUserContentUiState(
             followViewModel = followViewModel, enabledLoadPhotos = rememberSaveable { mutableStateOf(true) }

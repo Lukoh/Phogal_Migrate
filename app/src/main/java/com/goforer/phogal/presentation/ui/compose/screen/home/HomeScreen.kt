@@ -111,13 +111,9 @@ fun HomeScreen(
 
                         Box(modifier = Modifier.fillMaxSize()) {
                             tabs.forEach { tab ->
-                                val isSelected = navigationState.currentRoute == tab
-
-                                if (isSelected) {
-                                    val currentBackStack = navigationState.backStackForCurrentRoute
-
+                                if (navigationState.currentRoute == tab) {
                                     NavDisplay(
-                                        backStack = currentBackStack,
+                                        backStack = navigationState.backStackForCurrentRoute,
                                         onBack = { navigationState.pop() },
                                         sceneStrategies = sceneStrategies,
                                         entryDecorators = entryDecorators,

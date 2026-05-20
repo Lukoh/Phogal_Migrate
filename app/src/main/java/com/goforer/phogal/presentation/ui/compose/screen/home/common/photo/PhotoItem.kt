@@ -72,114 +72,105 @@ fun PhotoItem(
     onShowSnackBar: (text: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit
 ) {
-    AnimatedVisibility(
-        visible = true,
+    Card(
         modifier = modifier,
-        enter = scaleIn(transformOrigin = TransformOrigin(0f, 0f)) +
-                fadeIn() + expandIn(expandFrom = Alignment.TopStart),
-        exit = scaleOut(transformOrigin = TransformOrigin(0f, 0f)) +
-                fadeOut() + shrinkOut(shrinkTowards = Alignment.TopStart)
-    ) {
-        Card(
-            modifier = modifier,
-            shape = RectangleShape,
-            colors = CardDefaults.cardColors(
-                contentColor = MaterialTheme.colorScheme.primary,
-                containerColor =
+        shape = RectangleShape,
+        colors = CardDefaults.cardColors(
+            contentColor = MaterialTheme.colorScheme.primary,
+            containerColor =
                 if (state.clicked)
                     MaterialTheme.colorScheme.primaryContainer
                 else
                     MaterialTheme.colorScheme.surfaceVariant,
-                disabledContentColor = MaterialTheme.colorScheme.surface,
-                disabledContainerColor = MaterialTheme.colorScheme.onSurface
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 8.dp,
-                pressedElevation = 2.dp,
-                focusedElevation = 4.dp
-            )
-        ) {
-            val imageUrl = state.photo.urls.raw
-            val painter = loadImagePainter(
-                data = imageUrl,
-                size = Size(state.photo.width, state.photo.height)
-            )
-            val transition by animateFloatAsState(
-                targetValue = if (painter.state is AsyncImagePainter.State.Success) 1f else 0f
-            )
+            disabledContentColor = MaterialTheme.colorScheme.surface,
+            disabledContainerColor = MaterialTheme.colorScheme.onSurface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp,
+            pressedElevation = 2.dp,
+            focusedElevation = 4.dp
+        )
+    ) {
+        val imageUrl = state.photo.urls.raw
+        val painter = loadImagePainter(
+            data = imageUrl,
+            size = Size(state.photo.width, state.photo.height)
+        )
+        val transition by animateFloatAsState(
+            targetValue = if (painter.state is AsyncImagePainter.State.Success) 1f else 0f
+        )
 
-            if (painter.state is AsyncImagePainter.State.Loading) {
-                val holderModifier = Modifier
-                    .fillMaxWidth()
-                    .height(256.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .background(ColorSystemGray7)
-                    .shimmer(
-                        baseColor = ColorSystemGray7,
-                        highlightColor = MaterialTheme.colorScheme.surface,
-                    )
-
-                Text(
-                    modifier = holderModifier,
-                    text = "",
-                    textAlign = TextAlign.Center
+        if (painter.state is AsyncImagePainter.State.Loading) {
+            val holderModifier = Modifier
+                .fillMaxWidth()
+                .height(256.dp)
+                .align(Alignment.CenterHorizontally)
+                .background(ColorSystemGray7)
+                .shimmer(
+                    baseColor = ColorSystemGray7,
+                    highlightColor = MaterialTheme.colorScheme.surface,
                 )
-            } else {
-                val imageModifier = Modifier
-                    .then(
-                        ((painter.state as? AsyncImagePainter.State.Success)
-                            ?.painter
-                            ?.intrinsicSize
-                            ?.let { intrinsicSize ->
-                                Modifier.aspectRatio(intrinsicSize.width / intrinsicSize.height)
-                            } ?: Modifier)
-                    )
-                    .clip(RoundedCornerShape(1.dp))
-                    .clickable {
-                        state.setClicked(true)
-                        onItemClicked.invoke(state.photo, state.index)
-                    }
-                    .scale(.8f + (.2f * transition))
-                    .graphicsLayer { rotationX = (1f - transition) * 5f }
-                    .alpha(transition / .2f)
 
-                Box {
-                    Image(
-                        painter = painter,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = imageModifier,
-                        colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(transition) })
-                    )
-
-                    if (state.bookmarked) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_bookmark_on),
-                            contentDescription = "Bookmark",
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(top = 8.dp, end = 16.dp),
-                            tint = Red60Transparent
-                        )
-                    }
+            Text(
+                modifier = holderModifier,
+                text = "",
+                textAlign = TextAlign.Center
+            )
+        } else {
+            val imageModifier = Modifier
+                .then(
+                    ((painter.state as? AsyncImagePainter.State.Success)
+                        ?.painter
+                        ?.intrinsicSize
+                        ?.let { intrinsicSize ->
+                            Modifier.aspectRatio(intrinsicSize.width / intrinsicSize.height)
+                        } ?: Modifier)
+                )
+                .clip(RoundedCornerShape(1.dp))
+                .clickable {
+                    state.setClicked(true)
+                    onItemClicked.invoke(state.photo, state.index)
                 }
+                .scale(.8f + (.2f * transition))
+                .graphicsLayer { rotationX = (1f - transition) * 5f }
+                .alpha(transition / .2f)
 
-                val userState = rememberUserContainerUiState()
-
-                userState.setUser(state.photo.user.toString())
-                userState.setProfileSize(36.0)
-                userState.setColors(listOf(Color.White, Color.White, Blue70, Blue75, Blue50, ColorSnowWhite))
-                userState.setVisibleViewButton(state.visibleViewButton)
-                userState.setFromItem(true)
-
-                UserContainer(
-                    modifier = Modifier,
-                    state = userState,
-                    onViewPhotos = onViewPhotos,
-                    onShowSnackBar = onShowSnackBar,
-                    onOpenWebView = onOpenWebView
+            Box {
+                Image(
+                    painter = painter,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = imageModifier,
+                    colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(transition) })
                 )
+
+                if (state.bookmarked) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_bookmark_on),
+                        contentDescription = "Bookmark",
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 8.dp, end = 16.dp),
+                        tint = Red60Transparent
+                    )
+                }
             }
+
+            val userState = rememberUserContainerUiState()
+
+            userState.setUser(state.photo.user.toString())
+            userState.setProfileSize(36.0)
+            userState.setColors(listOf(Color.White, Color.White, Blue70, Blue75, Blue50, ColorSnowWhite))
+            userState.setVisibleViewButton(state.visibleViewButton)
+            userState.setFromItem(true)
+
+            UserContainer(
+                modifier = Modifier,
+                state = userState,
+                onViewPhotos = onViewPhotos,
+                onShowSnackBar = onShowSnackBar,
+                onOpenWebView = onOpenWebView
+            )
         }
     }
 }
