@@ -160,17 +160,6 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
         )
     }
 
-    // Storage-permission prompt as a backstack-managed Dialog scene.
-    // DialogSceneStrategy routes this entry into a real `Dialog` instance, so
-    // predictive back / rotation / process-death restoration all work.
-    //
-    // Note: we intentionally do NOT reuse `PermissionBottomSheet` here — it
-    // wraps its content in a Material `ModalBottomSheet`, which would nest
-    // inside the Dialog provided by DialogSceneStrategy (two overlays stacked).
-    // Instead, the dialog entry renders a lightweight inline UI. If you want a
-    // bottom-sheet feel, migrate the shared content out of PermissionBottomSheet
-    // into a separate `PermissionRequestContent` composable that both this
-    // entry and the legacy bottom sheet can call.
     entry<Routes.PermissionDialogRoute>(
         metadata = DialogSceneStrategy.dialog()
     ) {
@@ -183,9 +172,18 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
 
 // ───────────────────────── Popular photos tab ─────────────────────────
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 private fun EntryProviderScope<NavKey>.popularTabEntries(navState: NavigationState) {
-    entry<Routes.PopularPhotosRoute> {
+    // PopularPhotos is the LIST pane. On tablets/foldables it occupies the
+    // left column; on phones it renders full-screen with the detail pushed
+    // on top when an item is tapped.
+    entry<Routes.PopularPhotosRoute>(
+        metadata = ListDetailSceneStrategy.listPane(
+            detailPlaceholder = { DetailPlaceholder() }
+        )
+    ) {
         val popularPhotosViewModel: PopularPhotosViewModel = hiltViewModel()
+
         val contentUiState: PopularPhotosContentUiState = rememberPopularPhotosContentUiState(popularPhotosViewModel)
 
         PopularPhotosScreen(
@@ -230,6 +228,7 @@ private fun EntryProviderScope<NavKey>.notificationTabEntries(navState: Navigati
 
 // ─────────────────────────── Setting tab ───────────────────────────
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 private fun EntryProviderScope<NavKey>.settingTabEntries(navState: NavigationState) {
     entry<Routes.SettingRoute> {
         SettingScreen(
@@ -247,7 +246,11 @@ private fun EntryProviderScope<NavKey>.settingTabEntries(navState: NavigationSta
         )
     }
 
-    entry<Routes.BookmarkedPhotosRoute> {
+    entry<Routes.BookmarkedPhotosRoute>(
+        metadata = ListDetailSceneStrategy.listPane(
+            detailPlaceholder = { DetailPlaceholder() }
+        )
+    ) {
         val bookmarkViewModel: BookmarkViewModel = hiltViewModel()
         val contentUiState: BookmarkContentUiState  = rememberBookmarkContentUiState(
             bookmarkViewModel = bookmarkViewModel, enabledLoadPhotos = rememberSaveable { mutableStateOf(true) }
@@ -277,7 +280,11 @@ private fun EntryProviderScope<NavKey>.settingTabEntries(navState: NavigationSta
         )
     }
 
-    entry<Routes.FollowingUsersRoute> {
+    entry<Routes.FollowingUsersRoute>(
+        metadata = ListDetailSceneStrategy.listPane(
+            detailPlaceholder = { DetailPlaceholder() }
+        )
+    ) { 
         val followViewModel: FollowViewModel = hiltViewModel()
         val contentUiState: FollowingUserContentUiState = rememberFollowingUserContentUiState(
             followViewModel = followViewModel, enabledLoadPhotos = rememberSaveable { mutableStateOf(true) }

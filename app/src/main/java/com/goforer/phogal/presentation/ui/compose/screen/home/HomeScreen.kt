@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -45,14 +46,12 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.scene.Scene
-import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.goforer.phogal.presentation.ui.navigation.nav3.LocalSharedTransitionScope
 import com.goforer.phogal.presentation.ui.navigation.nav3.NavigationState
 import com.goforer.phogal.presentation.ui.navigation.nav3.phogalEntries
 import com.goforer.phogal.presentation.ui.navigation.nav3.rememberNavigationState
-
 import com.goforer.phogal.presentation.ui.theme.Blue80
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import com.goforer.phogal.presentation.ui.theme.ColorBottomBar
@@ -64,17 +63,9 @@ fun HomeScreen(
     shouldShowBottomBar: Boolean,
     navigationState: NavigationState = rememberNavigationState()
 ) {
-    // Bottom bar visibility flows straight from state — no listener needed.
     val bottomBarVisible = !navigationState.canPopInCurrentRoute
-
-    // M3 NavigationBar default height is 80.dp. We translate off-screen when hidden.
     val bottomBarOffset: Dp = if (bottomBarVisible) 0.dp else 80.dp
 
-    // All strategies + decorators parameterized as <NavKey> so that
-    // NavDisplay<NavKey> ↔ entryProvider<NavKey> ↔ phogalEntries(EntryProviderScope<NavKey>)
-    // share the same type parameter end-to-end.
-    //
-    // Order: Dialog first (overlays) → ListDetail (adaptive) → SinglePane (fallback).
     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
     val sceneStrategies = remember(listDetailStrategy) {
         listOf(
@@ -114,35 +105,30 @@ fun HomeScreen(
                     bottom = if (bottomBarVisible) innerPadding.calculateBottomPadding() else 0.dp
                 )
             ) {
-                // Wrap NavDisplay in a SharedTransitionLayout and pipe its scope into
-                // a CompositionLocal so any descendant can do shared-element animations.
                 SharedTransitionLayout {
                     CompositionLocalProvider(LocalSharedTransitionScope provides this) {
-                        /*
-                        // Please unblock this code if androidx.navigation3.runtime.1.1.1 could be applied...
-                        NavDisplay(
-                            backStack = navigationState.backStackForCurrentRoute,
-                            onBack = { navigationState.pop() },
-                            sceneStrategies = sceneStrategies,
-                            entryDecorators = entryDecorators,
-                            transitionSpec = DefaultTransitions.push, // 타입이 일치함
-                            popTransitionSpec = DefaultTransitions.pop,
-                            predictivePopTransitionSpec = DefaultTransitions.predictivePop,
-                            entryProvider = entryProvider { phogalEntries(navigationState) }
-                        )
+                        val tabs = remember { BottomNavRoute.entries }
 
-                         */
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            tabs.forEach { tab ->
+                                val isSelected = navigationState.currentRoute == tab
 
-                        NavDisplay(
-                            backStack = navigationState.backStackForCurrentRoute,
-                            onBack = { navigationState.pop() },
-                            entryDecorators = entryDecorators,
-                            transitionSpec = DefaultTransitions.push,
-                            popTransitionSpec = DefaultTransitions.pop,
-                            sceneStrategy = sceneStrategies.firstOrNull() as SceneStrategy<NavKey>,
-                            predictivePopTransitionSpec = DefaultTransitions.predictivePop,
-                            entryProvider = entryProvider { phogalEntries(navigationState) }
-                        )
+                                if (isSelected) {
+                                    val currentBackStack = navigationState.backStackForCurrentRoute
+
+                                    NavDisplay(
+                                        backStack = currentBackStack,
+                                        onBack = { navigationState.pop() },
+                                        sceneStrategies = sceneStrategies,
+                                        entryDecorators = entryDecorators,
+                                        transitionSpec = DefaultTransitions.push,
+                                        popTransitionSpec = DefaultTransitions.pop,
+                                        predictivePopTransitionSpec = DefaultTransitions.predictivePop,
+                                        entryProvider = entryProvider { phogalEntries(navigationState) }
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -152,34 +138,11 @@ fun HomeScreen(
 
 // ─────────────────────────── Transition specs (extracted) ───────────────────────────
 
-/**
- * Default transition specs for the app's main [NavDisplay].
- *
- * Nav3 1.1.0 declares each spec as an **extension function on the
- * animated-content scope**:
- *
- *   `transitionSpec: AnimatedContentTransitionScope<NavEntry<T>>.() -> ContentTransform`
- *
- * Inside each spec body we can therefore call `slideIntoContainer`,
- * `slideOutOfContainer`, `fadeIn`, etc. directly — the
- * `AnimatedContentTransitionScope` is the implicit receiver (`this`).
- *
- * A previous revision used the form `(scope) -> ContentTransform` and called
- * methods via the explicit `scope` parameter. That signature does NOT match
- * the `NavDisplay` parameter type, so the compiler produced a cascade of
- * misleading type errors — including the receiver-mismatch error this file
- * was submitted to fix. This revision uses the correct extension form.
- *
- * Using `*` star projection for the receiver lets us share the same lambda
- * across NavDisplay regardless of the concrete `T` — the animation only
- * touches scope methods that don't depend on `T`.
- */
 @Stable
 private object DefaultTransitions {
     private const val DURATION_MS = 300
     private const val PREDICTIVE_DURATION_MS = 250
 
-    /** Push (forward) */
     val push: AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
         val enter = slideIntoContainer(
             towards = AnimatedContentTransitionScope.SlideDirection.Start,
@@ -192,7 +155,6 @@ private object DefaultTransitions {
         enter togetherWith exit
     }
 
-    /** Pop (backward) */
     val pop: AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
         val enter = slideIntoContainer(
             towards = AnimatedContentTransitionScope.SlideDirection.End,
@@ -205,8 +167,6 @@ private object DefaultTransitions {
         enter togetherWith exit
     }
 
-
-    /** Predictive back */
     val predictivePop: AnimatedContentTransitionScope<Scene<NavKey>>.(Int) -> ContentTransform = { _ ->
         val enter = slideIntoContainer(
             towards = AnimatedContentTransitionScope.SlideDirection.End,

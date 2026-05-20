@@ -29,39 +29,3 @@ object ConnectionUtils {
         return (if (!urlString.contains("://")) "http://$urlString" else urlString.toUri()) as Uri
     }
 }
-
-class NetworkStatusChecker(context: Context) {
-    private val connectivityManager =
-        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-    val networkStatus = callbackFlow {
-        val networkStatusCallback = object: ConnectivityManager.NetworkCallback() {
-            override fun onUnavailable() {
-                trySend(NetworkStatus.Unavailable)
-            }
-
-            override fun onAvailable(network: Network) {
-                trySend(NetworkStatus.Available)
-            }
-
-            override fun onLost(network: Network) {
-                trySend(NetworkStatus.Unavailable)
-            }
-        }
-
-        val request = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .build()
-
-        connectivityManager.registerNetworkCallback(request, networkStatusCallback)
-
-        awaitClose {
-            connectivityManager.unregisterNetworkCallback(networkStatusCallback)
-        }
-    }.distinctUntilChanged()
-}
-
-sealed class NetworkStatus {
-    object Available : NetworkStatus()
-    object Unavailable: NetworkStatus()
-}

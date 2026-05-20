@@ -14,7 +14,6 @@ import javax.inject.Singleton
 class PopularPhotosRepositoryImpl @Inject constructor(
     private val api: RestAPI
 ) : PopularPhotosRepository {
-
     override fun popularPhotos(orderBy: String, pageSize: Int): Flow<PagingData<Photo>> {
         return Pager(
             config = PagingConfig(

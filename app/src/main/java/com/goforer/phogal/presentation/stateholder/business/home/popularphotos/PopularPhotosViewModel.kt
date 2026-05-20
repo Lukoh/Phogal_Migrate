@@ -9,6 +9,7 @@ import com.goforer.phogal.data.repository.popularphotos.PopularPhotosRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,20 +19,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PopularPhotosViewModel @Inject constructor(
-    popularPhotosRepository: PopularPhotosRepository
+    private val popularPhotosRepository: PopularPhotosRepository
 ) : ViewModel() {
-    /*
-    val photos: StateFlow<PagingData<Photo>> = popularPhotosRepository
-        .popularPhotos(orderBy = POPULAR, pageSize = PAGE_SIZE)
-        .cachedIn(viewModelScope)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
-            initialValue = PagingData.empty()
-        )
-
-     */
-
     private val _orderBy = MutableStateFlow(POPULAR)
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val photos: StateFlow<PagingData<Photo>> = _orderBy

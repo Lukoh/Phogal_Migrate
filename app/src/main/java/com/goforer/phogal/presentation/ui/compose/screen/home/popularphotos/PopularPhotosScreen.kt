@@ -28,7 +28,6 @@ import com.goforer.base.designsystem.component.CustomCenterAlignedTopAppBar
 import com.goforer.base.designsystem.component.ScaffoldContent
 import com.goforer.base.utils.connect.ConnectionUtils
 import com.goforer.phogal.R
-import com.goforer.phogal.presentation.stateholder.business.home.popularphotos.PopularPhotosViewModel.Companion.POPULAR
 import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.PopularPhotosContentUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.OfflineScreen
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
