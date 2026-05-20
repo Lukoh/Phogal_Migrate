@@ -28,6 +28,7 @@ import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneSt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -107,22 +108,21 @@ fun HomeScreen(
             ) {
                 SharedTransitionLayout {
                     CompositionLocalProvider(LocalSharedTransitionScope provides this) {
-                        val tabs = remember { BottomNavRoute.entries }
+                        val currentTab = navigationState.currentRoute
+                        val currentBackStack = navigationState.backStackForCurrentRoute
 
                         Box(modifier = Modifier.fillMaxSize()) {
-                            tabs.forEach { tab ->
-                                if (navigationState.currentRoute == tab) {
-                                    NavDisplay(
-                                        backStack = navigationState.backStackForCurrentRoute,
-                                        onBack = { navigationState.pop() },
-                                        sceneStrategies = sceneStrategies,
-                                        entryDecorators = entryDecorators,
-                                        transitionSpec = DefaultTransitions.push,
-                                        popTransitionSpec = DefaultTransitions.pop,
-                                        predictivePopTransitionSpec = DefaultTransitions.predictivePop,
-                                        entryProvider = entryProvider { phogalEntries(navigationState) }
-                                    )
-                                }
+                            key(currentTab) {
+                                NavDisplay(
+                                    backStack = currentBackStack,
+                                    onBack = { navigationState.pop() },
+                                    sceneStrategies = sceneStrategies,
+                                    entryDecorators = entryDecorators,
+                                    transitionSpec = DefaultTransitions.push,
+                                    popTransitionSpec = DefaultTransitions.pop,
+                                    predictivePopTransitionSpec = DefaultTransitions.predictivePop,
+                                    entryProvider = entryProvider { phogalEntries(navigationState) }
+                                )
                             }
                         }
                     }
