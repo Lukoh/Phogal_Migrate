@@ -237,10 +237,10 @@ private fun FollowingUsersItemPreviewContent() {
 
     val mockState = rememberFollowingUserItemUiState(
         index = remember { mutableIntStateOf(0) }, // index = 0
-        user = remember { mutableStateOf(dummyUser.toString()) }, // 필요한 유저 데이터 문자열화
+        user = remember { mutableStateOf(dummyUser.toString()) },
         visibleViewButton = remember { mutableStateOf(true) },
-        clicked = remember { mutableStateOf(false) }, // setClicked(false) 효과
-        followed = remember { mutableStateOf(true) }  // followed = true 효과
+        clicked = remember { mutableStateOf(false) },
+        followed = remember { mutableStateOf(true) }
     )
 
     MaterialTheme {

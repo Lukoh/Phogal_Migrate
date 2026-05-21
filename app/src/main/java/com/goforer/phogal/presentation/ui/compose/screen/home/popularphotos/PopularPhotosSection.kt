@@ -4,6 +4,8 @@ package com.goforer.phogal.presentation.ui.compose.screen.home.popularphotos
 
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -25,13 +27,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import com.goforer.base.designsystem.component.state.rememberLazyListState
+import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemUiState
@@ -41,6 +46,8 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.Photo
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.ShowUpButton
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.EmptyState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.ErrorRow
+import com.goforer.phogal.presentation.ui.theme.Blue15
+import com.goforer.phogal.presentation.ui.theme.Blue95
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -83,10 +90,17 @@ fun PopularPhotosSection(
         isRefreshing = isRefreshing,
         onRefresh = photos::refresh
     ) {
+        val isDark = isSystemInDarkTheme()
+        val skyBlueBackground = if (isDark)
+            Blue15
+        else
+            Blue95
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(),
+                .fillMaxHeight()
+                .background(skyBlueBackground),
             state = lazyListState,
             contentPadding = PaddingValues(
                 start = paddingValues.calculateLeftPadding(layoutDirection),

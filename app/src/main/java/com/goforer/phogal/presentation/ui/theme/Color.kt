@@ -3,6 +3,7 @@ package com.goforer.phogal.presentation.ui.theme
 import androidx.compose.ui.graphics.Color
 
 internal val Blue10 = Color(0xFF001F28)
+internal val Blue15 = Color(0xFF1E293B)
 internal val Blue20 = Color(0xFF003544)
 internal val Blue30 = Color(0xFF004D61)
 internal val Blue40 = Color(0xFF006780)
@@ -12,7 +13,8 @@ internal val Blue70 = Color(0xFF45A7Bf)
 internal val Blue75 = Color(0xFF45B7Bf)
 internal val Blue80 = Color(0xFF5DD5FC)
 internal val Blue90 = Color(0xFFB8EAFF)
-internal val Blue95 = Color(0xFFDDF4FF)
+internal val Blue95 = Color(0xFFE8F6FF)
+
 internal val DarkGreen10 = Color(0xFF0D1F12)
 internal val DarkGreen20 = Color(0xFF223526)
 internal val DarkGreen30 = Color(0xFF394B3C)

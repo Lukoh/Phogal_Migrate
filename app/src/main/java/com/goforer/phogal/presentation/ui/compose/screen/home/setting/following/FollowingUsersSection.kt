@@ -2,6 +2,8 @@ package com.goforer.phogal.presentation.ui.compose.screen.home.setting.following
 
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -24,12 +26,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import com.goforer.base.designsystem.component.state.rememberLazyListState
+import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.FollowingUserSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserSectionUiState
@@ -37,6 +42,8 @@ import com.goforer.phogal.presentation.stateholder.uistate.home.setting.followin
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.EmptyState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.ErrorRow
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.ShowUpButton
+import com.goforer.phogal.presentation.ui.theme.Blue15
+import com.goforer.phogal.presentation.ui.theme.Blue95
 import timber.log.Timber
 
 private const val UP_BUTTON_THRESHOLD = 4
@@ -74,11 +81,17 @@ fun FollowingUsersSection(
             modifier = modifier.clip(RoundedCornerShape(0.2.dp))
         ) {
             val layoutDirection = LocalLayoutDirection.current
+            val isDark = isSystemInDarkTheme()
+            val skyBlueBackground = if (isDark)
+                Blue15
+            else
+                Blue95
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(),
+                    .fillMaxHeight()
+                    .background(skyBlueBackground),
                 state = lazyListState,
                 contentPadding = PaddingValues(
                     start = paddingValues.calculateLeftPadding(layoutDirection),

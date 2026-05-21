@@ -48,6 +48,13 @@ fun Chips(
     onClicked: (String) -> Unit
 ) {
     val listState = rememberLazyListState()
+
+    LaunchedEffect(items.size) {
+        if (items.isNotEmpty()) {
+            listState.animateScrollToItem(0)
+        }
+    }
+
     val isDark = isSystemInDarkTheme()
     val skyBlueContainer = if (isDark) {
         Color(0xFF2C3E50).copy(alpha = 0.25f)
@@ -59,12 +66,6 @@ fun Chips(
         MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
     } else {
         Color(0xFFBACBE3).copy(alpha = 0.6f)
-    }
-
-    LaunchedEffect(items.size) {
-        if (items.isNotEmpty()) {
-            listState.animateScrollToItem(0)
-        }
     }
 
     LazyRow(

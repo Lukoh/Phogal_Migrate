@@ -104,7 +104,7 @@ fun PhotoItem(
                 } else {
                     Image(
                         painter = painter,
-                        contentDescription = "Photo by ${state.photo.user?.name}",
+                        contentDescription = "Photo by ${state.photo.user.name}",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxSize()

@@ -144,6 +144,9 @@ fun PictureViewerContent(
                     contentUiState.photoDownloadViewModel.getDownloadPhotoUrl(url)
                     contentUiState.setShowPopup(true)
                 }
+            },
+            onRetry = {
+                contentUiState.pictureViewModel.loadPicture(contentUiState.id)
             }
         )
 
@@ -204,7 +207,8 @@ fun PictureBody(
     onShownPhoto: (pictureUiState: Picture) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit,
     onSuccess: (isSuccessful: Boolean) -> Unit,
-    onClick: (id: String) -> Unit
+    onClick: (id: String) -> Unit,
+    onRetry: () -> Unit
 ) {
     when (pictureState) {
         is UiState.Success -> {
@@ -257,9 +261,7 @@ fun PictureBody(
                         else
                             stringResource(id = R.string.error_dialog_title),
                         message = "${stringResource(id = R.string.error_get_picture)}${"\n\n"}${pictureState.message}",
-                        onRetry = {
-                            //pictureViewModel.loadPicture(state.id)
-                        }
+                        onRetry = onRetry
                     )
                 }
             }
