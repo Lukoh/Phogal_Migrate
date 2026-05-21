@@ -45,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -81,7 +82,31 @@ import kotlinx.coroutines.launch
 fun UserContainer(
     modifier: Modifier = Modifier,
     state: UserContainerUiState = rememberUserContainerUiState(),
-    followViewModel: FollowViewModel = hiltViewModel(),
+    followViewModel: FollowViewModel? = if (LocalInspectionMode.current) null else hiltViewModel(),
+    onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
+    onShowSnackBar: (text: String) -> Unit,
+    onOpenWebView: (firstName: String, url: String) -> Unit
+) {
+    val user = state.user.toUser()
+
+    UserContainer(
+        modifier = modifier,
+        state = state,
+        isFollowed = followViewModel?.isUserFollowed(user) ?: false,
+        onFollowClick = { followViewModel?.setUserFollow(user) },
+        onViewPhotos = onViewPhotos,
+        onShowSnackBar = onShowSnackBar,
+        onOpenWebView = onOpenWebView
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun UserContainer(
+    modifier: Modifier = Modifier,
+    state: UserContainerUiState = rememberUserContainerUiState(),
+    isFollowed: Boolean,
+    onFollowClick: (User) -> Unit,
     onViewPhotos: (name: String, firstName: String, lastName: String, username: String) -> Unit,
     onShowSnackBar: (text: String) -> Unit,
     onOpenWebView: (firstName: String, url: String) -> Unit
@@ -154,9 +179,9 @@ fun UserContainer(
             ShowFollowButton(
                 modifier = modifier,
                 followColor = state.colors[4],
-                followViewModel.isUserFollowed(user)
+                isFollowed
             ) {
-                followViewModel.setUserFollow(user)
+                onFollowClick(user)
             }
         }
 

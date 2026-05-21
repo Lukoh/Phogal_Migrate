@@ -1,6 +1,8 @@
 package com.goforer.base.designsystem.component
 
 import android.content.res.Configuration
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,11 +16,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.ImageSearch
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,16 +41,25 @@ import com.goforer.phogal.presentation.ui.theme.Blue40
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 import com.google.common.collect.Multimaps.index
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Chips(
     modifier: Modifier = Modifier,
     items: List<String>,
-    textColor: Color,
-    leadingIconTint: Color,
     onClicked: (String) -> Unit
 ) {
     val listState = rememberLazyListState()
+    val isDark = isSystemInDarkTheme()
+    val skyBlueContainer = if (isDark) {
+        Color(0xFF2C3E50).copy(alpha = 0.25f)
+    } else {
+        Color(0xFFE0E8F5).copy(alpha = 0.4f)
+    }
+
+    val skyBlueBorder = if (isDark) {
+        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+    } else {
+        Color(0xFFBACBE3).copy(alpha = 0.6f)
+    }
 
     LaunchedEffect(items.size) {
         if (items.isNotEmpty()) {
@@ -52,94 +67,77 @@ fun Chips(
         }
     }
 
-    Column(
+    LazyRow(
+        state = listState,
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier.fillMaxWidth()
     ) {
-        LazyRow(
-            state = listState,
-            contentPadding = PaddingValues(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp), // Spacer 대신 간격 설정
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 4.dp)
-        ) {
-            items(
-                items = items,
-                key = { item -> item }
-            ) { item ->
-                InputChip(
-                    selected = true,
-                    onClick = { onClicked(item) },
-                    enabled = true,
-                    label = {
-                        Text(
-                            text = item,
-                            color = textColor,
-                            fontStyle = FontStyle.Normal,
-                            style = MaterialTheme.typography.bodyMedium
+        items(
+            items = items,
+            key = { item -> item }
+        ) { item ->
+            AssistChip(
+                onClick = { onClicked(item) },
+                label = {
+                    Text(
+                        text = item,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium
                         )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.ImageSearch,
-                            contentDescription = "Keyword",
-                            modifier = Modifier.size(24.dp),
-                            tint = leadingIconTint
-                        )
-                    }
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.History,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = skyBlueContainer,
+                    labelColor = MaterialTheme.colorScheme.onSurface,
+                    leadingIconContentColor = MaterialTheme.colorScheme.primary
+                ),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = skyBlueBorder
                 )
-            }
+            )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(name = "Light Mode")
 @Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    name = "1. Light Mode - Chips",
     showBackground = true,
-    name = "Dark Mode",
-    showSystemUi = true
+    device = "spec:width=360dp,height=80dp,dpi=420"
+)
+@Preview(
+    name = "2. Dark Mode - Chips",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    device = "spec:width=360dp,height=80dp,dpi=420"
 )
 @Composable
 fun ChipsPreview(modifier: Modifier = Modifier) {
-    val items = listOf("Mountain", "Train", "Seoul", "San Diego", "Sea", "Cook")
-    val textColor = Black
-    val textFontSize = 13.sp
-    val leadingIconTint = Blue40
+    val mockItems = listOf("Mountain", "Train", "Seoul", "San Diego", "Sea", "Cook")
 
     PhogalTheme {
-        Column {
-            LazyRow(
-                modifier = modifier.padding(horizontal = 8.dp)
+        Surface(
+            modifier = modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
             ) {
-                items(items) {
-                    InputChip(
-                        selected = true,
-                        onClick = {},
-                        enabled = true,
-                        label = {
-                            Text(
-                                text = it,
-                                color = textColor,
-                                fontFamily = FontFamily.SansSerif,
-                                fontWeight = FontWeight.Normal,
-                                fontSize = textFontSize,
-                                fontStyle = FontStyle.Normal,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.ImageSearch,
-                                contentDescription = "Keyword",
-                                modifier = Modifier.size(24.dp),
-                                tint = leadingIconTint
-                            )
-                        }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
+                Chips(
+                    items = mockItems,
+                    onClicked = { }
+                )
             }
         }
     }

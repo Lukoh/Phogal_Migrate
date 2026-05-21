@@ -5,17 +5,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -23,29 +29,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.isTraversalGroup
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.goforer.base.designsystem.component.IconButton
 import com.goforer.phogal.R
-import com.goforer.phogal.presentation.stateholder.uistate.EditableInputUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberEditableInputState
-import com.goforer.phogal.presentation.ui.theme.Black
-import com.goforer.phogal.presentation.ui.theme.ColorSnowWhite
-import com.goforer.phogal.presentation.ui.theme.ColorSystemGray9
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 
 @Composable
@@ -55,28 +53,30 @@ fun SearchSection(
     onSearched: (word: String) -> Unit,
 ) {
     val isFocused by sectionUiState.interactionSource.collectIsFocusedAsState()
-    val indicatorColor = if (isFocused) Color.Black else Color.Gray
+    val borderColor = if (isFocused) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.outlineVariant
+    }
+
+    val borderWidth = if (isFocused) 1.5.dp else 1.dp
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .height(50.dp)
-            .background(Color.Transparent)
-            .semantics { isTraversalGroup = true }
-            .zIndex(1f)
-            .wrapContentHeight(Alignment.Top)
-            .border(
-                width = 1.dp,
-                color = ColorSystemGray9,
-                shape = RoundedCornerShape(size = 8.dp)
-            )
             .fillMaxWidth()
+            .height(56.dp)
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+            .border(
+                width = borderWidth,
+                color = borderColor,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clip(RoundedCornerShape(12.dp))
+            .zIndex(1f)
     ) {
         TextField(
-            value = if (sectionUiState.editableInputState.isHint)
-                ""
-            else
-                sectionUiState.editableInputState.textState,
+            value = if (sectionUiState.editableInputState.isHint) "" else sectionUiState.editableInputState.textState,
             onValueChange = {
                 if (!it.contains("\n")) {
                     sectionUiState.setWordChanged(true)
@@ -86,181 +86,108 @@ fun SearchSection(
             enabled = sectionUiState.enabled,
             leadingIcon = {
                 Icon(
-                    modifier = Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp),
                     imageVector = Icons.Default.Search,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
             colors = TextFieldDefaults.colors(
-                focusedPlaceholderColor = MaterialTheme.colorScheme.primary,
-                unfocusedPlaceholderColor = MaterialTheme.colorScheme.primary,
-                focusedTextColor = Color.Gray,
-                disabledTextColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
                 disabledContainerColor = Color.Transparent,
-                errorContainerColor = Color.Transparent
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent
             ),
             singleLine = true,
-            shape = MaterialTheme.shapes.small,
             placeholder = {
-                Text(stringResource(R.string.placeholder_search),  style = MaterialTheme.typography.titleMedium.copy(color = Black))
+                Text(
+                    text = stringResource(R.string.placeholder_search),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
             },
-            textStyle = TextStyle.Default.copy(
+            textStyle = TextStyle(
                 fontSize = 16.sp,
                 fontFamily = FontFamily.SansSerif,
-                fontStyle = FontStyle.Normal,
                 fontWeight = FontWeight.Medium
             ),
-            modifier = modifier
-                .weight(4f)
-                .background(Color.Transparent)
-                .drawBehind {
-                    val strokeWidth =  0.5.dp.value * density
-                    val y = size.height - strokeWidth / 2
-                    drawLine(
-                        indicatorColor,
-                        Offset(0f, y),
-                        Offset(size.width, y),
-                        strokeWidth
-                    )
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    if (sectionUiState.wordChanged) {
+                        onSearched(sectionUiState.editableInputState.textState)
+                    }
                 }
+            ),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
         )
 
-        // Note: SearchSection text input is now hoisted into rememberSearchSectionUiState
-        // alongside the screen, so the chip-tap path goes through the same channel as
-        // typed input. This collapses two state mutation paths into one.
         val onClick = remember(sectionUiState) {
             {
-                if (sectionUiState.wordChanged)
+                if (sectionUiState.wordChanged) {
                     onSearched(sectionUiState.editableInputState.textState)
+                }
             }
         }
 
-        IconButton(
-            modifier = modifier.padding(horizontal = 2.dp),
-            height = 42.dp,
+        TextButton(
             onClick = onClick,
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = null,
-                )
-            },
-            text = {
-                Text(
-                    stringResource(id = R.string.text_search),
-                    fontFamily = FontFamily.SansSerif,
-                    fontSize = 15.sp,
-                    fontStyle = FontStyle.Italic
-                )
-            }
-        )
+            enabled = sectionUiState.wordChanged,
+            modifier = Modifier
+                .padding(end = 8.dp)
+                .fillMaxHeight(),
+            colors = ButtonDefaults.textButtonColors(
+                contentColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Text(
+                text = stringResource(id = R.string.text_search),
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+            )
+        }
     }
 }
 
-@Preview(name = "Light Mode")
 @Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    name = "1. Light Mode",
     showBackground = true,
-    name = "Dark Mode",
-    showSystemUi = true
+    device = "spec:width=360dp,height=120dp,dpi=420"
+)
+@Preview(
+    name = "2. Dark Mode",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    device = "spec:width=360dp,height=120dp,dpi=420"
 )
 @Composable
-fun SearchSectionPreview(modifier: Modifier = Modifier) {
+fun SearchSectionPreview() {
     PhogalTheme {
-        val interactionSource = remember { MutableInteractionSource() }
-        val isFocused by interactionSource.collectIsFocusedAsState()
-        val indicatorColor = if (isFocused) Color.Black else Color.Gray
-        val state: EditableInputUiState = rememberEditableInputState("")
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = modifier
-                .height(50.dp)
-                .background(Color.Transparent)
-                .wrapContentHeight(Alignment.Top)
-                .border(
-                    width = 1.dp,
-                    color = ColorSystemGray9,
-                    shape = RoundedCornerShape(size = 8.dp)
-                )
-                .fillMaxWidth()
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.background
         ) {
-            TextField(
-                value = if (state.isHint)
-                    ""
-                else
-                    state.textState,
-                onValueChange = {
-                    state.textState = it
-                },
-                leadingIcon = {
-                    Icon(
-                        modifier = Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp),
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null
-                    )
-                },
-                colors = TextFieldDefaults.colors(
-                    focusedPlaceholderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = Color.Gray,
-                    disabledTextColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
-                    errorContainerColor = Color.Transparent
-                ),
-                shape = MaterialTheme.shapes.small,
-                placeholder = {
-                    Text(stringResource(R.string.placeholder_search),  style = MaterialTheme.typography.titleMedium.copy(color = Black))
-                },
-                textStyle = TextStyle.Default.copy(
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily.SansSerif,
-                    fontStyle = FontStyle.Normal,
-                    fontWeight = FontWeight.Medium
-                ),
-                modifier = modifier
-                    .weight(4f)
-                    .background(ColorSnowWhite)
-                    .drawBehind {
-                        val strokeWidth =  0.5.dp.value * density
-                        val y = size.height - strokeWidth / 2
-                        drawLine(
-                            indicatorColor,
-                            Offset(0f, y),
-                            Offset(size.width, y),
-                            strokeWidth
-                        )
-                    }
-            )
-            IconButton(
-                modifier = modifier.padding(horizontal = 2.dp),
-                height = 42.dp,
-                onClick = {},
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null,
-                    )
-                },
-                text = {
-                    Text(
-                        stringResource(id = R.string.placeholder_search),
-                        fontFamily = FontFamily.SansSerif,
-                        fontSize = 15.sp,
-                        fontStyle = FontStyle.Italic
-                    )
-                }
-            )
+            val mockInteractionSource = remember { MutableInteractionSource() }
+            val mockEditableInputState = rememberEditableInputState("")
+            val mockSectionUiState = rememberSearchSectionUiState(
+                interactionSource = mockInteractionSource,
+                editableInputState = mockEditableInputState
+            ).apply {
+                setWordChanged(true)
+                editableInputState.textState = "Android Compose"
+            }
+
+            Box(modifier = Modifier.padding(16.dp)) {
+                SearchSection(
+                    sectionUiState = mockSectionUiState,
+                    onSearched = {}
+                )
+            }
         }
     }
 }

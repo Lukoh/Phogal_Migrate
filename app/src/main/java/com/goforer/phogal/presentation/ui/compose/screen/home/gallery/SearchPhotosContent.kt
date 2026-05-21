@@ -13,7 +13,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,8 +35,6 @@ import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPh
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchSectionUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.InitScreen
-import com.goforer.phogal.presentation.ui.theme.Black
-import com.goforer.phogal.presentation.ui.theme.Blue70
 import com.goforer.phogal.presentation.ui.theme.ColorSystemGray7
 import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -119,6 +117,11 @@ private fun RecentWordsChips(
     onTriggeredConsumed: () -> Unit,
     onChipClicked: (String) -> Unit
 ) {
+    if (triggered) {
+        LaunchedEffect(Unit) {
+            onTriggeredConsumed()
+        }
+    }
 
     GenericCubicAnimationShape(
         visible = !isScrolling,
@@ -134,22 +137,14 @@ private fun RecentWordsChips(
 
         Chips(
             modifier = Modifier
-                .padding(top = 2.dp)
+                .padding(top = 4.dp)
                 .graphicsLayer {
                     clip = true
                     shape = animatedShape
                 },
             items = items,
-            textColor = Black,
-            leadingIconTint = Blue70,
             onClicked = onChipClicked
         )
-
-        if (triggered) {
-            SideEffect {
-                onTriggeredConsumed()
-            }
-        }
     }
 }
 

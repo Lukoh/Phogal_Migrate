@@ -1,47 +1,37 @@
 package com.goforer.phogal.presentation.ui.compose.screen.home.setting.bookmark
 
 import android.content.res.Configuration
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.expandIn
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
@@ -52,12 +42,19 @@ import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.Pic
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPictureItemUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserContainerUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.user.UserContainer
-import com.goforer.phogal.presentation.ui.theme.Blue50
-import com.goforer.phogal.presentation.ui.theme.Blue70
 import com.goforer.phogal.presentation.ui.theme.Blue75
 import com.goforer.phogal.presentation.ui.theme.ColorSnowWhite
 import com.goforer.base.designsystem.component.shimmer
-import com.goforer.phogal.presentation.ui.theme.ColorSystemGray7
+import com.goforer.phogal.data.model.remote.response.gallery.common.Links
+import com.goforer.phogal.data.model.remote.response.gallery.common.ProfileImage
+import com.goforer.phogal.data.model.remote.response.gallery.common.Social
+import com.goforer.phogal.data.model.remote.response.gallery.common.Urls
+import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
+import com.goforer.phogal.data.model.remote.response.gallery.common.user.UserLinks
+import com.goforer.phogal.presentation.ui.theme.ColorSystemGray1
+import com.goforer.phogal.presentation.ui.theme.ColorSystemGray5
+import com.goforer.phogal.presentation.ui.theme.DarkGreen60
+import com.goforer.phogal.presentation.ui.theme.PhogalTheme
 
 @Composable
 fun PictureItem(
@@ -69,88 +66,85 @@ fun PictureItem(
     onOpenWebView: (firstName: String, url: String) -> Unit
 ) {
     val picture = pictureItemUiState.picture
-    val verticalPadding = if (pictureItemUiState.index == 0)
-        2.dp
-    else
-        0.5.dp
+    val topPadding = if (pictureItemUiState.index == 0) 16.dp else 8.dp
+    val bottomPadding = 8.dp
 
-    Card(
-        modifier = modifier.padding(vertical = verticalPadding),
-        shape = RectangleShape,
-        colors = CardDefaults.cardColors(
-            contentColor = MaterialTheme.colorScheme.primary,
-            containerColor =
-                if (pictureItemUiState.clicked)
-                    MaterialTheme.colorScheme.primaryContainer
-                else
-                    MaterialTheme.colorScheme.surfaceVariant,
-            disabledContentColor = MaterialTheme.colorScheme.surface,
-            disabledContainerColor = MaterialTheme.colorScheme.onSurface
+    ElevatedCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = topPadding, bottom = bottomPadding)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable {
+                pictureItemUiState.setClicked(true)
+                onItemClicked(picture, pictureItemUiState.index)
+            },
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = if (pictureItemUiState.clicked)
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+            else
+                MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp,
-            pressedElevation = 2.dp,
-            focusedElevation = 4.dp
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 0.dp
         )
     ) {
-        val imageUrl = picture.urls.raw
-        val painter = loadImagePainter(
-            data = imageUrl,
-            size = Size(picture.width.div(8), picture.height.div(8))
-        )
-        val transition by animateFloatAsState(
-            targetValue = if (painter.state is AsyncImagePainter.State.Success) 1f else 0f
-        )
-
-        if (painter.state is AsyncImagePainter.State.Loading) {
-            val holderModifier = Modifier
-                .fillMaxWidth()
-                .height(256.dp)
-                .align(Alignment.CenterHorizontally)
-                .background(ColorSystemGray7)
-                // In-house shimmer (replaces Accompanist placeholder, EOL 2024).
-                .shimmer(
-                    baseColor = ColorSystemGray7,
-                    highlightColor = MaterialTheme.colorScheme.surface,
-                )
-
-            Text(
-                modifier = holderModifier,
-                text = "",
-                textAlign = TextAlign.Center
+        Column(modifier = Modifier.fillMaxWidth()) {
+            val imageUrl = picture.urls.raw
+            val painter = loadImagePainter(
+                data = imageUrl,
+                size = Size(picture.width / 8,picture.height / 8)
             )
-        } else {
-            val imageModifier = Modifier
-                .then(
-                    ((painter.state as? AsyncImagePainter.State.Success)
-                        ?.painter
-                        ?.intrinsicSize
-                        ?.let { intrinsicSize ->
-                            Modifier.aspectRatio(intrinsicSize.width / intrinsicSize.height)
-                        } ?: Modifier)
-                )
-                .clip(RoundedCornerShape(1.dp))
-                .clickable {
-                    pictureItemUiState.setClicked(true)
-                    onItemClicked.invoke(picture, pictureItemUiState.index)
+
+            val transition by animateFloatAsState(
+                targetValue = if (painter.state is AsyncImagePainter.State.Success) 1f else 0f,
+                animationSpec = tween(durationMillis = 400)
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(
+                        ratio = if (picture.width > 0 && picture.height > 0)
+                            picture.width.toFloat() / picture.height.toFloat()
+                        else 4f / 3f
+                    )
+            ) {
+                if (painter.state is AsyncImagePainter.State.Loading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+                            .shimmer(
+                                durationMillis = 1300,
+                                shimmerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f)
+                            )
+                    )
+                } else {
+                    val imageModifier = Modifier
+                        .fillMaxSize()
+                        .scale(0.96f + (0.04f * transition))
+                        .graphicsLayer { rotationX = (1f - transition) * 3f }
+                        .alpha(transition)
+
+                    Image(
+                        painter = painter,
+                        contentDescription = "Picture by ${picture.user?.name}",
+                        contentScale = ContentScale.Crop,
+                        modifier = imageModifier,
+                        colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
+                            setToSaturation(transition)
+                        })
+                    )
                 }
-                .scale(.8f + (.2f * transition))
-                .graphicsLayer { rotationX = (1f - transition) * 5f }
-                .alpha(transition / .2f)
+            }
 
-            Image(
-                painter = painter,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = imageModifier,
-                colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(transition) })
-            )
             UserContainer(
-                modifier = Modifier,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                 state = rememberUserContainerUiState(
                     user = rememberSaveable { mutableStateOf(picture.user.toString()) },
                     profileSize = rememberSaveable { mutableDoubleStateOf(36.0) },
-                    colors = remember { mutableStateOf(listOf(Color.White, Color.White, Blue70, Blue75, Blue50, ColorSnowWhite)) },
+                    colors = remember { mutableStateOf(listOf(ColorSystemGray1, ColorSystemGray1, ColorSnowWhite, ColorSystemGray5, Blue75, DarkGreen60)) },
                     visibleViewButton = rememberSaveable { mutableStateOf(pictureItemUiState.visibleViewButton) },
                     fromItem = rememberSaveable { mutableStateOf(true) }
                 ),
@@ -162,53 +156,127 @@ fun PictureItem(
     }
 }
 
-@Preview(name = "Light Mode")
+@Preview(name = "Light Mode - Card", showBackground = true)
 @Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    name = "Dark Mode - Card",
     showBackground = true,
-    name = "Dark Mode",
-    showSystemUi = true
+    uiMode = Configuration.UI_MODE_NIGHT_YES
 )
 @Composable
-fun PictureItemPreview(modifier: Modifier = Modifier) {
-    val verticalPadding = 4.dp
-    var isClicked by rememberSaveable { mutableStateOf(false) }
+fun PictureItemPreview() {
+    val mockPicture = PreviewMockData.createMockPicture()
+    val mockUiState = rememberPictureItemUiState(
+        initialPicture = mockPicture,
+        initialIndex = 0,
+        initialVisibleViewButton = true
+    )
 
-    Card(
-        modifier = modifier.padding(0.dp, verticalPadding),
-        colors = CardDefaults.cardColors(
-            contentColor = MaterialTheme.colorScheme.primary,
-            containerColor =
-            if (isClicked)
-                MaterialTheme.colorScheme.primaryContainer
-            else
-                MaterialTheme.colorScheme.surfaceVariant,
-            disabledContentColor = MaterialTheme.colorScheme.surface,
-            disabledContainerColor = MaterialTheme.colorScheme.onSurface
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8. dp,
-            pressedElevation = 2. dp,
-            focusedElevation = 4. dp
+    PhogalTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column {
+                PictureItem(
+                    pictureItemUiState = mockUiState,
+                    onItemClicked = { item, index ->  },
+                    onViewPhotos = { name, first, last, username -> },
+                    onShowSnackBar = { text -> },
+                    onOpenWebView = { firstName, url -> }
+                )
+            }
+        }
+    }
+}
+
+object PreviewMockData {
+    fun createMockPicture(): Picture {
+        return Picture(
+            id = "mock_picture_id_01",
+            createdAt = "2026-05-21T00:00:00Z",
+            updatedAt = "2026-05-21T12:00:00Z",
+            width = 1920,
+            height = 1080,
+            color = "#E0E8F5",
+            blurHash = "LKO2?4%gWZ_4_w_4ofxtTg_3RjM{",
+            downloads = 1250,
+            publicDomain = true,
+            description = "Beautiful landscape photo for preview presentation",
+            exif = null,
+            location = null,
+            tags = emptyList(),
+            currentUserCollections = emptyList(),
+            urls = Urls(
+                raw = "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+                full = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80",
+                regular = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1080",
+                small = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400",
+                thumb = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=200"
+            ),
+            links = Links(
+                self = "https://api.unsplash.com/photos/mock",
+                html = "https://unsplash.com/photos/mock",
+                download = "https://unsplash.com/photos/mock/download",
+                downloadLocation = "https://api.unsplash.com/photos/mock/download"
+            ),
+            user = User(
+                acceptedTos = true,
+                bio = "Technical Project Manager & Automotive Android Engineer",
+                firstName = "Lukoh",
+                forHire = false,
+                id = "user_id_lukoh",
+                instagramUsername = "namlukoh_insta",
+                lastName = "Nam",
+                location = "Seoul, South Korea",
+                name = "Lukoh Nam",
+                portfolioUrl = "https://medium.com/@namlukoh",
+                totalCollections = 14,
+                totalLikes = 245,
+                totalPhotos = 82,
+                twitterUsername = null,
+                updatedAt = "2026-05-21T18:00:00Z",
+                username = "namlukoh",
+                profileImage = ProfileImage(
+                    small = "https://images.unsplash.com/profile-mock-s",
+                    medium = "https://images.unsplash.com/profile-mock-m",
+                    large = "https://images.unsplash.com/profile-mock-l"
+                ),
+                links = UserLinks(
+                    self = "https://api.unsplash.com/users/namlukoh",
+                    html = "https://unsplash.com/@namlukoh",
+                    photos = "https://api.unsplash.com/users/namlukoh/photos"
+                ),
+                social = Social(
+                    instagramUsername = "namlukoh_insta",
+                    portfolioUrl = "https://medium.com/@namlukoh",
+                    twitterUsername = null,
+                    paypalEmail = null
+                )
+            ),
+            likedByUser = false,
+            bookmarked = false
         )
-    ) {
-        val imageUrl = "http://t1.daumcdn.net/news/201706/21/kedtv/20170621155930292vyyx.jpg"
-        val painter = loadImagePainter(
-            data = imageUrl,
-            size = Size.ORIGINAL
-        )
+    }
+}
 
-        val imageModifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .clip(RoundedCornerShape(4.dp))
-            .clickable { isClicked = true }
+@Composable
+fun rememberPictureItemUiState(
+    initialPicture: Picture = PreviewMockData.createMockPicture(),
+    initialIndex: Int = 0,
+    initialVisibleViewButton: Boolean = true,
+    initialClicked: Boolean = false
+): PictureItemUiState {
+    val indexState = remember { mutableIntStateOf(initialIndex) }
+    val pictureState = remember { mutableStateOf(initialPicture) }
+    val visibleViewButtonState = remember { mutableStateOf(initialVisibleViewButton) }
+    val clickedState = remember { mutableStateOf(initialClicked) }
 
-        Image(
-            modifier = imageModifier,
-            painter = painter,
-            contentDescription = null,
-            contentScale = ContentScale.Crop
+    return remember(indexState, pictureState, visibleViewButtonState, clickedState) {
+        PictureItemUiState(
+            _index = indexState,
+            _picture = pictureState,
+            _visibleViewButton = visibleViewButtonState,
+            _clicked = clickedState
         )
     }
 }

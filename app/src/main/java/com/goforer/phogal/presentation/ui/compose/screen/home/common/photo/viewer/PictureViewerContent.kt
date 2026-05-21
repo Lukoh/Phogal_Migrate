@@ -1,13 +1,18 @@
 package com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.viewer
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,16 +30,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -57,22 +73,16 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImagePainter
 import coil.size.Size
-import com.goforer.base.designsystem.animation.GenericCubicAnimationShape
-import com.goforer.base.designsystem.component.IconButton
 import com.goforer.base.designsystem.component.dialog.AlertDialog
 import com.goforer.base.designsystem.component.dialog.AutoDismissDialog
 import com.goforer.base.designsystem.component.loadImagePainter
@@ -81,25 +91,20 @@ import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.photo.download.TrackDownload
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Exif
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
-import com.goforer.phogal.presentation.stateholder.business.home.common.photo.info.PictureViewModel
-import com.goforer.phogal.presentation.stateholder.business.home.download.PhotoDownloadViewModel
 import com.goforer.phogal.presentation.stateholder.uistate.UiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.PhotoContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.rememberUserContainerUiState
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.error.ErrorContent
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.user.UserContainer
-import com.goforer.phogal.presentation.ui.theme.Black
 import com.goforer.phogal.presentation.ui.theme.Blue75
-import com.goforer.phogal.presentation.ui.theme.ColorBlackLight
 import com.goforer.phogal.presentation.ui.theme.ColorSnowWhite
 import com.goforer.phogal.presentation.ui.theme.ColorSystemGray1
 import com.goforer.phogal.presentation.ui.theme.ColorSystemGray5
 import com.goforer.base.designsystem.component.shimmer
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.LoadingPicture
 import com.goforer.phogal.presentation.ui.theme.ColorSystemGray7
-import com.goforer.phogal.presentation.ui.theme.ColorText4
 import com.goforer.phogal.presentation.ui.theme.DarkGreen60
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Immutable
@@ -333,7 +338,10 @@ fun PictureBodyContent(
     ) {
         Column(
             modifier = Modifier
-                .padding(top = contentPadding.calculateTopPadding())
+                .padding(
+                    top = contentPadding.calculateTopPadding(),
+                    bottom = contentPadding.calculateBottomPadding() + 72.dp
+                )
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -479,143 +487,150 @@ fun BodyContent(
 ) {
     var visibleCameraInfo by remember { mutableStateOf(false) }
 
-    Card(
-        modifier = modifier.padding(0.dp, 2.dp),
-        colors = CardDefaults.cardColors(
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            containerColor =  MaterialTheme.colorScheme.onPrimary,
-            disabledContentColor = MaterialTheme.colorScheme.surface,
-            disabledContainerColor = MaterialTheme.colorScheme.onSurface
+    ElevatedCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp,
-            pressedElevation = 2.dp,
-            focusedElevation = 4.dp
-        ),
-        shape = RectangleShape
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        val imageUrl = picture.urls.raw
-        val painter = loadImagePainter(
-            data = imageUrl,
-            size = Size(picture.width.div(8), picture.height.div(8))
-        )
-
-        if (painter.state is AsyncImagePainter.State.Loading) {
-            val screenHeight = LocalWindowInfo.current.containerSize
-            val holderModifier = Modifier
+        Column(
+            modifier = Modifier
                 .fillMaxWidth()
-                .height(screenHeight.height.dp)
-                .align(Alignment.CenterHorizontally)
-                .background(ColorSystemGray7)
-                .shimmer(
-                    baseColor = ColorSystemGray7,
-                    highlightColor = MaterialTheme.colorScheme.surface,
+                .animateContentSize()
+        ) {
+            val imageUrl = picture.urls.raw
+            val painter = loadImagePainter(
+                data = imageUrl,
+                size = Size(picture.width.div(8), picture.height.div(8))
+            )
+            val bringIntoViewRequester = remember { BringIntoViewRequester() }
+
+            if (painter.state is AsyncImagePainter.State.Loading) {
+                val screenHeight = LocalWindowInfo.current.containerSize
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(screenHeight.height.dp / 2)
+                        .background(ColorSystemGray7)
+                        .shimmer(
+                            baseColor = ColorSystemGray7,
+                            highlightColor = MaterialTheme.colorScheme.surface,
+                        )
+                )
+            } else {
+                UserContainer(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    state = rememberUserContainerUiState(
+                        user = rememberSaveable { mutableStateOf(picture.user.toString()) },
+                        profileSize = rememberSaveable { mutableDoubleStateOf(48.0) },
+                        colors = remember { mutableStateOf(listOf(ColorSystemGray1, ColorSystemGray1, ColorSnowWhite, ColorSystemGray5, Blue75, DarkGreen60)) },
+                        visibleViewButton = rememberSaveable { mutableStateOf(visibleViewPhotosButton) },
+                        fromItem = rememberSaveable { mutableStateOf(false) }
+                    ),
+                    onViewPhotos = onViewPhotos,
+                    onShowSnackBar = onShowSnackBar,
+                    onOpenWebView = onOpenWebView
                 )
 
-            Text(
-                modifier = holderModifier,
-                text = "",
-                textAlign = TextAlign.Center
-            )
-        } else {
-            UserContainer(
-                modifier = Modifier,
-                state = rememberUserContainerUiState(
-                    user = rememberSaveable { mutableStateOf(picture.user.toString()) },
-                    profileSize = rememberSaveable { mutableDoubleStateOf(48.0) },
-                    colors = remember { mutableStateOf(listOf(ColorSystemGray1, ColorSystemGray1, ColorSnowWhite, ColorSystemGray5, Blue75, DarkGreen60)) },
-                    visibleViewButton = rememberSaveable { mutableStateOf(visibleViewPhotosButton) },
-                    fromItem = rememberSaveable { mutableStateOf(false) }
-                ),
-                onViewPhotos = onViewPhotos,
-                onShowSnackBar = onShowSnackBar,
-                onOpenWebView = onOpenWebView
-            )
-
-            AnimatedVisibility(
-                visible = true,
-                modifier = modifier,
-                enter = scaleIn(transformOrigin = TransformOrigin(0f, 0f)) +
-                        fadeIn() + expandIn(expandFrom = Alignment.TopStart),
-                exit = scaleOut(transformOrigin = TransformOrigin(0f, 0f)) +
-                        fadeOut() + shrinkOut(shrinkTowards = Alignment.TopStart)
-            ) {
-                ImageContent(
-                    painter = painter,
-                    onClick = {
-                        onClick(picture.id)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                ) {
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = true,
+                        enter = scaleIn(transformOrigin = TransformOrigin(0f, 0f)) + fadeIn(),
+                        exit = scaleOut(transformOrigin = TransformOrigin(0f, 0f)) + fadeOut(),
+                    ) {
+                        ImageContent(
+                            painter = painter,
+                            onClick = { onClick(picture.id) }
+                        )
                     }
-                )
-            }
+                }
 
-            Spacer(modifier = Modifier.height(12.dp))
-            BehaviorItem(700, 700, 700)
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = picture.description ?: "None",
-                modifier = Modifier.padding(8.dp, 4.dp),
-                color = ColorText4,
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.W400,
-                fontSize = 18.sp,
-                fontStyle = FontStyle.Normal,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            picture.location?.let {
-                LocationItem(it.name)
-                Spacer(modifier = Modifier.height(2.dp))
-            }
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    BehaviorBar(likes = 700, downloads = 700, views = 700)
+                    if (!picture.description.isNullOrEmpty()) {
+                        Text(
+                            text = picture.description,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Normal,
+                                lineHeight = 22.sp
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
 
-            DateItem(picture.createdAt)
-            Spacer(modifier = Modifier.height(2.dp))
-            picture.exif?.let { exif ->
-                GenericCubicAnimationShape(
-                    visible = visibleCameraInfo,
-                    duration = 550
-                ) { animatedShape, _ ->
-                    ExifItem(
-                        modifier = modifier
-                            .padding(horizontal = 4.dp, vertical = 4.dp)
-                            .graphicsLayer {
-                                clip = true
-                                shape = animatedShape
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        picture.location?.let {
+                            MetadataItem(icon = Icons.Outlined.Place, text = it.name)
+                        }
+                        MetadataItem(
+                            icon = Icons.Outlined.DateRange,
+                            text = "${picture.createdAt} ${stringResource(id = R.string.picture_posted)}"
+                        )
+                    }
+
+                    picture.exif?.let { exif ->
+                        LaunchedEffect(visibleCameraInfo) {
+                            if (visibleCameraInfo) {
+                                delay(1500)
+                                bringIntoViewRequester.bringIntoView()
+                            }
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                visibleCameraInfo = !visibleCameraInfo
                             },
-                        exifUiState = exif
-                    )
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.CameraAlt,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = if (visibleCameraInfo)
+                                    stringResource(id = R.string.picture_close_camera_info)
+                                else
+                                    stringResource(id = R.string.picture_view_camera_info),
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
+
+                        AnimatedVisibility(
+                            visible = visibleCameraInfo,
+                            enter = fadeIn() + expandVertically(animationSpec = tween(300)),
+                            exit = fadeOut() + shrinkVertically(animationSpec = tween(300))
+                        ) {
+                            Box(modifier = Modifier.bringIntoViewRequester(bringIntoViewRequester)) {
+                                ExifCard(exif = exif)
+                            }
+                        }
+                    }
+                }
+
+                LaunchedEffect(picture.id) {
+                    onShownPhoto(picture)
                 }
             }
-            IconButton(
-                modifier = Modifier.padding(horizontal = 4.dp),
-                height = 32.dp,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Blue75,
-                    contentColor = Color.White
-                ),
-                onClick = {
-                    visibleCameraInfo = !visibleCameraInfo
-                },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Face,
-                        contentDescription = null,
-                    )
-                },
-                text = {
-                    Text(
-                        text = if (visibleCameraInfo)
-                            stringResource(id = R.string.picture_close_camera_info)
-                        else
-                            stringResource(id = R.string.picture_view_camera_info),
-                        fontFamily = FontFamily.SansSerif,
-                        fontSize = 13.sp,
-                        fontStyle = FontStyle.Italic
-                    )
-                }
-            )
-
-            Spacer(modifier = Modifier.height(70.dp))
-            onShownPhoto(picture)
         }
     }
 }
@@ -627,7 +642,8 @@ fun ImageContent(
     onClick: () -> Unit
 ) {
     val transition by animateFloatAsState(
-        targetValue = if (painter.state is AsyncImagePainter.State.Success) 1f else 0f
+        targetValue = if (painter.state is AsyncImagePainter.State.Success) 1f else 0f,
+        animationSpec = tween(durationMillis = 400)
     )
 
     Image(
@@ -644,157 +660,95 @@ fun ImageContent(
                     } ?: Modifier)
             )
             .clip(RectangleShape)
-            .clickable {
-                onClick()
-            }
-            .scale(.8f + (.2f * transition))
-            .graphicsLayer { rotationX = (1f - transition) * 5f }
-            .alpha(transition / .2f),
+            .clickable { onClick() }
+            .scale(.95f + (.05f * transition))
+            .graphicsLayer { rotationX = (1f - transition) * 3f }
+            .alpha(transition),
         colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
-            setToSaturation(
-                transition
-            )
+            setToSaturation(transition)
         })
     )
 }
 
 @Composable
-fun BehaviorItem(likes: Long, downloads: Long, views: Long) {
+fun BehaviorBar(likes: Long, downloads: Long, views: Long) {
     Row(
-        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        StatItem(icon = Icons.Rounded.FavoriteBorder, value = likes.toString(), label = stringResource(id = R.string.picture_likes))
+        StatItem(icon = Icons.Rounded.Download, value = downloads.toString(), label = stringResource(id = R.string.picture_downloads))
+        StatItem(icon = Icons.Rounded.Visibility, value = views.toString(), label = stringResource(id = R.string.picture_views))
+    }
+}
+
+@Composable
+fun StatItem(icon: ImageVector, value: String, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = "$value $label",
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+fun MetadataItem(icon: ImageVector, text: String?) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.size(16.dp)
+        )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = "${likes}${" "}${stringResource(id = R.string.picture_likes)}",
-            modifier = Modifier.padding(vertical =  4.dp),
-            color = Black,
-            fontFamily = FontFamily.SansSerif,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 13.sp,
-            fontStyle = FontStyle.Normal,
-            style = MaterialTheme.typography.titleMedium
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = "${downloads}${" "}${stringResource(id = R.string.picture_downloads)}",
-            modifier = Modifier.padding(vertical = 4.dp),
-            color = Black,
-            fontFamily = FontFamily.SansSerif,
-            fontWeight = FontWeight.Medium,
-            fontSize = 13.sp,
-            fontStyle = FontStyle.Normal,
-            style = MaterialTheme.typography.titleMedium
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = "${views}${" "}${stringResource(id = R.string.picture_views)}",
-            modifier = Modifier.padding(vertical = 4.dp),
-            color = Black,
-            fontFamily = FontFamily.SansSerif,
-            fontWeight = FontWeight.Medium,
-            fontSize = 13.sp,
-            fontStyle = FontStyle.Normal,
-            style = MaterialTheme.typography.titleMedium
-        )
+        if (text != null) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
 @Composable
-fun LocationItem(location: String?) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+fun ExifCard(exif: Exif) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_location),
-            contentDescription = "Location",
-            modifier = Modifier
-                .size(22.dp)
-                .padding(horizontal = 4.dp)
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = location ?: stringResource(id = R.string.picture_no_location),
-            color = ColorBlackLight,
-            fontFamily = FontFamily.SansSerif,
-            fontWeight = FontWeight.Normal,
-            fontSize = 14.sp,
-            fontStyle = FontStyle.Normal,
-            style = MaterialTheme.typography.titleMedium
-        )
-    }
-}
-
-@Composable
-fun DateItem(createdAt: String) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_date),
-            contentDescription = "Date",
-            modifier = Modifier
-                .size(22.dp)
-                .padding(horizontal = 4.dp)
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = "${createdAt}${" "}${stringResource(id = R.string.picture_posted)}",
-            color = ColorBlackLight,
-            fontFamily = FontFamily.SansSerif,
-            fontWeight = FontWeight.Normal,
-            fontSize = 14.sp,
-            fontStyle = FontStyle.Normal,
-            style = MaterialTheme.typography.titleMedium
-        )
-    }
-}
-
-@Composable
-fun ExifItem(
-    modifier: Modifier = Modifier,
-    exifUiState: Exif
-) {
-    Box(modifier) {
-        Column {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_camera),
-                    contentDescription = "ExifUiState",
-                    modifier = Modifier
-                        .size(22.dp)
-                        .padding(horizontal = 4.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = exif.name ?: stringResource(id = R.string.picture_no_camera_name),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            exif.name?.let {
                 Text(
-                    text = exifUiState.name ?: stringResource(id = R.string.picture_no_camera_name),
-                    color = ColorBlackLight,
-                    fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 14.sp,
-                    fontStyle = FontStyle.Normal,
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-
-            exifUiState.name?.let {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "${"Lens\n"}${"f/"}${exifUiState.aperture}${"  "}${exifUiState.focalLength}${"mm  "}${exifUiState.exposureTime}${"s  iso "}${exifUiState.iso}",
-                    modifier = Modifier.padding(horizontal = 28.dp),
-                    color = ColorBlackLight,
-                    fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 14.sp,
-                    fontStyle = FontStyle.Normal,
-                    style = MaterialTheme.typography.titleMedium
+                    text = "Lens • ƒ/${exif.aperture}  ${exif.focalLength}mm  ${exif.exposureTime}s  ISO ${exif.iso}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.outline,
+                    lineHeight = 20.sp
                 )
             }
         }
