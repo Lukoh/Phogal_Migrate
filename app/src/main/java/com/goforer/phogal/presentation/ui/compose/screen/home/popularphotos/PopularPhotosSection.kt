@@ -104,7 +104,7 @@ fun PopularPhotosSection(
             state = lazyListState,
             contentPadding = PaddingValues(
                 start = paddingValues.calculateLeftPadding(layoutDirection),
-                top = 0.dp,
+                top = 4.dp,
                 end = paddingValues.calculateRightPadding(layoutDirection) ,
                 bottom = paddingValues.calculateBottomPadding() + 24.dp
             )
