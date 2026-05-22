@@ -74,15 +74,18 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImagePainter
 import coil.size.Size
+import com.goforer.base.designsystem.component.DownloadIndicator
 import com.goforer.base.designsystem.component.dialog.AlertDialog
 import com.goforer.base.designsystem.component.dialog.AutoDismissDialog
 import com.goforer.base.designsystem.component.loadImagePainter
@@ -151,7 +154,7 @@ fun PictureViewerContent(
         )
 
         if (contentUiState.showPopup) {
-            LoadingIndicator()
+            DownloadIndicator(modifier, stringResource(R.string.picture_download_indicator))
         }
 
         DownloadPhoto(
@@ -396,85 +399,6 @@ fun ShowDialog(
         DownloadDialogState.Idle -> { /* Noting */ }
     }
 }
-
-@Composable
-fun LoadingIndicator() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.7f)),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(100.dp),
-                    strokeWidth = 8.dp,
-                    color = Color.Magenta,
-                    trackColor = Color.LightGray,
-                    strokeCap = StrokeCap.Round
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = stringResource(id = R.string.picture_download_indicator),
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleLarge
-                )
-            }
-        }
-    }
-}
-
-/*
-@Composable
-fun DownloadLoadingIndicatorBox(context: Context, progress: Float) {
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
-        label = "progress_rate"
-    )
-
-    Box(contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(
-            progress = { animatedProgress },
-            modifier = Modifier.size(100.dp),
-            strokeWidth = 8.dp,
-            color = Color.Magenta,
-            trackColor = Color.LightGray,
-            strokeCap = StrokeCap.Round
-        )
-        Text(
-            text = "${(progress * 100).toInt()}%",
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleLarge
-        )
-    }
-
-    Spacer(modifier = Modifier.height(24.dp))
-
-    OutlinedButton(
-        onClick = {
-            /*
-            photoDownloadViewModel.cancelDownload(
-                context.getString(R.string.error_download_canceled)
-            )
-             */
-        },
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = Color.LightGray,
-            contentColor = Color.Red
-        )
-    ) {
-        Text(
-            text = context.getString(R.string.cancel),
-            color = Color.Red
-        )
-    }
-}
-
- */
 
 @Composable
 fun BodyContent(
