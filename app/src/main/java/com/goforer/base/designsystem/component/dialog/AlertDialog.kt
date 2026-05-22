@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.goforer.phogal.presentation.ui.theme.Blue20
@@ -67,5 +68,33 @@ fun AlertDialog(
                 }
             }
         }
+    }
+}
+
+@Preview(showSystemUi = true, name = "BaseAlertDialog")
+@Composable
+fun AlertDialogDefaultPreview() {
+    MaterialTheme {
+        AlertDialog(
+            title = "Download complete",
+            message = "The photo has been saved to your gallery successfully.",
+            confirmText = "OK",
+            onDismissRequest = { },
+            onConfirm = { }
+        )
+    }
+}
+
+@Preview(showSystemUi = true, name = "NetworkAlertDialog")
+@Composable
+fun AlertDialogLongMessagePreview() {
+    MaterialTheme {
+        AlertDialog(
+            title = "Network error",
+            message = "Network is unstable and we couldn't load the data. Please try again in a moment. If the problem persists, please contact customer support.",
+            confirmText = "Retry",
+            onDismissRequest = {},
+            onConfirm = {}
+        )
     }
 }
