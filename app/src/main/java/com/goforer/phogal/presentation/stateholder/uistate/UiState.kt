@@ -40,3 +40,10 @@ sealed interface UiState<out T> {
         val message: String
     ) : UiState<Nothing>
 }
+
+object UIConstants {
+    const val UP_BUTTON_THRESHOLD = 4
+    const val SCROLL_OFFSET_SIGNAL = 35
+    /** Matches `UserPhotosViewModel.PAGE_SIZE`. Kept local so the section stays decoupled. */
+    const val PAGE_SIZE_HINT = 10
+}

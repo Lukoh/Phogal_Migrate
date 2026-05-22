@@ -40,6 +40,8 @@ import com.goforer.base.designsystem.component.state.rememberLazyListState
 import com.goforer.phogal.R
 import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel
+import com.goforer.phogal.presentation.stateholder.uistate.UIConstants.SCROLL_OFFSET_SIGNAL
+import com.goforer.phogal.presentation.stateholder.uistate.UIConstants.UP_BUTTON_THRESHOLD
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoItemUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosSectionUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosSectionUiState
@@ -54,8 +56,6 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 private const val PAGE_SIZE_HINT = 10
-private const val UP_BUTTON_THRESHOLD = 4
-private const val SCROLL_OFFSET_SIGNAL = 35
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
