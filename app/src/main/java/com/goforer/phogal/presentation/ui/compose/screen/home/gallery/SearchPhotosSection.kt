@@ -115,9 +115,9 @@ fun SearchPhotosSection(
             state = lazyListState,
             contentPadding = PaddingValues(
                 start = paddingValues.calculateLeftPadding(layoutDirection),
-                top = 4.dp,
+                top = paddingValues.calculateLeftPadding(layoutDirection),
                 end = paddingValues.calculateRightPadding(layoutDirection) ,
-                bottom = paddingValues.calculateBottomPadding() + 24.dp
+                bottom = paddingValues.calculateBottomPadding() + 46.dp
             )
         ) {
             renderLoadState(
