@@ -77,7 +77,6 @@ fun PhotoItem(
         )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-
             val imageUrl = state.photo.urls.raw
             val painter = loadImagePainter(
                 data = imageUrl,

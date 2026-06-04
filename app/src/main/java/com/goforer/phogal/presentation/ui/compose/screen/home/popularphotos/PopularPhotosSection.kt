@@ -206,6 +206,7 @@ private fun LazyListScope.renderLoadState(
                             onShowSnackBar = onShowSnackBar,
                             onOpenWebView = onOpenWebView
                         )
+
                         if (photos.itemCount < PAGE_SIZE_HINT && index == photos.itemCount - 1)
                             Spacer(modifier = Modifier.height(26.dp))
                     }
