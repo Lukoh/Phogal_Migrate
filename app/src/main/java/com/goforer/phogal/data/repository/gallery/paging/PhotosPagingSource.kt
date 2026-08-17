@@ -2,7 +2,6 @@ package com.goforer.phogal.data.repository.gallery.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.goforer.phogal.BuildConfig
 import com.goforer.phogal.data.datasource.network.api.RestAPI
 import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import retrofit2.HttpException
@@ -38,7 +37,6 @@ class PhotosPagingSource(
         val page = params.key ?: STARTING_PAGE
         return try {
             val response = api.getPhotos(
-                clientId = BuildConfig.clientId,
                 keyword = query,
                 page = page,
                 perPage = pageSize

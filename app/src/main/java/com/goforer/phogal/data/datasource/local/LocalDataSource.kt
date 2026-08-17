@@ -13,7 +13,9 @@ import com.goforer.phogal.data.model.remote.response.gallery.common.user.User
 import com.goforer.phogal.data.model.remote.response.gallery.photo.photoinfo.Picture
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -25,6 +27,12 @@ import javax.inject.Singleton
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "phogal_preferences")
 
+/**
+ * Local data source powered by Jetpack DataStore (Preferences).
+ *
+ * Handles persistence of bookmarks, search history, following status, and
+ * user settings. Complex objects are serialized to JSON via kotlinx.serialization.
+ */
 @Singleton
 class LocalDataSource @Inject constructor(
     private val context: Context,
@@ -44,26 +52,24 @@ class LocalDataSource @Inject constructor(
     private val userListSerializer = ListSerializer(User.serializer())
     private val stringListSerializer = ListSerializer(String.serializer())
 
-    private fun Flow<Preferences>.handleErrors(): Flow<Preferences> = this.catch { exception ->
-        if (exception is IOException) {
-            Timber.e(exception, "Error reading preferences.")
-            emit(emptyPreferences())
-        } else {
-            throw exception
-        }
-    }
-
+    /**
+     * Resets all local data including preferences, cache, and cookies.
+     */
     suspend fun logOut() {
-        Timber.e("LocalDataSource - Log out")
-        clearPreference()
-        deleteCache(context)
+        Timber.i("Logging out - clearing all local data")
+        clearPreferences()
+        deleteCache()
         cookieJar?.clear()
     }
 
-    private fun deleteCache(context: Context) {
+    private suspend fun clearPreferences() {
+        context.dataStore.edit { it.clear() }
+    }
+
+    private fun deleteCache() {
         runCatching {
             deleteDir(context.cacheDir)
-        }.onFailure { e -> Timber.e(e, "Failed to delete cache") }
+        }.onFailure { e -> Timber.e(e, "Failed to delete cache directory") }
     }
 
     private fun deleteDir(dir: File?): Boolean {
@@ -78,119 +84,128 @@ class LocalDataSource @Inject constructor(
         }
     }
 
-    suspend fun clearPreference() {
-        Timber.d("LocalDataSource - Clear preference")
-        context.dataStore.edit { preferences ->
-            preferences.clear()
-        }
-    }
+    // ─────────────────────────── Bookmarks ───────────────────────────
 
-    val bookmarkedPhotosFlow: Flow<List<Picture>> = context.dataStore.data
-        .map { preferences ->
-            val jsonStr = preferences[PreferencesKeys.BOOKMARK_PHOTOS]
-            if (jsonStr.isNullOrEmpty()) {
-                emptyList()
-            } else {
-                runCatching { json.decodeFromString(pictureListSerializer, jsonStr) }
-                    .getOrElse {
-                        Timber.w(it, "Failed to parse stored bookmarks")
-                        emptyList()
-                    }
-            }
-        }
+    val bookmarkedPhotosFlow: Flow<List<Picture>> = observeList(
+        PreferencesKeys.BOOKMARK_PHOTOS,
+        pictureListSerializer
+    )
 
     fun isPhotoBookmarkedFlow(id: String): Flow<Boolean> = bookmarkedPhotosFlow
-        .map { photos ->
-            photos.any { it.id == id }
-        }
+        .map { photos -> photos.any { it.id == id } }
+        .distinctUntilChanged()
 
     fun isPhotoBookmarkedFlow(photo: Picture): Flow<Boolean> = bookmarkedPhotosFlow
         .map { photos ->
             photos.any { it.id == photo.id || it.urls.raw == photo.urls.raw }
         }
+        .distinctUntilChanged()
 
-    suspend fun toggleBookmarkPhoto(bookmarkedPhoto: Picture) {
+    suspend fun toggleBookmarkPhoto(photo: Picture) {
+        toggleInList(PreferencesKeys.BOOKMARK_PHOTOS, pictureListSerializer, photo) { it.id == photo.id }
+    }
+
+    // ─────────────────────────── Search History ───────────────────────────
+
+    val searchWordsFlow: Flow<List<String>> = observeList(
+        PreferencesKeys.SEARCH_WORDS,
+        stringListSerializer
+    )
+
+    suspend fun setSearchWords(words: List<String>) {
+        updateValue(PreferencesKeys.SEARCH_WORDS, json.encodeToString(stringListSerializer, words))
+    }
+
+    // ─────────────────────────── Following ───────────────────────────
+
+    val followingUsersFlow: Flow<List<User>> = observeList(
+        PreferencesKeys.FOLLOWING_USER,
+        userListSerializer
+    )
+
+    fun isUserFollowedFlow(user: User): Flow<Boolean> = followingUsersFlow
+        .map { users -> users.any { it.id == user.id || it.username == user.username } }
+        .distinctUntilChanged()
+
+    suspend fun toggleFollowingUser(user: User) {
+        toggleInList(PreferencesKeys.FOLLOWING_USER, userListSerializer, user) { it.id == user.id }
+    }
+
+    // ─────────────────────────── Notifications ───────────────────────────
+
+    val enabledFollowingNotificationFlow: Flow<Boolean> = observeBoolean(PreferencesKeys.NOTIF_FOLLOWING, true)
+    val enabledLatestNotificationFlow: Flow<Boolean> = observeBoolean(PreferencesKeys.NOTIF_LATEST, true)
+    val enabledCommunityNotificationFlow: Flow<Boolean> = observeBoolean(PreferencesKeys.NOTIF_COMMUNITY, true)
+
+    suspend fun setFollowingNotificationEnabled(enabled: Boolean) = updateValue(PreferencesKeys.NOTIF_FOLLOWING, enabled)
+    suspend fun setLatestNotificationEnabled(enabled: Boolean) = updateValue(PreferencesKeys.NOTIF_LATEST, enabled)
+    suspend fun setCommunityNotificationEnabled(enabled: Boolean) = updateValue(PreferencesKeys.NOTIF_COMMUNITY, enabled)
+
+    // ─────────────────────────── Generic Helpers ───────────────────────────
+
+    private fun <T> observeList(
+        key: Preferences.Key<String>,
+        serializer: KSerializer<List<T>>
+    ): Flow<List<T>> = context.dataStore.data
+        .handleErrors()
+        .map { preferences ->
+            val jsonStr = preferences[key]
+            if (jsonStr.isNullOrEmpty()) {
+                emptyList()
+            } else {
+                runCatching { json.decodeFromString(serializer, jsonStr) }
+                    .getOrElse {
+                        Timber.w(it, "Failed to parse stored list for key: ${key.name}")
+                        emptyList()
+                    }
+            }
+        }
+        .distinctUntilChanged()
+
+    private fun observeBoolean(
+        key: Preferences.Key<Boolean>,
+        defaultValue: Boolean
+    ): Flow<Boolean> = context.dataStore.data
+        .handleErrors()
+        .map { it[key] ?: defaultValue }
+        .distinctUntilChanged()
+
+    private suspend fun <T> toggleInList(
+        key: Preferences.Key<String>,
+        serializer: KSerializer<List<T>>,
+        item: T,
+        predicate: (T) -> Boolean
+    ) {
         context.dataStore.edit { preferences ->
-            val jsonStr = preferences[PreferencesKeys.BOOKMARK_PHOTOS]
-            val photos = if (jsonStr.isNullOrEmpty()) {
+            val currentJson = preferences[key]
+            val list = if (currentJson.isNullOrEmpty()) {
                 mutableListOf()
             } else {
-                runCatching { json.decodeFromString(pictureListSerializer, jsonStr).toMutableList() }
+                runCatching { json.decodeFromString(serializer, currentJson).toMutableList() }
                     .getOrDefault(mutableListOf())
             }
 
-            val existingPhoto = photos.find { it.id == bookmarkedPhoto.id }
-            if (existingPhoto == null) {
-                photos.add(bookmarkedPhoto)
+            val existingIndex = list.indexOfFirst(predicate)
+            if (existingIndex == -1) {
+                list.add(item)
             } else {
-                photos.remove(existingPhoto)
+                list.removeAt(existingIndex)
             }
 
-            preferences[PreferencesKeys.BOOKMARK_PHOTOS] = json.encodeToString(pictureListSerializer, photos)
+            preferences[key] = json.encodeToString(serializer, list)
         }
     }
 
-    val searchWordsFlow: Flow<List<String>> = context.dataStore.data
-        .handleErrors()
-        .map { preferences ->
-            val jsonStr = preferences[PreferencesKeys.SEARCH_WORDS]
-            if (jsonStr.isNullOrEmpty()) emptyList()
-            else runCatching { json.decodeFromString(stringListSerializer, jsonStr) }.getOrDefault(emptyList())
-        }
-
-    suspend fun setSearchWords(words: List<String>) {
-        context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.SEARCH_WORDS] = json.encodeToString(stringListSerializer, words)
-        }
+    private suspend fun <T> updateValue(key: Preferences.Key<T>, value: T) {
+        context.dataStore.edit { it[key] = value }
     }
 
-    val followingUsersFlow: Flow<List<User>> = context.dataStore.data
-        .handleErrors()
-        .map { preferences ->
-            val jsonStr = preferences[PreferencesKeys.FOLLOWING_USER]
-            if (jsonStr.isNullOrEmpty()) emptyList()
-            else runCatching { json.decodeFromString(userListSerializer, jsonStr) }.getOrDefault(emptyList())
+    private fun Flow<Preferences>.handleErrors(): Flow<Preferences> = catch { exception ->
+        if (exception is IOException) {
+            Timber.e(exception, "Error reading DataStore preferences.")
+            emit(emptyPreferences())
+        } else {
+            throw exception
         }
-
-    fun isUserFollowedFlow(user: User): Flow<Boolean> = followingUsersFlow
-        .map { users ->
-            users.any { it.id == user.id || it.username == user.username }
-        }
-
-    suspend fun toggleFollowingUser(user: User) {
-        context.dataStore.edit { preferences ->
-            val jsonStr = preferences[PreferencesKeys.FOLLOWING_USER]
-            val users = if (jsonStr.isNullOrEmpty()) mutableListOf()
-            else runCatching { json.decodeFromString(userListSerializer, jsonStr).toMutableList() }.getOrDefault(mutableListOf())
-
-            val existingUser = users.find { it.id == user.id }
-            if (existingUser == null) users.add(user) else users.remove(existingUser)
-
-            preferences[PreferencesKeys.FOLLOWING_USER] = json.encodeToString(userListSerializer, users)
-        }
-    }
-
-    val enabledFollowingNotificationFlow: Flow<Boolean> = context.dataStore.data
-        .handleErrors()
-        .map { it[PreferencesKeys.NOTIF_FOLLOWING] ?: true }
-
-    suspend fun setFollowingNotificationEnabled(enabled: Boolean) {
-        context.dataStore.edit { it[PreferencesKeys.NOTIF_FOLLOWING] = enabled }
-    }
-
-    val enabledLatestNotificationFlow: Flow<Boolean> = context.dataStore.data
-        .handleErrors()
-        .map { it[PreferencesKeys.NOTIF_LATEST] ?: true }
-
-    suspend fun setLatestNotificationEnabled(enabled: Boolean) {
-        context.dataStore.edit { it[PreferencesKeys.NOTIF_LATEST] = enabled }
-    }
-
-    val enableCommunityNotificationFlow: Flow<Boolean> = context.dataStore.data
-        .handleErrors()
-        .map { it[PreferencesKeys.NOTIF_COMMUNITY] ?: true }
-
-    suspend fun setCommunityNotificationEnabled(enabled: Boolean) {
-        context.dataStore.edit { it[PreferencesKeys.NOTIF_COMMUNITY] = enabled }
     }
 }

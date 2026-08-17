@@ -19,18 +19,18 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goforer.phogal.presentation.stateholder.business.home.setting.notification.NotificationSettingViewModel
+import com.goforer.phogal.presentation.stateholder.business.home.setting.notification.NotificationSettingViewModel.NotificationChannel
 import com.goforer.phogal.presentation.ui.theme.Black
 import com.goforer.phogal.presentation.ui.theme.ColorBgSecondary
 import com.goforer.phogal.presentation.ui.theme.DarkGreen60
@@ -43,44 +43,40 @@ import com.goforer.phogal.presentation.ui.theme.Red80
 fun NotificationSettingContent(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(4.dp),
-    notificationSettingViewModel: NotificationSettingViewModel = hiltViewModel()
+    viewModel: NotificationSettingViewModel = hiltViewModel()
 ) {
-    val names = listOf("Following Notification", "Latest Notification", "Community Notification")
+    val followingEnabled by viewModel.followingEnabled.collectAsStateWithLifecycle()
+    val latestEnabled by viewModel.latestEnabled.collectAsStateWithLifecycle()
+    val communityEnabled by viewModel.communityEnabled.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(ColorBgSecondary)
-            //.wrapContentSize(Alignment.Center)
-            .padding(0.dp, contentPadding.calculateTopPadding(), 0.dp, 0.dp)
+            .padding(top = contentPadding.calculateTopPadding())
             .verticalScroll(rememberScrollState())
     ) {
         NotificationToggleItem(
-            modifier = Modifier,
-            name = names[0],
-            isToggled = notificationSettingViewModel.getNotificationSetting()
-        ) { toggled ->
-            notificationSettingViewModel.setNotificationEnabled(toggled)
-        }
+            name = "Following Notification",
+            isToggled = followingEnabled,
+            onToggled = { viewModel.setEnabled(NotificationChannel.Following, it) }
+        )
 
         HorizontalDivider(modifier = Modifier.height(0.5.dp))
 
         NotificationToggleItem(
-            modifier = Modifier,
-            name = names[1],
-            isToggled = notificationSettingViewModel.getNotificationSetting()
-        ) { toggled ->
-            notificationSettingViewModel.setNotificationEnabled(toggled)
-        }
+            name = "Latest Notification",
+            isToggled = latestEnabled,
+            onToggled = { viewModel.setEnabled(NotificationChannel.Latest, it) }
+        )
 
         HorizontalDivider(modifier = Modifier.height(0.5.dp))
+
         NotificationToggleItem(
-            modifier = Modifier,
-            name = names[2],
-            isToggled = notificationSettingViewModel.getNotificationSetting()
-        ) { toggled ->
-            notificationSettingViewModel.setNotificationEnabled(toggled)
-        }
+            name = "Community Notification",
+            isToggled = communityEnabled,
+            onToggled = { viewModel.setEnabled(NotificationChannel.Community, it) }
+        )
 
         HorizontalDivider(modifier = Modifier.height(0.5.dp))
     }
@@ -93,29 +89,25 @@ fun NotificationToggleItem(
     isToggled: Boolean,
     onToggled: (toggled: Boolean) -> Unit
 ) {
-    var toggled by remember { mutableStateOf(isToggled) }
-
     Row(
-        modifier = modifier.padding(horizontal = 16.dp)
+        modifier = modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = name,
-            modifier = modifier.align(Alignment.CenterVertically),
+            modifier = Modifier.weight(1f),
             color = Black,
             fontFamily = FontFamily.SansSerif,
             fontSize = 16.sp,
             fontStyle = FontStyle.Normal,
+            fontWeight = FontWeight.Medium,
             style = MaterialTheme.typography.titleMedium
         )
-        Spacer(modifier = Modifier.weight(1F))
         Switch(
-            checked = toggled,
-            onCheckedChange = {
-                toggled = it
-                onToggled(it)
-            },
+            checked = isToggled,
+            onCheckedChange = onToggled,
             modifier = Modifier.size(60.dp),
-            enabled = true,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Red80,
                 uncheckedThumbColor = DarkGreen60,
@@ -134,33 +126,27 @@ fun NotificationToggleItem(
     showSystemUi = true
 )
 @Composable
-fun NotificationSettingContentPreview(modifier: Modifier = Modifier) = PhogalTheme {
-    val names = listOf("Following Notification", "Latest Notification", "Community Notification")
-
+fun NotificationSettingContentPreview() = PhogalTheme {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(ColorBgSecondary)
-            //.wrapContentSize(Alignment.Center)
             .verticalScroll(rememberScrollState())
     ) {
         NotificationToggleItem(
-            modifier = Modifier,
-            name = names[0],
+            name = "Following Notification",
             isToggled = true
         ) {}
 
         HorizontalDivider(modifier = Modifier.height(0.5.dp))
         NotificationToggleItem(
-            modifier = Modifier,
-            name = names[1],
+            name = "Latest Notification",
             isToggled = false
         ) {}
 
         HorizontalDivider(modifier = Modifier.height(0.5.dp))
         NotificationToggleItem(
-            modifier = Modifier,
-            name = names[2],
+            name = "Community Notification",
             isToggled = true
         ) {}
 

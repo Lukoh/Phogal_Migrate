@@ -1,10 +1,16 @@
 package com.goforer.phogal.presentation.ui.navigation.nav3
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
@@ -19,7 +25,6 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
 import com.goforer.base.customtab.openCustomTab
-import com.goforer.base.utils.connect.ConnectionUtils
 import com.goforer.phogal.R
 import com.goforer.phogal.presentation.stateholder.business.home.common.photo.info.PictureViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.common.user.UserPhotosViewModel
@@ -28,20 +33,13 @@ import com.goforer.phogal.presentation.stateholder.business.home.gallery.Gallery
 import com.goforer.phogal.presentation.stateholder.business.home.popularphotos.PopularPhotosViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.setting.bookmark.BookmarkViewModel
 import com.goforer.phogal.presentation.stateholder.business.home.setting.follow.FollowViewModel
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.PhotoContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.photo.rememberPhotoContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.UserPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.common.user.photos.rememberUserPhotosContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.SearchPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.gallery.rememberSearchPhotosContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.PopularPhotosContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.popularphotos.rememberPopularPhotosContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.setting.bookmark.BookmarkContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.bookmark.rememberBookmarkContentUiState
-import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.FollowingUserContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.home.setting.following.rememberFollowingUserContentUiState
 import com.goforer.phogal.presentation.stateholder.uistate.rememberBaseUiState
-import com.goforer.phogal.presentation.ui.compose.screen.home.OfflineScreen
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.photo.viewer.PictureViewerScreen
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.user.userphotos.UserPhotosScreen
 import com.goforer.phogal.presentation.ui.compose.screen.home.common.webview.WebViewScreen
@@ -54,6 +52,11 @@ import com.goforer.phogal.presentation.ui.compose.screen.home.setting.following.
 import com.goforer.phogal.presentation.ui.compose.screen.home.setting.notification.NotificationSettingScreen
 import com.goforer.phogal.presentation.ui.navigation.Routes
 
+/**
+ * Main entry provider for Phogal's Navigation 3 graph.
+ *
+ * It delegates to tab-specific functions to keep the routing table organized.
+ */
 fun EntryProviderScope<NavKey>.phogalEntries(navState: NavigationState) {
     galleryTabEntries(navState)
     popularTabEntries(navState)
@@ -61,51 +64,40 @@ fun EntryProviderScope<NavKey>.phogalEntries(navState: NavigationState) {
     settingTabEntries(navState)
 }
 
-// ─────────────────────────────── Gallery tab ───────────────────────────────
+// ─────────────────────────────── Gallery Tab ───────────────────────────────
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: NavigationState) {
+private fun EntryProviderScope<NavKey>.galleryTabEntries(navState: NavigationState) {
 
-    // SearchPhotos is the LIST pane. On tablets/foldables it occupies the
-    // left column; on phones it renders full-screen with the detail pushed
-    // on top when an item is tapped.
     entry<Routes.SearchPhotosRoute>(
         metadata = ListDetailSceneStrategy.listPane(
             detailPlaceholder = { DetailPlaceholder() }
         )
     ) {
         val galleryViewModel: GalleryViewModel = hiltViewModel()
-        val contentUiState: SearchPhotosContentUiState = rememberSearchPhotosContentUiState(galleryViewModel)
+        val contentUiState = rememberSearchPhotosContentUiState(galleryViewModel)
 
         SearchPhotosScreen(
             contentUiState = contentUiState,
             onItemClicked = { id ->
-                navigationState.push(Routes.PictureRoute(id = id, showViewPhotosButton = true))
+                navState.push(Routes.PictureRoute(id = id, showViewPhotosButton = true))
             },
-            onViewPhotos = { name, firstName, lastName, username ->
-                navigationState.push(
-                    Routes.UserPhotosRoute(
-                        name = name,
-                        firstName = firstName,
-                        lastName = lastName,
-                        username = username
-                    )
-                )
+            onViewPhotos = { name, first, last, user ->
+                navState.push(Routes.UserPhotosRoute(name, first, last, user))
             },
-            onOpenWebView = { firstName, url ->
-                navigationState.push(Routes.WebViewRoute(firstName = firstName, url = url))
+            onOpenWebView = { first, url ->
+                navState.push(Routes.WebViewRoute(first, url))
             }
         )
     }
 
-    // PictureRoute is the DETAIL pane — paired with SearchPhotos on wide screens.
     entry<Routes.PictureRoute>(
         metadata = ListDetailSceneStrategy.detailPane()
     ) { key ->
         val pictureViewModel: PictureViewModel = hiltViewModel()
         val bookmarkViewModel: BookmarkViewModel = hiltViewModel()
         val photoDownloadViewModel: PhotoDownloadViewModel = hiltViewModel()
-        val contentUiState: PhotoContentUiState = rememberPhotoContentUiState(
+        val contentUiState = rememberPhotoContentUiState(
             pictureViewModel = pictureViewModel,
             bookmarkViewModel = bookmarkViewModel,
             photoDownloadViewModel = photoDownloadViewModel,
@@ -117,26 +109,19 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
 
         PictureViewerScreen(
             contentUiState = contentUiState,
-            onViewPhotos = { name, firstName, lastName, username ->
-                navigationState.push(
-                    Routes.UserPhotosRoute(
-                        name = name,
-                        firstName = firstName,
-                        lastName = lastName,
-                        username = username
-                    )
-                )
+            onViewPhotos = { name, first, last, user ->
+                navState.push(Routes.UserPhotosRoute(name, first, last, user))
             },
-            onBackPressed = { navigationState.pop() },
-            onOpenWebView = { firstName, url ->
-                navigationState.push(Routes.WebViewRoute(firstName = firstName, url = url))
+            onBackPressed = { navState.pop() },
+            onOpenWebView = { first, url ->
+                navState.push(Routes.WebViewRoute(first, url))
             }
         )
     }
 
     entry<Routes.UserPhotosRoute> { key ->
         val userPhotosViewModel: UserPhotosViewModel = hiltViewModel()
-        val contentUiState: UserPhotosContentUiState = rememberUserPhotosContentUiState(
+        val contentUiState = rememberUserPhotosContentUiState(
             baseUiState = rememberBaseUiState(),
             userPhotosViewModel = userPhotosViewModel,
             name = rememberSaveable { mutableStateOf(key.name) },
@@ -146,9 +131,9 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
         UserPhotosScreen(
             contentUiState = contentUiState,
             onItemClicked = { id ->
-                navigationState.push(Routes.PictureRoute(id = id, showViewPhotosButton = false))
+                navState.push(Routes.PictureRoute(id = id, showViewPhotosButton = false))
             },
-            onBackPressed = { navigationState.pop() }
+            onBackPressed = { navState.pop() }
         )
     }
 
@@ -156,7 +141,7 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
         WebViewScreen(
             firstName = key.firstName,
             url = key.url,
-            onBackPressed = { navigationState.pop() }
+            onBackPressed = { navState.pop() }
         )
     }
 
@@ -164,58 +149,45 @@ private fun EntryProviderScope<NavKey>.galleryTabEntries(navigationState: Naviga
         metadata = DialogSceneStrategy.dialog()
     ) {
         PermissionDialogContent(
-            onDismiss = { navigationState.pop() },
-            onConfirm = { navigationState.pop() }
+            onDismiss = { navState.pop() },
+            onConfirm = { navState.pop() }
         )
     }
 }
 
-// ───────────────────────── Popular photos tab ─────────────────────────
+// ─────────────────────────── Popular Photos Tab ───────────────────────────
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 private fun EntryProviderScope<NavKey>.popularTabEntries(navState: NavigationState) {
-    // PopularPhotos is the LIST pane. On tablets/foldables it occupies the
-    // left column; on phones it renders full-screen with the detail pushed
-    // on top when an item is tapped.
     entry<Routes.PopularPhotosRoute>(
         metadata = ListDetailSceneStrategy.listPane(
             detailPlaceholder = { DetailPlaceholder() }
         )
     ) {
         val popularPhotosViewModel: PopularPhotosViewModel = hiltViewModel()
-
-        val contentUiState: PopularPhotosContentUiState = rememberPopularPhotosContentUiState(popularPhotosViewModel)
+        val contentUiState = rememberPopularPhotosContentUiState(popularPhotosViewModel)
 
         PopularPhotosScreen(
             contentUiState = contentUiState,
             onItemClicked = { id ->
                 navState.push(Routes.PictureRoute(id = id, showViewPhotosButton = true))
             },
-            onViewPhotos = { name, firstName, lastName, username ->
-                navState.push(
-                    Routes.UserPhotosRoute(
-                        name = name,
-                        firstName = firstName,
-                        lastName = lastName,
-                        username = username
-                    )
-                )
+            onViewPhotos = { name, first, last, user ->
+                navState.push(Routes.UserPhotosRoute(name, first, last, user))
             },
-            onOpenWebView = { firstName, url ->
-                navState.push(Routes.WebViewRoute(firstName = firstName, url = url))
+            onOpenWebView = { first, url ->
+                navState.push(Routes.WebViewRoute(first, url))
             }
         )
     }
 }
 
-// ───────────────────────── Notification tab ─────────────────────────
+// ────────────────────────────── Notification Tab ───────────────────────────────
 
 private fun EntryProviderScope<NavKey>.notificationTabEntries(navState: NavigationState) {
     entry<Routes.NotificationsRoute> {
         NotificationsScreen(
-            onItemClicked = { id ->
-                navState.push(Routes.NotificationRoute(id = id))
-            }
+            onItemClicked = { id -> navState.push(Routes.NotificationRoute(id)) }
         )
     }
 
@@ -226,7 +198,7 @@ private fun EntryProviderScope<NavKey>.notificationTabEntries(navState: Navigati
     }
 }
 
-// ─────────────────────────── Setting tab ───────────────────────────
+// ─────────────────────────────── Setting Tab ───────────────────────────────
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 private fun EntryProviderScope<NavKey>.settingTabEntries(navState: NavigationState) {
@@ -252,30 +224,22 @@ private fun EntryProviderScope<NavKey>.settingTabEntries(navState: NavigationSta
         )
     ) {
         val bookmarkViewModel: BookmarkViewModel = hiltViewModel()
-        val contentUiState: BookmarkContentUiState  = rememberBookmarkContentUiState(
-            bookmarkViewModel = bookmarkViewModel, enabledLoadPhotos = rememberSaveable { mutableStateOf(true) }
+        val contentUiState = rememberBookmarkContentUiState(
+            bookmarkViewModel = bookmarkViewModel,
+            enabledLoadPhotos = rememberSaveable { mutableStateOf(true) }
         )
 
         BookmarkedPhotosScreen(
             contentUiState = contentUiState,
             onItemClicked = { picture, _ ->
-                navState.push(
-                    Routes.PictureRoute(id = picture.id, showViewPhotosButton = false)
-                )
+                navState.push(Routes.PictureRoute(id = picture.id, showViewPhotosButton = false))
             },
             onBackPressed = { navState.pop() },
-            onViewPhotos = { name, firstName, lastName, username ->
-                navState.push(
-                    Routes.UserPhotosRoute(
-                        name = name,
-                        firstName = firstName,
-                        lastName = lastName,
-                        username = username
-                    )
-                )
+            onViewPhotos = { name, first, last, user ->
+                navState.push(Routes.UserPhotosRoute(name, first, last, user))
             },
-            onOpenWebView = { firstName, url ->
-                navState.push(Routes.WebViewRoute(firstName = firstName, url = url))
+            onOpenWebView = { first, url ->
+                navState.push(Routes.WebViewRoute(first, url))
             }
         )
     }
@@ -286,25 +250,19 @@ private fun EntryProviderScope<NavKey>.settingTabEntries(navState: NavigationSta
         )
     ) {
         val followViewModel: FollowViewModel = hiltViewModel()
-        val contentUiState: FollowingUserContentUiState = rememberFollowingUserContentUiState(
-            followViewModel = followViewModel, enabledLoadPhotos = rememberSaveable { mutableStateOf(true) }
+        val contentUiState = rememberFollowingUserContentUiState(
+            followViewModel = followViewModel,
+            enabledLoadPhotos = rememberSaveable { mutableStateOf(true) }
         )
 
         FollowingUsersScreen(
             contentUiState = contentUiState,
             onBackPressed = { navState.pop() },
-            onViewPhotos = { name, firstName, lastName, username ->
-                navState.push(
-                    Routes.UserPhotosRoute(
-                        name = name,
-                        firstName = firstName,
-                        lastName = lastName,
-                        username = username
-                    )
-                )
+            onViewPhotos = { name, first, last, user ->
+                navState.push(Routes.UserPhotosRoute(name, first, last, user))
             },
-            onOpenWebView = { firstName, url ->
-                navState.push(Routes.WebViewRoute(firstName = firstName, url = url))
+            onOpenWebView = { first, url ->
+                navState.push(Routes.WebViewRoute(first, url))
             }
         )
     }
@@ -314,14 +272,8 @@ private fun EntryProviderScope<NavKey>.settingTabEntries(navState: NavigationSta
     }
 }
 
-// ─────────────────────────── Helpers ───────────────────────────
+// ─────────────────────────────── Helpers ───────────────────────────────
 
-/**
- * Placeholder shown in the right (detail) pane of the list-detail layout
- * when no photo is selected. Only visible on wide screens / tablets —
- * on compact phones the list pane occupies the whole screen until the
- * user taps an item.
- */
 @Composable
 private fun DetailPlaceholder() {
     Box(
@@ -339,38 +291,47 @@ private fun DetailPlaceholder() {
 }
 
 /**
- * Content for the permission-prompt dialog entry. Rendered inside the
- * `Dialog` instance provided by [DialogSceneStrategy], so we do NOT wrap it
- * in another dialog/bottom-sheet. Keep this lightweight — its job is to
- * notify the user what permission is needed and let them confirm or cancel.
+ * A dialog-themed surface for the permission entry.
  *
- * For a full bottom-sheet UX, use the existing non-Nav3 `PermissionBottomSheet`
- * directly inside `SearchPhotosScreen`. This dialog-scene variant is here as
- * an example of how any ad-hoc dialog can be made a first-class back-stack
- * entry in Nav3 1.1.0.
+ * We avoid using `AlertDialog` here because [DialogSceneStrategy.dialog]
+ * already provides the standard [androidx.compose.ui.window.Dialog] window.
+ * Using `Surface` with standard padding and shape ensures a clean Material 3
+ * look without double-wrapping the dialog window.
  */
 @Composable
 private fun PermissionDialogContent(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    androidx.compose.material3.AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(text = stringResource(id = R.string.bottom_navigation_photo))
-        },
-        text = {
-            Text(text = stringResource(id = R.string.bottom_navigation_photo))
-        },
-        confirmButton = {
-            androidx.compose.material3.TextButton(onClick = onConfirm) {
-                Text(text = "OK")
-            }
-        },
-        dismissButton = {
-            androidx.compose.material3.TextButton(onClick = onDismiss) {
-                Text(text = "Cancel")
+    Surface(
+        shape = MaterialTheme.shapes.extraLarge,
+        tonalElevation = 6.dp,
+        modifier = Modifier.padding(24.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.End
+        ) {
+            Text(
+                text = stringResource(id = R.string.bottom_navigation_photo),
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.align(Alignment.Start)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = stringResource(id = R.string.bottom_navigation_photo),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.align(Alignment.Start)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Row {
+                TextButton(onClick = onDismiss) {
+                    Text("Cancel")
+                }
+                TextButton(onClick = onConfirm) {
+                    Text("OK")
+                }
             }
         }
-    )
+    }
 }

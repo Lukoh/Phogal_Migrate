@@ -9,8 +9,8 @@ import com.goforer.phogal.data.repository.gallery.PhotosRepository
 import com.goforer.phogal.di.dispatcher.IoDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,10 +23,12 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -38,11 +40,14 @@ class GalleryViewModel @Inject constructor(
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
 
-    private val _recentWords = MutableStateFlow<List<String>>(emptyList())
+    /**
+     * Recent search keywords, newest first.
+     */
     val recentWords: StateFlow<List<String>> = photosRepository.getSearchWords()
+        .map { it.reversed() }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000), // UI가 활성화될 때만 데이터 수집
+            started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
             initialValue = emptyList()
         )
 
@@ -51,7 +56,7 @@ class GalleryViewModel @Inject constructor(
      * Blank queries are filtered out so the UI's empty state doesn't burn a request.
      */
     val photos: StateFlow<PagingData<Photo>> = _query
-        .debounce(DEBOUNCE_MS)
+        .debounce(DEBOUNCE_MS.milliseconds)
         .distinctUntilChanged()
         .filter { it.isNotBlank() }
         .flatMapLatest { query -> photosRepository.search(query, PAGE_SIZE) }
@@ -68,10 +73,6 @@ class GalleryViewModel @Inject constructor(
     )
     val events: SharedFlow<GalleryUiEvent> = _events.asSharedFlow()
 
-    init {
-        refreshRecentWords()
-    }
-
     fun onQueryChanged(newQuery: String) {
         _query.value = newQuery
     }
@@ -85,27 +86,21 @@ class GalleryViewModel @Inject constructor(
         if (keyword.isEmpty()) return
 
         viewModelScope.launch {
-            val updated = withContext(ioDispatcher) {
-                val currentKeywords = recentWords.value.toMutableList()
+            withContext(ioDispatcher) {
+                // Get current words from the StateFlow. Note: we use the raw list
+                // from the repo (which is reversed in the public recentWords flow).
+                // But it's easier to just use recentWords.value and reverse it back
+                // if we want to maintain the "append to end" logic, OR just prepend.
+                
+                val currentKeywords = recentWords.value.reversed().toMutableList()
 
-                if (keyword in recentWords.value) return@withContext null
+                if (keyword in currentKeywords) return@withContext
                 if (currentKeywords.size >= MAX_HISTORY_SIZE) currentKeywords.removeAt(0)
                 currentKeywords += keyword
-                val snapshot = currentKeywords.toMutableList()
-                photosRepository.setSearchWords(snapshot)
-                snapshot
-            } ?: return@launch
-
-            _recentWords.value = updated
-            _events.tryEmit(GalleryUiEvent.SearchCommitted(keyword))
-        }
-    }
-
-    private fun refreshRecentWords() {
-        viewModelScope.launch {
-            _recentWords.value = withContext(ioDispatcher) {
-                _recentWords.value.asReversed()
+                
+                photosRepository.setSearchWords(currentKeywords)
             }
+            _events.tryEmit(GalleryUiEvent.SearchCommitted(keyword))
         }
     }
 

@@ -8,12 +8,17 @@ import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
 import com.goforer.phogal.data.repository.common.user.photos.UserPhotosRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -23,12 +28,26 @@ class UserPhotosViewModel @Inject constructor(
 ) : ViewModel() {
     private val _username = MutableStateFlow("")
 
-    val photos: StateFlow<PagingData<Photo>> = _username
-        .flatMapLatest { username ->
-            if (username.isBlank()) {
+    /**
+     * The Unsplash username whose photos are currently being viewed.
+     */
+    val username: StateFlow<String> = _username.asStateFlow()
+
+    private val _refreshTrigger = MutableSharedFlow<Unit>(replay = 0)
+
+    /**
+     * Stream of paged photos for the current [username].
+     * Blank usernames result in an empty paging stream.
+     */
+    val photos: StateFlow<PagingData<Photo>> = combine(
+        _username,
+        _refreshTrigger.onStart { emit(Unit) }
+    ) { user, _ -> user }
+        .flatMapLatest { user ->
+            if (user.isBlank()) {
                 flowOf(PagingData.empty())
             } else {
-                userPhotosRepository.userPhotos(username, PAGE_SIZE)
+                userPhotosRepository.userPhotos(user, PAGE_SIZE)
             }
         }
         .cachedIn(viewModelScope)
@@ -38,9 +57,25 @@ class UserPhotosViewModel @Inject constructor(
             initialValue = PagingData.empty()
         )
 
-    /** Sets (or resets) which user we're viewing. Safe to call multiple times. */
-    fun loadFor(username: String) {
-        _username.value = username
+    /** 
+     * Sets which user we're viewing. 
+     * 
+     * Safe to call multiple times; redundant updates with the same [name] 
+     * will not trigger a new network request.
+     */
+    fun loadFor(name: String) {
+        if (_username.value != name) {
+            _username.value = name
+        }
+    }
+
+    /**
+     * Forces a refresh of the photo stream for the current user.
+     */
+    fun refresh() {
+        viewModelScope.launch {
+            _refreshTrigger.emit(Unit)
+        }
     }
 
     private companion object {

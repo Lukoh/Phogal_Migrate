@@ -2,16 +2,15 @@ package com.goforer.phogal.di.module
 
 import android.app.Application
 import android.content.Context
-import com.orhanobut.logger.Logger
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
-import com.goforer.base.extension.isNull
 import com.goforer.phogal.BuildConfig
 import com.goforer.phogal.data.datasource.network.NetworkError
 import com.goforer.phogal.data.datasource.network.NetworkErrorHandler
 import com.goforer.phogal.data.datasource.network.adapter.factory.NullOnEmptyConverterFactory
 import com.goforer.phogal.data.datasource.network.api.RestAPI
+import com.orhanobut.logger.Logger
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,26 +33,20 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-    private const val timeout_read = 60L
-    private const val timeout_connect = 60L
-    private const val timeout_write = 60L
+    private const val TIMEOUT_READ = 60L
+    private const val TIMEOUT_CONNECT = 60L
+    private const val TIMEOUT_WRITE = 60L
 
     @Singleton
     @Provides
-    fun appContext(application: Application): Context = application.applicationContext
+    fun provideAppContext(application: Application): Context = application.applicationContext
 
     /**
      * Configures and provides a [Json] instance for the `retrofit2-kotlinx-serialization-converter`.
      *
-     * - By default, Kotlinx Serialization throws an [UnknownKeyException] if the JSON contains
-     *   keys not defined in the DTO. Setting `ignoreUnknownKeys = true` ensures the app gracefully
-     *   ignores undefined fields and prevents crashes when the backend updates.
-     * - Enabling `coerceInputValues = true` is highly recommended in production. It coerces invalid
-     *   or null inputs into their declared default values if the types don't match, preventing
-     *   deserialization failures.
-     *
-     * This configuration is declared as a singleton object to maintain a consistent parsing policy
-     * across the entire application.
+     * - `ignoreUnknownKeys = true` ensures the app ignores undefined fields from the backend.
+     * - `coerceInputValues = true` coerces invalid/null inputs into declared default values.
+     * - `isLenient = true` allows for non-strict JSON (e.g., unquoted keys).
      */
     @Singleton
     @Provides
@@ -66,7 +59,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideNetworkErrorHandler(context: Context, json: Json) = NetworkErrorHandler(context, json)
+    fun provideNetworkErrorHandler(json: Json) = NetworkErrorHandler(json)
 
     @Singleton
     @Provides
@@ -79,162 +72,104 @@ object AppModule {
         interceptor: Interceptor,
         cookieJar: PersistentCookieJar
     ): OkHttpClient {
-        val ok = OkHttpClient.Builder()
-            .cookieJar(cookieJar)
-            .connectTimeout(timeout_connect, TimeUnit.SECONDS)
-            .readTimeout(timeout_read, TimeUnit.SECONDS)
-            .writeTimeout(timeout_write, TimeUnit.SECONDS)
+        return OkHttpClient.Builder().apply {
+            cookieJar(cookieJar)
+            connectTimeout(TIMEOUT_CONNECT, TimeUnit.SECONDS)
+            readTimeout(TIMEOUT_READ, TimeUnit.SECONDS)
+            writeTimeout(TIMEOUT_WRITE, TimeUnit.SECONDS)
 
-        if (BuildConfig.DEBUG) {
-            val httpLoggingInterceptor =
-                HttpLoggingInterceptor(object : HttpLoggingInterceptor.Logger {
-                    override fun log(message: String) {
-                        if (isJSONValid(message))
-                            Logger.json(message)
-                        else
-                            Timber.d("%s", message)
+            if (BuildConfig.DEBUG) {
+                val loggingInterceptor = HttpLoggingInterceptor { message ->
+                    if (isJSONValid(message)) {
+                        Logger.json(message)
+                    } else {
+                        Timber.d(message)
                     }
+                }.apply {
+                    level = HttpLoggingInterceptor.Level.BODY
+                }
+                addInterceptor(loggingInterceptor)
+            }
 
-                    fun isJSONValid(jsonInString: String): Boolean {
-                        try {
-                            JSONObject(jsonInString)
-                        } catch (ex: JSONException) {
-                            try {
-                                JSONArray(jsonInString)
-                            } catch (ex1: JSONException) {
-                                return false
-                            }
-
-                        }
-
-                        return true
-                    }
-                })
-
-            httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-            ok.addInterceptor(httpLoggingInterceptor)
-        }
-
-        ok.addInterceptor(interceptor)
-
-        return ok.build()
+            addInterceptor(interceptor)
+        }.build()
     }
 
     @Provides
     @Singleton
-    fun getRequestInterceptor(
-        application: Application,
-        context: Context,
+    fun provideRequestInterceptor(
         json: Json
-    ): Interceptor {
-        // Captured by the Interceptor lambda below for decoding error responses.
-        // Aliased to `errorJson` to make it explicit at the call site that this
-        // is for error-envelope decoding, not for the application's data payloads
-        // (those go through Retrofit's converter, set up in provideRestAPI).
-        val errorJson = json
-        return Interceptor {
-            Timber.tag("PRETTY_LOGGER")
+    ): Interceptor = Interceptor { chain ->
+        val originalRequest = chain.request()
 
-            val original = it.request()
+        // Append standard headers and Auth to every outgoing request.
+        val authenticatedRequest = originalRequest.newBuilder().apply {
+            header("Accept", "application/json")
+            header("Accept-Version", "v1")
+            header("Authorization", "Client-ID ${BuildConfig.clientId}")
+            header("mobileplatform", "android")
+            header("versioncode", "${BuildConfig.VERSION_CODE}")
+        }.build()
 
-            Timber.tag("pretty").e("Interceptor.url.host: %s", original.url.host)
-            Timber.tag("pretty").e("Interceptor.url.path: %s", original.url)
-            val requested = with(original) {
-                val builder = newBuilder()
+        val response = chain.proceed(authenticatedRequest)
+        val body = response.body
+        val bodyContentType = body.contentType()
+        var bodyString = body.string()
 
-                builder.header("Accept", "application/json")
-                builder.header("Accept-Version", "v1")
-                builder.header("mobileplatform", "android")
-                Timber.d("mobileplatform: android")
-
-                builder.header("versioncode", "${BuildConfig.VERSION_CODE}")
-                Timber.d("versioncode: ${BuildConfig.VERSION_CODE}")
-
-                builder.build()
-            }
-
-            val response = it.proceed(requested)
-            val body = response.body
-            var bodyStr = body.string()
-            Timber.d("**http-num: ${response.code}")
-            Timber.d("**http-body: $body")
-
-            if (!response.isSuccessful) {
-                try {
-                    when (response.code) {
-                        NetworkError.ERROR_SERVICE_BAD_GATEWAY, NetworkError.ERROR_SERVICE_UNAVAILABLE -> {
-                            // Implemented UI
-                        }
-
-                        NetworkError.ERROR_SERVICE_UNPROCESSABLE_ENTITY -> {
-                            // Decode the error envelope using kotlinx.serialization.
-                            // Use a fresh Json instance configured with the same lenient
-                            // settings as provideJson() — passing the injected one would
-                            // require restructuring this lambda to receive it, which is
-                            // out of scope for the migration.
-                            val networkError = errorJson.decodeFromString(
-                                NetworkError.serializer(),
-                                bodyStr
-                            )
-
-                            networkError.isNull({
-
-                            }, {
-                                networkError.detail[0].msg =
-                                    original.url.encodedPath + "\n" + networkError.detail[0].msg
-                                bodyStr = errorJson.encodeToString(
-                                    NetworkError.serializer(),
-                                    networkError
-                                )
-                            })
-                        }
-
-                        else -> {
-                            Timber.d("Else What")
+        if (!response.isSuccessful) {
+            try {
+                when (response.code) {
+                    NetworkError.ERROR_SERVICE_UNPROCESSABLE_ENTITY -> {
+                        val networkError = json.decodeFromString<NetworkError>(bodyString)
+                        // Prepend the URL to the error message for debugging purposes.
+                        networkError.detail.firstOrNull()?.let { errorBody ->
+                            errorBody.msg = "${originalRequest.url.encodedPath}\n${errorBody.msg}"
+                            bodyString = json.encodeToString(networkError)
                         }
                     }
-                } catch (e: Exception) {
-                    e.stackTrace
-                    Timber.e(Throwable(e.toString()))
+                    NetworkError.ERROR_SERVICE_BAD_GATEWAY, NetworkError.ERROR_SERVICE_UNAVAILABLE -> {
+                        Timber.w("Service unavailable or bad gateway: ${response.code}")
+                    }
+                    else -> Timber.d("Unhandled HTTP error: ${response.code}")
                 }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to process error response body")
             }
-
-            val builder = response.newBuilder()
-
-            builder.body(bodyStr.toByteArray().toResponseBody(body.contentType())).build()
         }
+
+        // Re-wrap the body because body.string() consumes the stream.
+        response.newBuilder()
+            .body(bodyString.toByteArray().toResponseBody(bodyContentType))
+            .build()
     }
 
     /**
      * Builds the Retrofit instance that drives [RestAPI].
-     *
-     * ### Converter chain (order matters)
-     *
-     * 1. `NullOnEmptyConverterFactory` — handles HTTP 200 with empty body
-     *    (Unsplash returns this for some "no content" success cases). Must
-     *    be first so it gets a chance to short-circuit before the JSON
-     *    converter tries to parse an empty string and throws.
-     *
-     * 2. `Json.asConverterFactory(...)` — the kotlinx.serialization converter,
-     *    keyed off the `application/json` media type. Replaces the previous
-     *    `GsonConverterFactory.create(gson)` as part of the Gson →
-     *    kotlinx.serialization migration.
-     *
-     * The `Json` instance is the one provided by [provideJson], so all of its
-     * production hardening (`ignoreUnknownKeys`, `coerceInputValues`, etc.)
-     * is in effect for every API response.
      */
     @Singleton
     @Provides
     fun provideRestAPI(json: Json, okHttpClient: OkHttpClient): RestAPI {
         val contentType = "application/json".toMediaType()
-        val retrofit = Retrofit.Builder()
+        return Retrofit.Builder()
             .baseUrl(BuildConfig.apiServer)
             .addConverterFactory(NullOnEmptyConverterFactory())
             .addConverterFactory(json.asConverterFactory(contentType))
             .client(okHttpClient)
             .build()
+            .create(RestAPI::class.java)
+    }
 
-        return retrofit.create(RestAPI::class.java)
+    private fun isJSONValid(json: String): Boolean {
+        return try {
+            JSONObject(json)
+            true
+        } catch (_: JSONException) {
+            try {
+                JSONArray(json)
+                true
+            } catch (_: JSONException) {
+                false
+            }
+        }
     }
 }

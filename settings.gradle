@@ -14,7 +14,7 @@ pluginManagement {
 
 plugins {
     // Foojay Toolchain Resolver - Gradle이 JDK 17을 자동 프로비저닝
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.9.0'
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 
 dependencyResolutionManagement {

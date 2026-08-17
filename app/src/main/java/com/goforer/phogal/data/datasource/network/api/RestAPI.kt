@@ -12,8 +12,6 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
-import retrofit2.http.Streaming
-import retrofit2.http.Url
 
 /**
  * Retrofit definition of the Unsplash API surface used by Phogal.
@@ -22,59 +20,81 @@ import retrofit2.http.Url
  * with [com.goforer.phogal.data.datasource.network.safeApiCall] to convert the raw
  * response (or any thrown exception) into a type-safe
  * [com.goforer.phogal.data.datasource.network.NetworkResult].
+ *
+ * Authentication:
+ * The Unsplash Access Key (client_id) is automatically appended to every request
+ * via the `Authorization` header in [com.goforer.phogal.di.module.AppModule.getRequestInterceptor].
  */
 interface RestAPI {
 
+    /**
+     * Search photos by keyword.
+     * [PhotosResponse] contains the list of photos and pagination metadata.
+     */
     @GET("search/photos")
     suspend fun getPhotos(
-        @Query("client_id") clientId: String,
         @Query("query") keyword: String,
-        @Query("page") page: Int?,
-        @Query("per_page") perPage: Int?
+        @Query("page") page: Int? = null,
+        @Query("per_page") perPage: Int? = null
     ): Response<PhotosResponse>
 
+    /**
+     * Retrieve a single photo by its [id].
+     */
     @GET("photos/{id}")
     suspend fun getPhoto(
-        @Path("id") id: String,
-        @Query("client_id") clientId: String
+        @Path("id") id: String
     ): Response<Picture>
 
+    /**
+     * Retrieve a user's public profile.
+     */
     @GET("users/{username}")
     suspend fun getUserPublicProfile(
         @Path("username") username: String
     ): Response<User>
 
+    /**
+     * Get a list of photos uploaded by a user.
+     */
     @GET("users/{username}/photos")
     suspend fun getUserPhotos(
         @Path("username") username: String,
-        @Query("client_id") clientId: String,
-        @Query("page") page: Int?,
-        @Query("per_page") perPage: Int?
+        @Query("page") page: Int? = null,
+        @Query("per_page") perPage: Int? = null
     ): Response<List<Photo>>
 
+    /**
+     * Like a photo.
+     */
     @POST("photos/{id}/like")
     suspend fun postLike(
-        @Path("id") id: String,
-        @Query("client_id") clientId: String
+        @Path("id") id: String
     ): Response<LikeResponse>
 
+    /**
+     * Remove a like from a photo.
+     */
     @DELETE("photos/{id}/like")
     suspend fun deleteLike(
-        @Path("id") id: String,
-        @Query("client_id") clientId: String
+        @Path("id") id: String
     ): Response<LikeResponse>
 
+    /**
+     * Get the latest/popular photos.
+     */
     @GET("photos")
     suspend fun getPopularPhotos(
-        @Query("client_id") clientId: String,
-        @Query("page") page: Int?,
-        @Query("per_page") perPage: Int?,
-        @Query("order_by") orderBy: String,
+        @Query("page") page: Int? = null,
+        @Query("per_page") perPage: Int? = null,
+        @Query("order_by") orderBy: String? = null,
     ): Response<List<Photo>>
 
+    /**
+     * Tracking a download is required by Unsplash API terms.
+     */
     @GET("photos/{id}/download")
     suspend fun trackDownload(
-        @Path("id") id: String,
-        @Query("client_id") clientId: String,
+        @Path("id") id: String
     ): Response<TrackDownload>
 }

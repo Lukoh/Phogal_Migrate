@@ -1,6 +1,5 @@
 package com.goforer.phogal.data.repository.download
 
-import com.goforer.phogal.BuildConfig
 import com.goforer.phogal.data.datasource.network.NetworkResult
 import com.goforer.phogal.data.datasource.network.api.RestAPI
 import com.goforer.phogal.data.datasource.network.safeApiCall
@@ -13,6 +12,6 @@ class PhotoDownloadRepositoryImpl @Inject constructor(
     private val api: RestAPI
 ) : PhotoDownloadRepository {
     override suspend fun getFinalDownloadUrl(id: String): NetworkResult<TrackDownload> = safeApiCall {
-        api.trackDownload(id, BuildConfig.clientId)
+        api.trackDownload(id)
     }
 }
