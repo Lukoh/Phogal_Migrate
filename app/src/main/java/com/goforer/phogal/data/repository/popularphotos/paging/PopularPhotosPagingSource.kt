@@ -2,11 +2,11 @@ package com.goforer.phogal.data.repository.popularphotos.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.goforer.phogal.data.datasource.network.BackendException
 import com.goforer.phogal.data.datasource.network.api.RestAPI
+import com.goforer.phogal.data.datasource.network.fold
+import com.goforer.phogal.data.datasource.network.safeApiCall
 import com.goforer.phogal.data.model.remote.response.gallery.common.photo.Photo
-import retrofit2.HttpException
-import java.io.IOException
-import kotlin.coroutines.cancellation.CancellationException
 
 class PopularPhotosPagingSource(
     private val api: RestAPI,
@@ -23,30 +23,34 @@ class PopularPhotosPagingSource(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Photo> {
         val page = params.key ?: STARTING_PAGE
-        return try {
-            val response = api.getPopularPhotos(
+        return safeApiCall {
+            api.getPopularPhotos(
                 orderBy = orderBy,
                 page = page,
                 perPage = pageSize
             )
-            if (!response.isSuccessful) {
-                return LoadResult.Error(HttpException(response))
+        }.fold(
+            onSuccess = { photos ->
+                LoadResult.Page(
+                    data = photos,
+                    prevKey = if (page == STARTING_PAGE) null else page - 1,
+                    nextKey = if (photos.isEmpty()) null else page + 1
+                )
+            },
+            onEmpty = {
+                LoadResult.Page(
+                    data = emptyList(),
+                    prevKey = if (page == STARTING_PAGE) null else page - 1,
+                    nextKey = null
+                )
+            },
+            onError = { code, message ->
+                LoadResult.Error(BackendException(code, message))
+            },
+            onException = { throwable ->
+                LoadResult.Error(throwable)
             }
-            val photos = response.body().orEmpty()
-            LoadResult.Page(
-                data = photos,
-                prevKey = if (page == STARTING_PAGE) null else page - 1,
-                nextKey = if (photos.isEmpty()) null else page + 1
-            )
-        } catch (ce: CancellationException) {
-            throw ce
-        } catch (io: IOException) {
-            LoadResult.Error(io)
-        } catch (http: HttpException) {
-            LoadResult.Error(http)
-        } catch (t: Throwable) {
-            LoadResult.Error(t)
-        }
+        )
     }
 
     private companion object {
