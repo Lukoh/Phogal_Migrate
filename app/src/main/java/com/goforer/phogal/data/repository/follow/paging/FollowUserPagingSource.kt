@@ -8,8 +8,11 @@ import kotlin.coroutines.cancellation.CancellationException
 /**
  * Paging source for followed users stored locally.
  *
- * Slices an in-memory [List] of [User] objects into pages. Uses 1-based
- * indexing to match project-wide paging conventions.
+ * This source pages over an in-memory [List] of [User] objects.
+ * It uses 1-based indexing for consistency with network-based paging sources.
+ *
+ * Note: [com.goforer.phogal.data.datasource.network.safeApiCall] is not used here
+ * because this source operates on local data and does not produce HTTP responses.
  */
 class FollowUserPagingSource(
     private val followedUsers: List<User>
@@ -25,6 +28,14 @@ class FollowUserPagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, User> {
         val page = params.key ?: STARTING_PAGE
         val pageSize = params.loadSize
+
+        if (followedUsers.isEmpty()) {
+            return LoadResult.Page(
+                data = emptyList(),
+                prevKey = null,
+                nextKey = null
+            )
+        }
 
         return try {
             val fromIndex = (page - 1) * pageSize

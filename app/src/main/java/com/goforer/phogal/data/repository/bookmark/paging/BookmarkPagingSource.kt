@@ -8,11 +8,11 @@ import kotlin.coroutines.cancellation.CancellationException
 /**
  * Paging source for bookmarked photos stored locally.
  *
- * Since bookmarks are already loaded into memory as a [List], this source
- * simply slices the list based on the requested page size.
+ * This source pages over an in-memory [List] of [Picture] objects.
+ * It uses 1-based indexing for consistency with network-based paging sources.
  *
- * This implementation uses 1-based indexing for consistency with other
- * paging sources in the project.
+ * Note: [com.goforer.phogal.data.datasource.network.safeApiCall] is not used here
+ * because this source operates on local data and does not produce HTTP responses.
  */
 class BookmarkPagingSource(
     private val pictures: List<Picture>
@@ -28,6 +28,14 @@ class BookmarkPagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Picture> {
         val page = params.key ?: STARTING_PAGE
         val pageSize = params.loadSize
+
+        if (pictures.isEmpty()) {
+            return LoadResult.Page(
+                data = emptyList(),
+                prevKey = null,
+                nextKey = null
+            )
+        }
 
         return try {
             val fromIndex = (page - 1) * pageSize
